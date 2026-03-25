@@ -1,0 +1,168 @@
+package edu.hitsz.application.protocol.socket;
+
+import edu.hitsz.application.protocol.MessageCodec;
+import edu.hitsz.application.protocol.ProtocolMessage;
+import edu.hitsz.application.protocol.ProtocolMessageListener;
+import edu.hitsz.application.protocol.Transport;
+
+import java.io.BufferedReader;
+import java.io.IOException;
+import java.io.InputStreamReader;
+import java.io.OutputStreamWriter;
+import java.io.PrintWriter;
+import java.net.ServerSocket;
+import java.net.Socket;
+import java.net.SocketException;
+import java.nio.charset.StandardCharsets;
+import java.util.List;
+import java.util.concurrent.CopyOnWriteArrayList;
+
+public class SocketServerTransport implements Transport {
+
+    private final int configuredPort;
+    private final MessageCodec codec;
+    private final LineMessageFramer framer;
+    private final List<ClientConnection> clients;
+
+    private volatile ProtocolMessageListener listener;
+    private volatile boolean running;
+    private ServerSocket serverSocket;
+    private Thread acceptThread;
+
+    public SocketServerTransport(int configuredPort, MessageCodec codec) {
+        this.configuredPort = configuredPort;
+        this.codec = codec;
+        this.framer = new LineMessageFramer();
+        this.clients = new CopyOnWriteArrayList<>();
+    }
+
+    @Override
+    public synchronized void start() {
+        if (running) {
+            return;
+        }
+        try {
+            serverSocket = new ServerSocket(configuredPort);
+            running = true;
+            acceptThread = new Thread(this::acceptLoop, "socket-server-acceptor");
+            acceptThread.setDaemon(true);
+            acceptThread.start();
+        } catch (IOException e) {
+            throw new IllegalStateException("Failed to start server transport", e);
+        }
+    }
+
+    @Override
+    public synchronized void stop() {
+        running = false;
+        closeQuietly(serverSocket);
+        for (ClientConnection client : clients) {
+            client.close();
+        }
+        clients.clear();
+        serverSocket = null;
+    }
+
+    @Override
+    public void send(ProtocolMessage message) {
+        String framed = framer.frame(codec.encode(message));
+        for (ClientConnection client : clients) {
+            client.send(framed);
+        }
+    }
+
+    @Override
+    public void setListener(ProtocolMessageListener listener) {
+        this.listener = listener;
+    }
+
+    public int getPort() {
+        return serverSocket == null ? configuredPort : serverSocket.getLocalPort();
+    }
+
+    private void acceptLoop() {
+        while (running) {
+            try {
+                Socket socket = serverSocket.accept();
+                ClientConnection clientConnection = new ClientConnection(socket);
+                clients.add(clientConnection);
+                clientConnection.start();
+            } catch (SocketException e) {
+                if (running) {
+                    throw new IllegalStateException("Server socket accept failed", e);
+                }
+            } catch (IOException e) {
+                if (running) {
+                    throw new IllegalStateException("Server transport accept loop failed", e);
+                }
+            }
+        }
+    }
+
+    private void closeQuietly(ServerSocket serverSocket) {
+        if (serverSocket == null) {
+            return;
+        }
+        try {
+            serverSocket.close();
+        } catch (IOException ignored) {
+        }
+    }
+
+    private final class ClientConnection {
+
+        private final Socket socket;
+        private PrintWriter writer;
+
+        private ClientConnection(Socket socket) {
+            this.socket = socket;
+        }
+
+        private void start() throws IOException {
+            writer = new PrintWriter(new OutputStreamWriter(socket.getOutputStream(), StandardCharsets.UTF_8), true);
+            BufferedReader reader = new BufferedReader(
+                    new InputStreamReader(socket.getInputStream(), StandardCharsets.UTF_8)
+            );
+            Thread readerThread = new Thread(() -> readLoop(reader), "socket-server-client-reader");
+            readerThread.setDaemon(true);
+            readerThread.start();
+        }
+
+        private void readLoop(BufferedReader reader) {
+            try {
+                String line;
+                while (running && (line = reader.readLine()) != null) {
+                    if (line.trim().isEmpty()) {
+                        continue;
+                    }
+                    ProtocolMessageListener currentListener = listener;
+                    if (currentListener != null) {
+                        currentListener.onMessage(codec.decode(line));
+                    }
+                }
+            } catch (IOException e) {
+                if (running) {
+                    throw new IllegalStateException("Server client read loop failed", e);
+                }
+            } finally {
+                close();
+                clients.remove(this);
+            }
+        }
+
+        private synchronized void send(String framed) {
+            if (writer == null) {
+                return;
+            }
+            writer.write(framed);
+            writer.flush();
+        }
+
+        private void close() {
+            try {
+                socket.close();
+            } catch (IOException ignored) {
+            }
+        }
+    }
+}
