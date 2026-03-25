@@ -22,7 +22,7 @@ public class ServerGameLoop {
 
     public void stepOnce(long nowMillis) {
         worldState.advanceTick();
-        worldState.stepEnemies(nowMillis);
+        worldState.stepWorld(nowMillis);
     }
 
     public WorldSnapshot buildSnapshot() {

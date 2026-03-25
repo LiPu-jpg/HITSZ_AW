@@ -6,15 +6,14 @@ public class PlayerRuntimeState {
 
     private final String playerId;
     private final PlayerSkillState skillState;
-    private int x;
-    private int y;
-    private int hp;
+    private final ServerPlayerAircraft aircraft;
     private int level;
+    private int score;
 
     public PlayerRuntimeState(String playerId) {
         this.playerId = playerId;
         this.skillState = new PlayerSkillState();
-        this.hp = 1000;
+        this.aircraft = new ServerPlayerAircraft(0, 0, 0, 0, 1000);
         this.level = 1;
     }
 
@@ -23,24 +22,23 @@ public class PlayerRuntimeState {
     }
 
     public int getX() {
-        return x;
+        return aircraft.getLocationX();
     }
 
     public int getY() {
-        return y;
+        return aircraft.getLocationY();
     }
 
     public void setPosition(int x, int y) {
-        this.x = x;
-        this.y = y;
+        aircraft.setLocation(x, y);
     }
 
     public int getHp() {
-        return hp;
+        return aircraft.getHp();
     }
 
     public void setHp(int hp) {
-        this.hp = Math.max(0, hp);
+        aircraft.setHp(hp);
     }
 
     public int getLevel() {
@@ -52,10 +50,30 @@ public class PlayerRuntimeState {
     }
 
     public void decreaseHp(int damage) {
-        setHp(hp - damage);
+        aircraft.decreaseHp(damage);
     }
 
     public PlayerSkillState getSkillState() {
         return skillState;
+    }
+
+    public void increaseHp(int amount) {
+        aircraft.increaseHp(amount);
+    }
+
+    public ServerPlayerAircraft getAircraft() {
+        return aircraft;
+    }
+
+    public int getScore() {
+        return score;
+    }
+
+    public void setScore(int score) {
+        this.score = score;
+    }
+
+    public void addScore(int delta) {
+        this.score += delta;
     }
 }

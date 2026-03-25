@@ -108,6 +108,22 @@ public class Game extends JPanel {
         return playerAircrafts;
     }
 
+    public List<AbstractAircraft> getEnemyAircrafts() {
+        return enemyAircrafts;
+    }
+
+    public List<BaseBullet> getHeroBullets() {
+        return heroBullets;
+    }
+
+    public List<BaseBullet> getEnemyBullets() {
+        return enemyBullets;
+    }
+
+    public List<AbstractItem> getItems() {
+        return items;
+    }
+
     public ClientWorldState getClientWorldState() {
         return clientWorldState;
     }
@@ -121,6 +137,15 @@ public class Game extends JPanel {
         snapshotApplier.apply(snapshot, clientWorldState);
         playerAircrafts.clear();
         playerAircrafts.addAll(clientWorldState.getPlayerAircrafts());
+        enemyAircrafts.clear();
+        enemyAircrafts.addAll(clientWorldState.getEnemyAircrafts());
+        heroBullets.clear();
+        heroBullets.addAll(clientWorldState.getHeroBullets());
+        enemyBullets.clear();
+        enemyBullets.addAll(clientWorldState.getEnemyBullets());
+        items.clear();
+        items.addAll(clientWorldState.getItems());
+        score = clientWorldState.getLocalScore();
     }
 
     public void attachCommandPublisher(ClientCommandPublisher commandPublisher) {

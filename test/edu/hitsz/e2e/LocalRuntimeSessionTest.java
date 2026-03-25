@@ -21,7 +21,8 @@ public class LocalRuntimeSessionTest {
         game.attachCommandPublisher(session);
         session.start();
 
-        waitUntil(() -> game.getPlayerAircrafts().size() == 2, 3000L);
+        waitUntil(() -> game.getPlayerAircrafts().size() == 1, 3000L);
+        waitUntil(() -> !game.getEnemyAircrafts().isEmpty(), 3000L);
 
         game.handleLocalHeroInput(300, 520);
 
@@ -34,7 +35,8 @@ public class LocalRuntimeSessionTest {
         session.stop();
         server.stop();
 
-        assert game.getPlayerAircrafts().size() == 2 : "Initial snapshot should contain local and remote players";
+        assert game.getPlayerAircrafts().size() == 1 : "Single-player runtime should still go through server";
+        assert !game.getEnemyAircrafts().isEmpty() : "Server should drive enemy generation via snapshots";
         assert HeroAircraft.getSingleton().getLocationX() == 300 : "Move command should round-trip via local server";
         assert HeroAircraft.getSingleton().getLocationY() == 520 : "Move command should round-trip via local server";
     }

@@ -17,12 +17,15 @@ import edu.hitsz.application.server.skill.DefaultServerSkillResolver;
 import edu.hitsz.application.server.skill.SkillScalingConfig;
 import edu.hitsz.application.server.skill.SkillType;
 
+import java.util.Timer;
+import java.util.TimerTask;
+import java.util.concurrent.atomic.AtomicLong;
+
 public class LocalAuthorityServer {
 
     private static final String LOCAL_SESSION_ID = "session-local";
     private static final String LOCAL_PLAYER_ID = "player-local";
-    private static final String REMOTE_SESSION_ID = "session-2";
-    private static final String REMOTE_PLAYER_ID = "player-2";
+    private static final int TICK_INTERVAL_MILLIS = 40;
 
     private final ServerWorldState worldState;
     private final ServerGameLoop gameLoop;
@@ -32,6 +35,8 @@ public class LocalAuthorityServer {
     private final InputMovePayloadJsonMapper movePayloadJsonMapper;
     private final InputSkillPayloadJsonMapper skillPayloadJsonMapper;
     private final WorldSnapshotJsonMapper snapshotJsonMapper;
+    private final Timer timer;
+    private final AtomicLong serverSequence;
 
     public LocalAuthorityServer(int port) {
         this.worldState = new ServerWorldState();
@@ -42,15 +47,26 @@ public class LocalAuthorityServer {
         this.movePayloadJsonMapper = new InputMovePayloadJsonMapper();
         this.skillPayloadJsonMapper = new InputSkillPayloadJsonMapper();
         this.snapshotJsonMapper = new WorldSnapshotJsonMapper();
+        this.timer = new Timer("local-authority-server", true);
+        this.serverSequence = new AtomicLong();
         seedDemoPlayers();
         transport.setListener(this::handleMessage);
     }
 
     public void start() {
         transport.start();
+        timer.schedule(new TimerTask() {
+            @Override
+            public void run() {
+                long nowMillis = System.currentTimeMillis();
+                gameLoop.stepOnce(nowMillis);
+                sendSnapshot(LOCAL_SESSION_ID, serverSequence.incrementAndGet());
+            }
+        }, 0, TICK_INTERVAL_MILLIS);
     }
 
     public void stop() {
+        timer.cancel();
         transport.stop();
     }
 
@@ -67,12 +83,6 @@ public class LocalAuthorityServer {
         localSession.getPlayerState().setPosition(
                 Main.WINDOW_WIDTH / 2,
                 Main.WINDOW_HEIGHT - 80
-        );
-
-        PlayerSession remoteSession = worldState.getSessionRegistry().create(REMOTE_SESSION_ID, REMOTE_PLAYER_ID);
-        remoteSession.getPlayerState().setPosition(
-                Main.WINDOW_WIDTH / 2 - 80,
-                Main.WINDOW_HEIGHT - 160
         );
     }
 
