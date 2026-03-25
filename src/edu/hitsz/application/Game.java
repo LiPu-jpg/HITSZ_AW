@@ -2,6 +2,7 @@ package edu.hitsz.application;
 
 import edu.hitsz.aircraft.*;
 import edu.hitsz.application.client.ClientWorldState;
+import edu.hitsz.application.client.ClientCommandPublisher;
 import edu.hitsz.application.client.DefaultSnapshotApplier;
 import edu.hitsz.application.client.SnapshotApplier;
 import edu.hitsz.application.protocol.dto.WorldSnapshot;
@@ -38,6 +39,7 @@ public class Game extends JPanel {
     private final List<AbstractAircraft> playerAircrafts;
     private final ClientWorldState clientWorldState;
     private final SnapshotApplier snapshotApplier;
+    private ClientCommandPublisher commandPublisher;
     private final List<AbstractAircraft> enemyAircrafts;
     private final List<BaseBullet> heroBullets;
     private final List<BaseBullet> enemyBullets;
@@ -89,7 +91,17 @@ public class Game extends JPanel {
     }
 
     public void handleLocalHeroInput(int x, int y) {
+        if (commandPublisher != null) {
+            commandPublisher.publishMove(x, y);
+            return;
+        }
         heroAircraft.setLocation(x, y);
+    }
+
+    public void handleLocalSkillInput(String skillType) {
+        if (commandPublisher != null) {
+            commandPublisher.publishSkill(skillType);
+        }
     }
 
     public List<AbstractAircraft> getPlayerAircrafts() {
@@ -111,6 +123,10 @@ public class Game extends JPanel {
         playerAircrafts.addAll(clientWorldState.getPlayerAircrafts());
     }
 
+    public void attachCommandPublisher(ClientCommandPublisher commandPublisher) {
+        this.commandPublisher = commandPublisher;
+    }
+
     /**
      * 游戏启动入口，执行游戏逻辑
      */
@@ -120,6 +136,10 @@ public class Game extends JPanel {
         TimerTask task = new TimerTask() {
             @Override
             public void run() {
+                if (commandPublisher != null) {
+                    repaint();
+                    return;
+                }
 
                 enemySpawnCounter++;
                 createEnemyAction();

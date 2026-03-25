@@ -2,6 +2,8 @@ package edu.hitsz.application;
 
 import edu.hitsz.aircraft.HeroAircraft;
 
+import java.awt.event.KeyAdapter;
+import java.awt.event.KeyEvent;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
 
@@ -14,6 +16,7 @@ public class HeroController {
     private final Game game;
     private final HeroAircraft heroAircraft;
     private final MouseAdapter mouseAdapter;
+    private final KeyAdapter keyAdapter;
 
     public HeroController(Game game, HeroAircraft heroAircraft){
         this.game = game;
@@ -33,8 +36,30 @@ public class HeroController {
             }
         };
 
+        keyAdapter = new KeyAdapter() {
+            @Override
+            public void keyPressed(KeyEvent e) {
+                super.keyPressed(e);
+                switch (e.getKeyCode()) {
+                    case KeyEvent.VK_1:
+                        game.handleLocalSkillInput("FREEZE");
+                        break;
+                    case KeyEvent.VK_2:
+                        game.handleLocalSkillInput("BOMB");
+                        break;
+                    case KeyEvent.VK_3:
+                        game.handleLocalSkillInput("SHIELD");
+                        break;
+                    default:
+                        break;
+                }
+            }
+        };
+
         game.addMouseListener(mouseAdapter);
         game.addMouseMotionListener(mouseAdapter);
+        game.addKeyListener(keyAdapter);
+        game.setFocusable(true);
     }
 
 
