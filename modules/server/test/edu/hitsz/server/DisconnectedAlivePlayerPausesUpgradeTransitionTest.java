@@ -11,9 +11,7 @@ public class DisconnectedAlivePlayerPausesUpgradeTransitionTest {
     public static void main(String[] args) {
         RoomRuntime roomRuntime = new RoomRuntime("ROOM-1", "host-session", Difficulty.NORMAL);
         roomRuntime.addOrReconnectPlayer("host-session", "host-player", 0L);
-        roomRuntime.findSession("host-session").getPlayerState().setSelectedSkill("FREEZE");
         roomRuntime.addOrReconnectPlayer("guest-session", "guest-player", 0L);
-        roomRuntime.findSession("guest-session").getPlayerState().setSelectedSkill("BOMB");
         roomRuntime.updateReady("host-session", true);
         roomRuntime.updateReady("guest-session", true);
         roomRuntime.startRoundIfHost("host-session");
@@ -35,8 +33,8 @@ public class DisconnectedAlivePlayerPausesUpgradeTransitionTest {
         roomRuntime.tick(flashUntilMillis, 10_000L);
 
         assert roomRuntime.isGameStarted() : "Room should remain active while waiting for the disconnected alive player";
-        assert roomRuntime.getGamePhase() == GamePhase.UPGRADE_SELECTION
-                : "Upgrade transition should pause until a retained alive player reconnects";
+        assert roomRuntime.getGamePhase() == GamePhase.BRANCH_SELECTION
+                : "First-boss branch selection should pause until a retained alive player reconnects";
         assert roomRuntime.getChapterId() == ChapterId.CH1
                 : "Chapter should not advance while the only alive player is offline";
     }
