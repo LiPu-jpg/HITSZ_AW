@@ -19,6 +19,8 @@ public class PlayerRuntimeState {
     private int level;
     private int score;
     private AircraftBranch aircraftBranch;
+    private int targetX;
+    private int targetY;
     private boolean branchUnlocked;
     private String selectedSkill;
     private List<UpgradeChoice> availableUpgradeChoices;
@@ -35,6 +37,8 @@ public class PlayerRuntimeState {
         this.aircraft = new ServerPlayerAircraft(0, 0, 0, 0, GameplayBalance.PLAYER_INITIAL_HP);
         this.level = INITIAL_LEVEL;
         this.aircraftBranch = AircraftBranch.STARTER_BLUE;
+        this.targetX = aircraft.getLocationX();
+        this.targetY = aircraft.getLocationY();
         this.branchUnlocked = false;
         this.selectedSkill = null;
         this.availableUpgradeChoices = Collections.emptyList();
@@ -54,6 +58,20 @@ public class PlayerRuntimeState {
 
     public void setPosition(int x, int y) {
         aircraft.setLocation(x, y);
+        setTargetPosition(x, y);
+    }
+
+    public void setTargetPosition(int x, int y) {
+        this.targetX = x;
+        this.targetY = y;
+    }
+
+    public int getTargetX() {
+        return targetX;
+    }
+
+    public int getTargetY() {
+        return targetY;
     }
 
     public int getHp() {
@@ -126,6 +144,8 @@ public class PlayerRuntimeState {
         level = INITIAL_LEVEL;
         score = 0;
         aircraftBranch = AircraftBranch.STARTER_BLUE;
+        targetX = x;
+        targetY = y;
         branchUnlocked = false;
         selectedSkill = null;
         availableUpgradeChoices = Collections.emptyList();
@@ -239,6 +259,32 @@ public class PlayerRuntimeState {
                 lightTrackingUpgradeLevel * GameplayBalance.PLAYER_LIGHT_TRACKING_SPEED_STEP
         );
         return deltaX > 0 ? maxTracking : -maxTracking;
+    }
+
+    public void advanceTowardTarget() {
+        int currentX = getX();
+        int currentY = getY();
+        int deltaX = targetX - currentX;
+        int deltaY = targetY - currentY;
+        if (Math.abs(deltaX) <= GameplayBalance.PLAYER_STOP_RADIUS
+                && Math.abs(deltaY) <= GameplayBalance.PLAYER_STOP_RADIUS) {
+            return;
+        }
+
+        int moveSpeed = GameplayBalance.playerMoveSpeed(aircraftBranch);
+        int stepX = clamp(deltaX, moveSpeed);
+        int stepY = clamp(deltaY, moveSpeed);
+        aircraft.setLocation(currentX + stepX, currentY + stepY);
+    }
+
+    private int clamp(int delta, int limit) {
+        if (delta > limit) {
+            return limit;
+        }
+        if (delta < -limit) {
+            return -limit;
+        }
+        return delta;
     }
 
     private String normalizeSelectedSkill(String selectedSkill) {

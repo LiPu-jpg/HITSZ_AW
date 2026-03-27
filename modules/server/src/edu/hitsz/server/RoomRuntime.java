@@ -147,7 +147,7 @@ public class RoomRuntime {
             return;
         }
         PlayerSession session = commandRouter.route(new MoveCommand(sessionId, x, y, sequence, timestamp));
-        session.getPlayerState().setPosition(x, y);
+        session.getPlayerState().setTargetPosition(x, y);
     }
 
     public synchronized void handleSkill(String sessionId, String skillType, long sequence, long timestamp) {
