@@ -12,6 +12,7 @@ import edu.hitsz.common.GameConstants;
 import edu.hitsz.common.GamePhase;
 import edu.hitsz.common.UpgradeChoice;
 import edu.hitsz.common.protocol.dto.LaserSnapshot;
+import edu.hitsz.common.protocol.dto.ExplosionSnapshot;
 import edu.hitsz.common.protocol.dto.WorldSnapshot;
 
 import javax.swing.*;
@@ -43,6 +44,7 @@ public class Game extends JPanel {
     private final List<BaseBullet> heroBullets;
     private final List<BaseBullet> enemyBullets;
     private final List<LaserSnapshot> activeLasers;
+    private final List<ExplosionSnapshot> explosionSnapshots;
     private final List<AbstractItem> items;
 
     //当前玩家分数
@@ -85,6 +87,7 @@ public class Game extends JPanel {
         heroBullets = new LinkedList<>();
         enemyBullets = new LinkedList<>();
         activeLasers = new LinkedList<>();
+        explosionSnapshots = new LinkedList<>();
         items = new LinkedList<>();
         playerAircrafts.add(heroAircraft);
         clientWorldState.getPlayerAircrafts().add(heroAircraft);
@@ -196,6 +199,8 @@ public class Game extends JPanel {
         enemyBullets.addAll(clientWorldState.getEnemyBullets());
         activeLasers.clear();
         activeLasers.addAll(clientWorldState.getActiveLasers());
+        explosionSnapshots.clear();
+        explosionSnapshots.addAll(clientWorldState.getExplosionSnapshots());
         items.clear();
         items.addAll(clientWorldState.getItems());
         localHp = clientWorldState.getLocalHp();
@@ -314,6 +319,7 @@ public class Game extends JPanel {
         paintImageWithPositionRevised(g, enemyAircrafts);
         paintImageWithPositionRevised(g, items);
         paintLaserBeams(g);
+        paintExplosionBursts(g);
 
         //绘制得分和生命值
         paintScoreAndLife(g);
@@ -371,6 +377,38 @@ public class Game extends JPanel {
                 ));
                 graphics.setColor(new Color(255, 240, 180));
                 graphics.drawLine(laser.getOriginX(), laser.getOriginY(), endX, endY);
+            }
+        } finally {
+            graphics.dispose();
+        }
+    }
+
+    private void paintExplosionBursts(Graphics g) {
+        if (explosionSnapshots.isEmpty()) {
+            return;
+        }
+        Graphics2D graphics = (Graphics2D) g.create();
+        try {
+            graphics.setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON);
+            for (ExplosionSnapshot explosion : explosionSnapshots) {
+                int radius = Math.max(8, explosion.getRadius());
+                int diameter = radius * 2;
+                int left = explosion.getX() - radius;
+                int top = explosion.getY() - radius;
+
+                graphics.setComposite(AlphaComposite.getInstance(AlphaComposite.SRC_OVER, 0.28f));
+                graphics.setColor(new Color(255, 140, 40));
+                graphics.fillOval(left, top, diameter, diameter);
+
+                graphics.setComposite(AlphaComposite.getInstance(AlphaComposite.SRC_OVER, 0.8f));
+                graphics.setStroke(new BasicStroke(4.0f, BasicStroke.CAP_ROUND, BasicStroke.JOIN_ROUND));
+                graphics.setColor(new Color(255, 245, 200));
+                graphics.drawOval(left, top, diameter, diameter);
+
+                graphics.setComposite(AlphaComposite.getInstance(AlphaComposite.SRC_OVER, 0.85f));
+                graphics.setStroke(new BasicStroke(2.0f, BasicStroke.CAP_ROUND, BasicStroke.JOIN_ROUND));
+                graphics.setColor(new Color(255, 210, 120));
+                graphics.drawOval(left + radius / 3, top + radius / 3, diameter - radius / 2, diameter - radius / 2);
             }
         } finally {
             graphics.dispose();

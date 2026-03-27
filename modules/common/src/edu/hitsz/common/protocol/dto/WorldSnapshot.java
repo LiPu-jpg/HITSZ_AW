@@ -14,6 +14,7 @@ public class WorldSnapshot {
     private final List<BulletSnapshot> heroBulletSnapshots;
     private final List<BulletSnapshot> enemyBulletSnapshots;
     private final List<LaserSnapshot> laserSnapshots;
+    private final List<ExplosionSnapshot> explosionSnapshots;
     private final List<ItemSnapshot> itemSnapshots;
     private boolean gameStarted;
     private int readyPlayerCount;
@@ -36,6 +37,7 @@ public class WorldSnapshot {
         this.heroBulletSnapshots = new LinkedList<>();
         this.enemyBulletSnapshots = new LinkedList<>();
         this.laserSnapshots = new LinkedList<>();
+        this.explosionSnapshots = new LinkedList<>();
         this.itemSnapshots = new LinkedList<>();
     }
 
@@ -81,6 +83,14 @@ public class WorldSnapshot {
 
     public List<LaserSnapshot> getLaserSnapshots() {
         return Collections.unmodifiableList(laserSnapshots);
+    }
+
+    public void addExplosionSnapshot(ExplosionSnapshot explosionSnapshot) {
+        explosionSnapshots.add(explosionSnapshot);
+    }
+
+    public List<ExplosionSnapshot> getExplosionSnapshots() {
+        return Collections.unmodifiableList(explosionSnapshots);
     }
 
     public void addItemSnapshot(ItemSnapshot itemSnapshot) {

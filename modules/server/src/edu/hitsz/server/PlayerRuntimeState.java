@@ -298,6 +298,14 @@ public class PlayerRuntimeState {
         return aircraftBranch == AircraftBranch.GREEN_DEFENSE;
     }
 
+    public boolean usesAirburstWeapon() {
+        return aircraftBranch == AircraftBranch.BLACK_HEAVY;
+    }
+
+    public AirburstProjectileState createAirburstProjectile(String ownerSessionId, int targetX, int targetY) {
+        return aircraft.shootAirburst(ownerSessionId, targetX, targetY);
+    }
+
     public LaserBeamState createLaserBeam(String ownerSessionId) {
         int originX = getX();
         int originY = getY() - aircraft.getHeight() / 2;

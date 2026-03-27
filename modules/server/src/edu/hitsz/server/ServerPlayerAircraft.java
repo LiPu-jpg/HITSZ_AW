@@ -75,6 +75,19 @@ public class ServerPlayerAircraft extends AbstractAircraft {
         return bullets;
     }
 
+    public AirburstProjectileState shootAirburst(String ownerSessionId, int targetX, int targetY) {
+        return new AirburstProjectileState(
+                ownerSessionId,
+                getLocationX(),
+                getLocationY() + DIRECTION * 2,
+                targetX,
+                targetY,
+                GameplayBalance.BLACK_HEAVY_AIRBURST_MAX_RANGE,
+                GameplayBalance.BLACK_HEAVY_AIRBURST_RADIUS,
+                bulletPower
+        );
+    }
+
     public void increaseFirepower(int amount) {
         if (amount <= 0) {
             return;

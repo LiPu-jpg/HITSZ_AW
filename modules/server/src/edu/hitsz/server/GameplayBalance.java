@@ -32,6 +32,9 @@ public final class GameplayBalance {
     public static final double RED_SPEED_LASER_ANGLE = -Math.PI / 2.0;
     public static final int RED_SPEED_LASER_WIDTH = 24;
     public static final int RED_SPEED_LASER_DURATION_TICKS = 4;
+    public static final int BLACK_HEAVY_AIRBURST_RADIUS = 90;
+    public static final int BLACK_HEAVY_AIRBURST_MAX_RANGE = 280;
+    public static final int BLACK_HEAVY_EXPLOSION_DURATION_TICKS = 3;
 
     public static final double ITEM_DROP_PROBABILITY = 0.6;
 

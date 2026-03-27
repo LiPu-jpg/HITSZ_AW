@@ -5,6 +5,7 @@ import edu.hitsz.common.ChapterId;
 import edu.hitsz.common.GamePhase;
 import edu.hitsz.common.UpgradeChoice;
 import edu.hitsz.common.protocol.dto.BulletSnapshot;
+import edu.hitsz.common.protocol.dto.ExplosionSnapshot;
 import edu.hitsz.common.protocol.dto.EnemySnapshot;
 import edu.hitsz.common.protocol.dto.ItemSnapshot;
 import edu.hitsz.common.protocol.dto.LaserSnapshot;
@@ -39,6 +40,7 @@ public class WorldSnapshotJsonMapper {
                 .append("\"heroBullets\":").append(bulletsToJson(snapshot.getHeroBulletSnapshots())).append(',')
                 .append("\"enemyBullets\":").append(bulletsToJson(snapshot.getEnemyBulletSnapshots())).append(',')
                 .append("\"lasers\":").append(lasersToJson(snapshot.getLaserSnapshots())).append(',')
+                .append("\"explosions\":").append(explosionsToJson(snapshot.getExplosionSnapshots())).append(',')
                 .append("\"items\":").append(itemsToJson(snapshot.getItemSnapshots()))
                 .append('}');
         return builder.toString();
@@ -121,6 +123,16 @@ public class WorldSnapshotJsonMapper {
                     SimpleJsonSupport.extractInt(laserJson, "length"),
                     SimpleJsonSupport.extractInt(laserJson, "durationTicks"),
                     SimpleJsonSupport.extractInt(laserJson, "damage")
+            ));
+        }
+        for (String explosionJson : SimpleJsonSupport.splitTopLevelArray(
+                SimpleJsonSupport.extractJsonValueOrDefault(json, "explosions", "[]")
+        )) {
+            snapshot.addExplosionSnapshot(new ExplosionSnapshot(
+                    SimpleJsonSupport.extractInt(explosionJson, "x"),
+                    SimpleJsonSupport.extractInt(explosionJson, "y"),
+                    SimpleJsonSupport.extractInt(explosionJson, "radius"),
+                    SimpleJsonSupport.extractInt(explosionJson, "durationTicks")
             ));
         }
         for (String itemJson : SimpleJsonSupport.splitTopLevelArray(SimpleJsonSupport.extractJsonValue(json, "items"))) {
@@ -231,6 +243,24 @@ public class WorldSnapshotJsonMapper {
                     .append("\"length\":").append(laser.getLength()).append(',')
                     .append("\"durationTicks\":").append(laser.getDurationTicks()).append(',')
                     .append("\"damage\":").append(laser.getDamage())
+                    .append('}');
+        }
+        builder.append(']');
+        return builder.toString();
+    }
+
+    private String explosionsToJson(List<ExplosionSnapshot> explosions) {
+        StringBuilder builder = new StringBuilder("[");
+        for (int i = 0; i < explosions.size(); i++) {
+            ExplosionSnapshot explosion = explosions.get(i);
+            if (i > 0) {
+                builder.append(',');
+            }
+            builder.append('{')
+                    .append("\"x\":").append(explosion.getX()).append(',')
+                    .append("\"y\":").append(explosion.getY()).append(',')
+                    .append("\"radius\":").append(explosion.getRadius()).append(',')
+                    .append("\"durationTicks\":").append(explosion.getDurationTicks())
                     .append('}');
         }
         builder.append(']');

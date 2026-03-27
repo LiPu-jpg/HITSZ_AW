@@ -17,6 +17,7 @@ import edu.hitsz.server.basic.FirePlusSupply;
 import edu.hitsz.server.basic.FireSupply;
 import edu.hitsz.server.basic.FreezeSupply;
 import edu.hitsz.server.bullet.BaseBullet;
+import edu.hitsz.common.protocol.dto.ExplosionSnapshot;
 import edu.hitsz.common.GameConstants;
 import edu.hitsz.server.skill.DefaultServerSkillResolver;
 import edu.hitsz.server.skill.ServerSkillResolver;
@@ -38,6 +39,8 @@ public class ServerWorldState {
     private final List<BaseBullet> heroBullets;
     private final List<BaseBullet> enemyBullets;
     private final List<LaserBeamState> activeLasers;
+    private final List<AirburstProjectileState> airburstProjectiles;
+    private final List<ExplosionSnapshot> explosionSnapshots;
     private final List<AbstractItem> items;
     private final WorldEffectState worldEffectState;
     private final ServerSkillResolver skillResolver;
@@ -56,6 +59,8 @@ public class ServerWorldState {
         this.heroBullets = new LinkedList<>();
         this.enemyBullets = new LinkedList<>();
         this.activeLasers = new LinkedList<>();
+        this.airburstProjectiles = new LinkedList<>();
+        this.explosionSnapshots = new LinkedList<>();
         this.items = new LinkedList<>();
         this.worldEffectState = new WorldEffectState();
         this.skillResolver = new DefaultServerSkillResolver(SkillScalingConfig.defaultConfig());
@@ -100,6 +105,10 @@ public class ServerWorldState {
 
     public List<LaserBeamState> getActiveLasers() {
         return activeLasers;
+    }
+
+    public List<ExplosionSnapshot> getExplosionSnapshots() {
+        return explosionSnapshots;
     }
 
     public List<AbstractItem> getItems() {
@@ -154,12 +163,14 @@ public class ServerWorldState {
         if (chapterProgressionState.getGamePhase() == GamePhase.UPGRADE_SELECTION
                 || chapterProgressionState.getGamePhase() == GamePhase.BRANCH_SELECTION) {
             activeLasers.clear();
+            explosionSnapshots.clear();
             return;
         }
         movePlayersAction();
         enemySpawnCounter++;
         createEnemyAction();
         shootAction(nowMillis);
+        burstAction(nowMillis);
         bulletsMoveAction();
         stepEnemies(nowMillis);
         itemsMoveAction();
@@ -204,6 +215,8 @@ public class ServerWorldState {
         heroBullets.clear();
         enemyBullets.clear();
         activeLasers.clear();
+        airburstProjectiles.clear();
+        explosionSnapshots.clear();
         items.clear();
         worldEffectState.reset();
         totalScore = 0;
@@ -228,6 +241,8 @@ public class ServerWorldState {
         heroBullets.clear();
         enemyBullets.clear();
         activeLasers.clear();
+        airburstProjectiles.clear();
+        explosionSnapshots.clear();
         items.clear();
         bossActive = false;
         return chapterProgressionState.advanceToNextChapter();
@@ -308,18 +323,25 @@ public class ServerWorldState {
             if (playerState.getAircraft().notValid() || !playerState.shouldShootAtTick(tick)) {
                 continue;
             }
-            if (playerState.usesLaserWeapon()) {
-                replaceActiveLaser(playerState.createLaserBeam(session.getSessionId()));
-            } else if (playerState.usesSpreadWeapon()) {
-                heroBullets.addAll(playerState.getAircraft().shootSpread(
-                        session.getSessionId(),
-                        playerState.trackingSpeedXForTarget(nearestEnemyX(playerState.getX()))
-                ));
-            } else {
-                heroBullets.addAll(playerState.getAircraft().shoot(
-                        session.getSessionId(),
-                        playerState.trackingSpeedXForTarget(nearestEnemyX(playerState.getX()))
-                ));
+        if (playerState.usesLaserWeapon()) {
+            replaceActiveLaser(playerState.createLaserBeam(session.getSessionId()));
+        } else if (playerState.usesSpreadWeapon()) {
+            heroBullets.addAll(playerState.getAircraft().shootSpread(
+                    session.getSessionId(),
+                    playerState.trackingSpeedXForTarget(nearestEnemyX(playerState.getX()))
+            ));
+        } else if (playerState.usesAirburstWeapon()) {
+            AbstractAircraft targetEnemy = nearestEnemy(playerState);
+            int targetX = targetEnemy == null ? playerState.getX() : targetEnemy.getLocationX();
+            int targetY = targetEnemy == null
+                    ? Math.max(0, playerState.getY() - GameplayBalance.BLACK_HEAVY_AIRBURST_MAX_RANGE)
+                    : targetEnemy.getLocationY();
+            airburstProjectiles.add(playerState.createAirburstProjectile(session.getSessionId(), targetX, targetY));
+        } else {
+            heroBullets.addAll(playerState.getAircraft().shoot(
+                    session.getSessionId(),
+                    playerState.trackingSpeedXForTarget(nearestEnemyX(playerState.getX()))
+            ));
             }
             playerState.markShotAtTick(tick);
         }
@@ -572,6 +594,16 @@ public class ServerWorldState {
         bossActive = containsBossEnemy();
     }
 
+    private void burstAction(long nowMillis) {
+        explosionSnapshots.clear();
+        for (AirburstProjectileState projectile : airburstProjectiles) {
+            ExplosionSnapshot explosion = projectile.resolveBurst();
+            explosionSnapshots.add(explosion);
+            applyAirburstDamage(projectile, explosion, nowMillis);
+        }
+        airburstProjectiles.clear();
+    }
+
     private void spawnBoss() {
         enemyAircrafts.clear();
         enemyBullets.clear();
@@ -663,6 +695,43 @@ public class ServerWorldState {
             }
         }
         return nearestEnemy == null ? fallbackX : nearestEnemy.getLocationX();
+    }
+
+    private AbstractAircraft nearestEnemy(PlayerRuntimeState playerState) {
+        AbstractAircraft nearestEnemy = null;
+        long nearestDistance = Long.MAX_VALUE;
+        for (AbstractAircraft enemyAircraft : enemyAircrafts) {
+            if (enemyAircraft.notValid()) {
+                continue;
+            }
+            long deltaX = enemyAircraft.getLocationX() - playerState.getX();
+            long deltaY = enemyAircraft.getLocationY() - playerState.getY();
+            long distance = deltaX * deltaX + deltaY * deltaY;
+            if (distance < nearestDistance) {
+                nearestDistance = distance;
+                nearestEnemy = enemyAircraft;
+            }
+        }
+        return nearestEnemy;
+    }
+
+    private void applyAirburstDamage(AirburstProjectileState projectile, ExplosionSnapshot explosion, long nowMillis) {
+        int radius = projectile.getBurstRadius();
+        int radiusSquared = radius * radius;
+        for (AbstractAircraft enemyAircraft : enemyAircrafts) {
+            if (enemyAircraft.notValid()) {
+                continue;
+            }
+            long deltaX = enemyAircraft.getLocationX() - explosion.getX();
+            long deltaY = enemyAircraft.getLocationY() - explosion.getY();
+            long distanceSquared = deltaX * deltaX + deltaY * deltaY;
+            if (distanceSquared <= radiusSquared) {
+                enemyAircraft.decreaseHp(projectile.getDamage());
+                if (enemyAircraft.notValid()) {
+                    awardScore(projectile.getOwnerSessionId(), enemyAircraft);
+                }
+            }
+        }
     }
 
     private void replaceActiveLaser(LaserBeamState laser) {

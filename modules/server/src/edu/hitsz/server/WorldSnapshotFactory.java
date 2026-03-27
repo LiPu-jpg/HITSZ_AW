@@ -4,6 +4,7 @@ import edu.hitsz.common.Difficulty;
 import edu.hitsz.common.AircraftBranch;
 import edu.hitsz.common.protocol.SnapshotTypes;
 import edu.hitsz.common.protocol.dto.BulletSnapshot;
+import edu.hitsz.common.protocol.dto.ExplosionSnapshot;
 import edu.hitsz.common.protocol.dto.EnemySnapshot;
 import edu.hitsz.common.protocol.dto.ItemSnapshot;
 import edu.hitsz.common.protocol.dto.LaserSnapshot;
@@ -95,6 +96,14 @@ public class WorldSnapshotFactory {
                     laser.getLength(),
                     laser.getDurationTicks(),
                     laser.getDamage()
+            ));
+        }
+        for (ExplosionSnapshot explosion : worldState.getExplosionSnapshots()) {
+            snapshot.addExplosionSnapshot(new ExplosionSnapshot(
+                    explosion.getX(),
+                    explosion.getY(),
+                    explosion.getRadius(),
+                    explosion.getDurationTicks()
             ));
         }
         for (AbstractItem item : worldState.getItems()) {
