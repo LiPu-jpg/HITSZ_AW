@@ -46,6 +46,14 @@ public final class ImageResourceLoader {
         );
     }
 
+    public static BufferedImage loadOrFallback(String preferredFileName, String fallbackFileName) {
+        try {
+            return load(preferredFileName);
+        } catch (IllegalStateException ignored) {
+            return load(fallbackFileName);
+        }
+    }
+
     private static BufferedImage loadFromClasspath(String fileName) {
         String resourcePath = IMAGE_ROOT + "/" + fileName;
         ClassLoader contextClassLoader = Thread.currentThread().getContextClassLoader();

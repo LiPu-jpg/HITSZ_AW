@@ -26,9 +26,27 @@ public final class ChapterVisualCatalog {
         BACKGROUND_BY_CHAPTER.put(ChapterId.CH2, ImageManager.NORMAL_BACKGROUND_IMAGE);
         BACKGROUND_BY_CHAPTER.put(ChapterId.CH3, ImageManager.HARD_BACKGROUND_IMAGE);
 
-        ENEMY_IMAGES_BY_CHAPTER.put(ChapterId.CH1, baseEnemyMap());
-        ENEMY_IMAGES_BY_CHAPTER.put(ChapterId.CH2, tintedEnemyMap(new Color(40, 120, 160, 70)));
-        ENEMY_IMAGES_BY_CHAPTER.put(ChapterId.CH3, tintedEnemyMap(new Color(180, 80, 30, 80)));
+        ENEMY_IMAGES_BY_CHAPTER.put(ChapterId.CH1, chapterEnemyMap(
+                ImageManager.MOB_ENEMY_IMAGE,
+                ImageManager.CH1_ELITE_ENEMY_IMAGE,
+                tint(ImageManager.CH1_ELITE_ENEMY_IMAGE, new Color(80, 180, 120, 72)),
+                tint(ImageManager.COMMON_SOLDIER_IMAGE, new Color(215, 180, 60, 88)),
+                ImageManager.CH1_BOSS_ENEMY_IMAGE
+        ));
+        ENEMY_IMAGES_BY_CHAPTER.put(ChapterId.CH2, chapterEnemyMap(
+                tint(ImageManager.MOB_ENEMY_IMAGE, new Color(188, 156, 92, 72)),
+                ImageManager.CH2_ELITE_ENEMY_IMAGE,
+                tint(ImageManager.CH2_ELITE_ENEMY_IMAGE, new Color(176, 120, 48, 84)),
+                tint(ImageManager.COMMON_SOLDIER_IMAGE, new Color(96, 92, 84, 90)),
+                ImageManager.CH2_BOSS_ENEMY_IMAGE
+        ));
+        ENEMY_IMAGES_BY_CHAPTER.put(ChapterId.CH3, chapterEnemyMap(
+                tint(ImageManager.MOB_ENEMY_IMAGE, new Color(122, 108, 94, 78)),
+                ImageManager.CH3_ELITE_ENEMY_IMAGE,
+                tint(ImageManager.CH3_ELITE_ENEMY_IMAGE, new Color(180, 72, 50, 88)),
+                tint(ImageManager.COMMON_SOLDIER_IMAGE, new Color(132, 24, 18, 96)),
+                ImageManager.CH3_BOSS_ENEMY_IMAGE
+        ));
     }
 
     private ChapterVisualCatalog() {
@@ -73,23 +91,18 @@ public final class ChapterVisualCatalog {
         return null;
     }
 
-    private static Map<String, BufferedImage> baseEnemyMap() {
+    private static Map<String, BufferedImage> chapterEnemyMap(BufferedImage mobImage,
+                                                              BufferedImage eliteImage,
+                                                              BufferedImage elitePlusImage,
+                                                              BufferedImage aceImage,
+                                                              BufferedImage bossImage) {
         Map<String, BufferedImage> images = new HashMap<>();
-        images.put(MobEnemy.class.getName(), ImageManager.MOB_ENEMY_IMAGE);
-        images.put(EliteEnemy.class.getName(), ImageManager.ELITE_ENEMY_IMAGE);
-        images.put(ElitePlusEnemy.class.getName(), ImageManager.ELITE_PLUS_ENEMY_IMAGE);
-        images.put(AceEnemy.class.getName(), ImageManager.ACE_ENEMY_IMAGE);
-        images.put(BossEnemy.class.getName(), ImageManager.BOSS_ENEMY_IMAGE);
+        images.put(MobEnemy.class.getName(), mobImage);
+        images.put(EliteEnemy.class.getName(), eliteImage);
+        images.put(ElitePlusEnemy.class.getName(), elitePlusImage);
+        images.put(AceEnemy.class.getName(), aceImage);
+        images.put(BossEnemy.class.getName(), bossImage);
         return images;
-    }
-
-    private static Map<String, BufferedImage> tintedEnemyMap(Color tint) {
-        Map<String, BufferedImage> base = baseEnemyMap();
-        Map<String, BufferedImage> tinted = new HashMap<>();
-        for (Map.Entry<String, BufferedImage> entry : base.entrySet()) {
-            tinted.put(entry.getKey(), tint(entry.getValue(), tint));
-        }
-        return tinted;
     }
 
     private static BufferedImage tint(BufferedImage source, Color tint) {
