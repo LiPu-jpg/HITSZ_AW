@@ -1,0 +1,38 @@
+@startuml hero_singleton
+title HeroAircraft 单例模式结构图
+
+skinparam classAttributeIconSize 10
+skinparam shadowing false
+skinparam linetype ortho
+
+class "Game\n游戏主循环" as Game {
+  - heroAircraft : HeroAircraft
+  + Game()
+  + action() : void
+}
+
+class "HeroAircraft\n英雄机单例" as HeroAircraft <<Singleton>> {
+  - singleton : HeroAircraft {static, volatile}
+  - HeroAircraft(locationX, locationY, speedX, speedY, hp) 
+  + getSingleton() : HeroAircraft {static}
+  + forward() : void
+  + shoot() : List<BaseBullet>
+}
+
+note right of HeroAircraft
+使用双重检查锁定（DCL）：
+1. 先做第一次判空
+2. 再进入 synchronized 块
+3. 在锁内做第二次判空
+4. 最后进行延迟初始化
+end note
+
+note bottom of Game
+Game 不直接 new HeroAircraft，
+而是通过 getSingleton()
+获取全局唯一的英雄机对象。
+end note
+
+Game ..> HeroAircraft : 调用 getSingleton()
+
+@enduml

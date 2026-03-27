@@ -2,37 +2,161 @@
 
 > **For Claude:** REQUIRED SUB-SKILL: Use superpowers:executing-plans to implement this plan task-by-task.
 
+> **Current Layout Note:** 协议层现已迁移到 `modules/common/src`，非协议测试已拆到 `modules/server/test` 与 `modules/client-desktop/test`。当前仓库的统一编译命令应使用：
+>
+> `javac -encoding UTF-8 $(find src modules/common/src modules/server/src modules/client-desktop/src modules/server/test modules/client-desktop/test test -name '*.java') -d /tmp/aircraftwar-build`
+
 **Goal:** 将当前单机版 AircraftWar 重构为“客户端本地渲染 + 权威服务器统一结算”的多人架构，并补齐冻结、炸弹、护盾三类技能，以及它们随玩家等级增长的数值体系。
 
 **Architecture:** 客户端只负责输入采集、快照消费和 Swing 渲染；服务器维护 `PlayerSession`、权威世界状态、敌机生成、碰撞、掉落、技能和升级。协议层先抽象消息包络、快照 DTO、编解码器和传输接口，通信格式统一 JSON，后续再落到 Java Socket。
 
-**Tech Stack:** Java 8+/Swing，现有 `Timer` 驱动游戏循环，未来使用 Java Socket，消息体为 JSON；当前项目没有 Maven/Gradle 和 `.git`，验证方式以 `javac` + `java -ea` 为主。
+**Tech Stack:** Java 8+/Swing，运行时使用 Java Socket，消息体为 JSON；当前代码已托管到 GitHub，仍未引入 Maven/Gradle，验证方式以 `javac` + `java -ea` 为主。
 
 ---
 
+## 0. Progress Update
+
+- Plan last refreshed on `2026-03-27`.
+- Repository: `https://github.com/LiPu-jpg/HITSZ_AW`
+- Completed:
+  - Hero/OtherPlayer 模型拆分
+  - 协议包络、JSON codec、Socket 传输层
+  - Session 注册与 `SessionID` 校验
+  - 房间制多人模型：创建房间 / 加入房间 / 6 位房号 / 房主开局
+  - 每个房间独立 `ServerWorldState`、独立快照、独立进度与 Boss 状态
+  - 服务端技能系统：冻结、炸弹、护盾、等级缩放
+  - 本地 authority server 启动链路
+  - 单人模式走本地 authority server
+  - 玩家、敌机、子弹、道具、分数进入 `WorldSnapshot`
+  - 客户端按快照渲染完整战斗对象
+  - `common/server/client-desktop` 多模块目录已建立并可编译
+  - 协议层已迁入 `modules/common`
+  - 服务端运行时已迁入 `modules/server`
+  - 桌面客户端运行时已迁入 `modules/client-desktop`
+  - `src/edu/hitsz/application` 已收敛为兼容入口壳
+  - 客户端渲染实体树已迁入 `modules/client-desktop/src/edu/hitsz/client/{aircraft,bullet,basic}`
+  - 服务端权威实体树已迁入 `modules/server/src/edu/hitsz/server/{aircraft,bullet,basic}`
+  - 旧共享实体树 `src/edu/hitsz/{aircraft,bullet,basic}` 已删除
+  - 章节状态已接入权威服务器：`chapterId / gamePhase / chapterTransitionFlash`
+  - 快照协议已同步章节、升级候选、已选升级和玩家最大生命值
+  - 客户端场景已切为章节驱动：`CH1 / CH2 / CH3 / boss`
+  - Boss 击败后已进入 `UPGRADE_SELECTION`，并由每个玩家单独提交升级方向
+  - 升级输入已经是服务器权威时钟判定，不再信任客户端时间戳
+  - 死亡玩家已从客户端可渲染飞机列表中移除
+  - 本地运行目录已刷新：`/tmp/aircraftwar-scene-runtime`
+- Verified:
+  - 本地 socket authority smoke test 通过
+  - 本地 runtime session test 通过
+  - 延迟入场 fresh-start smoke test 通过
+  - 多客户端广播 smoke test 通过
+  - 断线隐藏 / 同会话重连恢复 smoke test 通过
+  - 大厅准备后开局 smoke test 通过
+  - 大厅难度/技能选择 smoke test 通过
+  - 房间隔离 smoke test 通过
+  - 房主独占开局 smoke test 通过
+  - 分数升级测试通过
+  - 难度缩放测试通过
+  - Boss 触发测试通过
+  - 启动页默认选择测试通过
+  - 难度背景切换测试通过
+  - 敌机弹幕梯度测试通过
+  - 敌机分层解锁测试通过
+  - `game over` / 死亡后同 `sessionId` 重连复位 smoke test 通过
+  - 服务端快照内容测试通过
+  - 技能与回归测试通过
+  - 章节快照协议 round-trip 测试通过
+  - 章节状态到客户端快照流水线测试通过
+  - 升级覆盖层显示与白光阻塞测试通过
+  - 升级选择阻塞移动/技能测试通过
+  - 已提交后断线不阻塞切章测试通过
+  - 忽略客户端伪造未来时间戳的升级提交 smoke test 通过
+- Remaining:
+  - 服务端碰撞尺寸仍通过素材尺寸读取，未来可继续抽成无图片依赖的纯数值配置
+  - 非法房号 / 入房失败的客户端提示仍可继续补强
+  - 当前章节视觉仍基于现有素材做映射和染色，后续可继续替换为每章独立敌机/Boss 美术资源
+  - 升级分支已接入权威状态与基础战斗参数，后续可继续加强独立 HUD 表现和更丰富的弹道差异
+
 ## 1. Current Status
 
-- 当前项目仍是单进程、本地权威的游戏循环，核心计算集中在 `src/edu/hitsz/application/Game.java`。
-- `HeroAircraft` 已完成 DCL 单例化，但它目前仍服务于单机逻辑，还没有和“其他玩家”区分职责。
-- 敌机体系已经扩展为：
-  - `MobEnemy`
-  - `EliteEnemy`
-  - `ElitePlusEnemy`
-  - `AceEnemy`
-  - `BossEnemy`
-- 道具体系已经扩展为：
-  - `AbstractItem`
-  - `BloodSupply`
-  - `FireSupply`
-  - `FirePlusSupply`
-  - `BombSupply`
-  - `FreezeSupply`
-- 目前只有 `BloodSupply` 真正改变数值；`FireSupply`/`FirePlusSupply` 只打印日志；`BombSupply`/`FreezeSupply` 仍是占位类；护盾能力还不存在。
-- 当前没有等级系统，没有技能持续时间/伤害随等级增长的统一配置。
-- 当前 `Game` 只维护本地 `heroAircraft`、`enemyAircrafts`、`heroBullets`、`enemyBullets`、`items`，还没有 `List<AbstractAircraft> playerAircrafts`，也没有 `OtherPlayer`。
-- 当前没有协议抽象、没有 `SessionID`、没有 `PlayerSession`、没有服务端世界状态、没有客户端快照应用层。
-- 当前逻辑碰撞尺寸仍间接依赖图片资源；真正进入权威服务器前，最好把逻辑碰撞盒与 `ImageManager` 解耦。
-- 当前没有构建工具和外部依赖管理；如果后续确实要稳定接入 JSON 库，最好补 Maven/Gradle，否则需要保持接口抽象并先用最小实现推进。
+- 当前项目已经是“本地客户端 + 本地 authority server”的房间制联机骨架，而不再是纯本地单机。
+- 客户端已新增独立启动页：选择 `Create Room` 或 `Join Room`。
+- 创建房间时：
+  - 房主选择房间难度 `EASY / NORMAL / HARD`
+  - 房主选择自己的技能 `FREEZE / BOMB / SHIELD`
+- 加入房间时：
+  - 玩家手动输入房号
+  - 玩家只选择自己的技能
+- 当前开局语义已经调整为“房间大厅 -> 玩家 ready -> 房主 start -> 全灭回房间大厅”。
+- 战斗背景已经切为章节分层：
+  - 启动页 `bg.jpg`
+  - `CH1 -> bg2.jpg`
+  - `CH2 -> bg3.jpg`
+  - `CH3 -> bg4.jpg`
+  - `Boss 阶段 -> bg5.jpg`
+- `HeroAircraft` 已完成 DCL 单例化，只代表当前本地操作者；`OtherPlayer` 已存在并可由快照生成。
+- `Main` 默认会启动 `LocalAuthorityServer`，然后让 Swing 客户端通过 `SocketClientSession` 连接本地 server。
+- 单人模式也已经走服务器：本地鼠标移动与技能按键会先发命令，再由服务器推进世界并返回快照。
+- `LocalAuthorityServer` 已不再维护单一全局大厅，而是协调多个 `RoomRuntime`。
+- 每个 `RoomRuntime` 拥有：
+  - 独立 `ServerWorldState`
+  - 独立 `ServerGameLoop`
+  - 独立房间难度、房主、ready 状态、总分和 Boss 进度
+- `WorldSnapshot` 当前已包含：
+  - 玩家
+  - 敌机
+  - 我方子弹
+  - 敌方子弹
+  - 道具
+  - 本地玩家分数
+  - 当前章节
+  - 当前阶段
+  - 章节白光标记
+  - 玩家升级候选项与已选升级
+- `DefaultSnapshotApplier` 已能把完整快照恢复为客户端渲染态，`Game` 在联机模式下按快照更新玩家、敌机、子弹、道具和分数。
+- `Game` 当前已经收敛为“输入转发 + 快照应用 + 渲染”的客户端视图层，不再承担敌机生成、碰撞、掉落和伤害结算。
+- 服务端 `ServerWorldState` 当前已接管：
+  - 敌机生成
+  - 玩家自动射击
+  - 敌机自动射击
+  - 子弹移动
+  - 敌机移动
+  - 子弹/飞机/道具碰撞
+  - 分数结算
+  - 精英敌机掉落
+- 技能体系已在服务端生效：
+  - 冻结：停全体敌机移动与敌机射击推进
+  - 炸弹：群体伤害
+  - 护盾：免伤
+  - 数值随等级增长
+- 进度系统已在服务端生效：
+  - 玩家分数驱动升级
+  - 升级会增强技能数值，并提高玩家机火力
+  - 刷怪节奏会随难度和房间总分提高而加快
+  - 房间总分达到阈值后触发 Boss 战
+  - 敌机梯度已扩展为 `Mob -> Elite -> ElitePlus -> Ace -> Boss`
+  - 不同敌机层级已有不同弹幕密度与散射方式
+  - 章节流转已生效：`CH1 -> boss -> white flash -> per-player upgrade -> next chapter`
+- 升级选择系统已在服务端和客户端闭环：
+  - `FIRE_RATE / BULLET_POWER / SPREAD_SHOT / LIGHT_TRACKING`
+  - 只有白光结束后服务器才接受升级提交
+  - 所有存活玩家提交后才推进下一章
+  - 选择结果会回写到玩家快照
+- 道具体系已在服务端闭环：
+  - `BloodSupply` 回血
+  - `FireSupply` / `FirePlusSupply` 提升火力
+  - `BombSupply` / `FreezeSupply` 已进入掉落池并在拾取时触发对应技能
+- 实体树已完成双向拆分：
+  - 客户端只保留渲染实体 `modules/client-desktop/src/edu/hitsz/client/{aircraft,bullet,basic}`
+  - 服务端只保留权威实体 `modules/server/src/edu/hitsz/server/{aircraft,bullet,basic}`
+- 当前仍存在的限制：
+  - 房间内快照已改为按房间成员定向发送，而不是全局广播
+  - 服务端已改为“至少有一名在线玩家后才推进世界”，更贴近课设的入场开局语义
+  - 服务端当前采用房间大厅模型：客户端按 `Enter` 切换 ready，房主按 `S` / `START_GAME` 开局；全员阵亡后自动回到本房间大厅并重置轮次状态
+  - 难度已经是严格房间级配置；只有房主可以修改
+  - 本地 authority server 当前采用“创建/加入房间、断线隐藏、同 `sessionId` + `HELLO` 重连恢复、超时清理”的轻量会话生命周期
+  - 服务端碰撞尺寸仍依赖图片资源尺寸
+  - 当前没有构建工具；JSON 编解码仍是轻量手写实现
+  - 章节视觉当前仍复用现有底图和敌机素材，尚未切到每章独立资源包
 
 ## 2. Confirmed Design Decisions
 
@@ -72,37 +196,49 @@
 ### 2.4 Networking Model
 
 - 采用“权威服务器快照同步”。
+- 当前快照策略为“服务端广播统一世界状态，客户端按本地 `sessionId` 识别 `HeroAircraft`”。
 - 第一阶段不做客户端预测、回滚、插值和复杂反作弊。
 - 先抽象协议和传输接口，再接 Java Socket。
 - 消息格式统一为 JSON。
 
 ## 3. Suggested Package Layout
 
-为了尽量遵循现有顶层包结构，新增内容建议放到 `application` 下的子包，而不是引入过多新的顶层目录。
+当前仓库正处于“旧 `src` 运行时 + 新多模块目录”并存的迁移期，实际推荐布局已经调整为：
 
-- Keep:
-  - `src/edu/hitsz/application`
-  - `src/edu/hitsz/aircraft`
-  - `src/edu/hitsz/bullet`
-  - `src/edu/hitsz/basic`
-- Add:
-  - `src/edu/hitsz/application/client`
-  - `src/edu/hitsz/application/protocol`
-  - `src/edu/hitsz/application/protocol/dto`
-  - `src/edu/hitsz/application/server`
-  - `src/edu/hitsz/application/server/command`
-  - `src/edu/hitsz/application/server/skill`
-  - `src/edu/hitsz/application/protocol/json`
-  - `src/edu/hitsz/application/protocol/socket`
+- Shared:
+  - `modules/common/src/edu/hitsz/common`
+  - `modules/common/src/edu/hitsz/common/protocol`
+  - `modules/common/src/edu/hitsz/common/protocol/dto`
+  - `modules/common/src/edu/hitsz/common/protocol/json`
+  - `modules/common/src/edu/hitsz/common/protocol/socket`
+- Server:
+  - `modules/server/src/edu/hitsz/server`
+  - `modules/server/src/edu/hitsz/server/aircraft`
+  - `modules/server/src/edu/hitsz/server/bullet`
+  - `modules/server/src/edu/hitsz/server/basic`
+  - `modules/server/src/edu/hitsz/server/command`
+  - `modules/server/src/edu/hitsz/server/skill`
+  - `modules/server/test/edu/hitsz/server`
+- Client:
+  - `modules/client-desktop/src/edu/hitsz/client`
+  - `modules/client-desktop/src/edu/hitsz/client/aircraft`
+  - `modules/client-desktop/src/edu/hitsz/client/bullet`
+  - `modules/client-desktop/src/edu/hitsz/client/basic`
+  - `modules/client-desktop/test/edu/hitsz/client`
+  - `modules/client-desktop/test/edu/hitsz/e2e`
+- Compatibility:
+  - `src/edu/hitsz/application/Main.java`
+- Root shared tests:
+  - `test/edu/hitsz/protocol`
 
 推荐职责划分：
 
-- `aircraft`: 客户端可渲染飞机对象，包括 `HeroAircraft` 与 `OtherPlayer`
-- `application/client`: 客户端快照状态、快照应用器、命令发布器
-- `application/protocol`: 消息包络、消息类型、编解码接口、传输接口
-- `application/protocol/dto`: 快照 DTO 和命令载荷 DTO
-- `application/server`: 会话、权威世界、命令路由、世界循环
-- `application/server/skill`: 技能类型、缩放配置、技能状态、技能结算器
+- `modules/client-desktop/.../{aircraft,bullet,basic}`: 客户端渲染对象
+- `modules/server/.../{aircraft,bullet,basic}`: 服务端权威模拟对象
+- `modules/common/.../protocol`: 消息包络、消息类型、编解码接口、传输接口、DTO
+- `modules/client-desktop`: 桌面客户端逻辑
+- `modules/server`: 服务端逻辑
+- `modules/server/test` / `modules/client-desktop/test`: 模块级测试入口
 
 ## 4. Interface Draft
 
@@ -140,7 +276,7 @@ public final class PlayerSession {
 
 ```java
 public interface SnapshotApplier {
-    void apply(WorldSnapshot snapshot, ClientWorldState state);
+    void apply(WorldSnapshot snapshot, ClientWorldState state, String localSessionId);
 }
 ```
 
@@ -220,13 +356,13 @@ public interface ServerSkillResolver {
 
 ## 7. Implementation Plan
 
-### Task 1: Split Local Hero And Remote Players
+### Task 1: Split Local Hero And Remote Players `(Completed)`
 
 **Files:**
 - Create: `src/edu/hitsz/aircraft/OtherPlayer.java`
 - Modify: `src/edu/hitsz/application/Game.java`
 - Modify: `src/edu/hitsz/application/HeroController.java`
-- Test: `test/edu/hitsz/client/PlayerAircraftModelTest.java`
+- Test: `modules/client-desktop/test/edu/hitsz/client/PlayerAircraftModelTest.java`
 
 **Step 1: Write the failing test**
 - 验证 `HeroAircraft` 仍为单例。
@@ -234,7 +370,7 @@ public interface ServerSkillResolver {
 - 验证 `Game` 可以维护玩家集合概念。
 
 **Step 2: Run test to verify it fails**
-- `javac -encoding UTF-8 $(find src test -name '*.java') -d /tmp/aircraftwar-build`
+- `javac -encoding UTF-8 $(find src modules/common/src test modules/client-desktop/test modules/server/test -name '*.java') -d /tmp/aircraftwar-build`
 - `java -ea -cp /tmp/aircraftwar-build edu.hitsz.client.PlayerAircraftModelTest`
 
 **Step 3: Write minimal implementation**
@@ -245,17 +381,17 @@ public interface ServerSkillResolver {
 **Step 4: Run test to verify it passes**
 - 重新运行同一组编译与测试命令。
 
-### Task 2: Introduce Protocol Envelope And Snapshot DTOs
+### Task 2: Introduce Protocol Envelope And Snapshot DTOs `(Completed)`
 
 **Files:**
-- Create: `src/edu/hitsz/application/protocol/ProtocolMessage.java`
-- Create: `src/edu/hitsz/application/protocol/MessageType.java`
-- Create: `src/edu/hitsz/application/protocol/MessageCodec.java`
-- Create: `src/edu/hitsz/application/protocol/Transport.java`
-- Create: `src/edu/hitsz/application/protocol/ProtocolMessageListener.java`
-- Create: `src/edu/hitsz/application/protocol/dto/InputMovePayload.java`
-- Create: `src/edu/hitsz/application/protocol/dto/InputSkillPayload.java`
-- Create: `src/edu/hitsz/application/protocol/dto/WorldSnapshot.java`
+- Create: `modules/common/src/edu/hitsz/common/protocol/ProtocolMessage.java`
+- Create: `modules/common/src/edu/hitsz/common/protocol/MessageType.java`
+- Create: `modules/common/src/edu/hitsz/common/protocol/MessageCodec.java`
+- Create: `modules/common/src/edu/hitsz/common/protocol/Transport.java`
+- Create: `modules/common/src/edu/hitsz/common/protocol/ProtocolMessageListener.java`
+- Create: `modules/common/src/edu/hitsz/common/protocol/dto/InputMovePayload.java`
+- Create: `modules/common/src/edu/hitsz/common/protocol/dto/InputSkillPayload.java`
+- Create: `modules/common/src/edu/hitsz/common/protocol/dto/WorldSnapshot.java`
 - Test: `test/edu/hitsz/protocol/ProtocolEnvelopeTest.java`
 
 **Step 1: Write the failing test**
@@ -263,7 +399,7 @@ public interface ServerSkillResolver {
 - 验证 `WorldSnapshot` DTO 可被构造与消费。
 
 **Step 2: Run test to verify it fails**
-- `javac -encoding UTF-8 $(find src test -name '*.java') -d /tmp/aircraftwar-build`
+- `javac -encoding UTF-8 $(find src modules/common/src test modules/client-desktop/test modules/server/test -name '*.java') -d /tmp/aircraftwar-build`
 - `java -ea -cp /tmp/aircraftwar-build edu.hitsz.protocol.ProtocolEnvelopeTest`
 
 **Step 3: Write minimal implementation**
@@ -272,7 +408,7 @@ public interface ServerSkillResolver {
 **Step 4: Run test to verify it passes**
 - 重新运行同一组编译与测试命令。
 
-### Task 3: Build Server Session Registry And Identity Validation
+### Task 3: Build Server Session Registry And Identity Validation `(Completed)`
 
 **Files:**
 - Create: `src/edu/hitsz/application/server/PlayerSession.java`
@@ -280,14 +416,14 @@ public interface ServerSkillResolver {
 - Create: `src/edu/hitsz/application/server/ServerCommandRouter.java`
 - Create: `src/edu/hitsz/application/server/command/MoveCommand.java`
 - Create: `src/edu/hitsz/application/server/command/SkillCommand.java`
-- Test: `test/edu/hitsz/server/SessionValidationTest.java`
+- Test: `modules/server/test/edu/hitsz/server/SessionValidationTest.java`
 
 **Step 1: Write the failing test**
 - 验证 `SessionRegistry` 可以创建、查找、注销 `PlayerSession`。
 - 验证错误 `SessionID` 的命令不会被路由到其他玩家。
 
 **Step 2: Run test to verify it fails**
-- `javac -encoding UTF-8 $(find src test -name '*.java') -d /tmp/aircraftwar-build`
+- `javac -encoding UTF-8 $(find src modules/common/src test modules/client-desktop/test modules/server/test -name '*.java') -d /tmp/aircraftwar-build`
 - `java -ea -cp /tmp/aircraftwar-build edu.hitsz.server.SessionValidationTest`
 
 **Step 3: Write minimal implementation**
@@ -297,21 +433,21 @@ public interface ServerSkillResolver {
 **Step 4: Run test to verify it passes**
 - 重新运行同一组编译与测试命令。
 
-### Task 4: Extract Authoritative Server World
+### Task 4: Extract Authoritative Server World `(Completed)`
 
 **Files:**
 - Create: `src/edu/hitsz/application/server/ServerWorldState.java`
 - Create: `src/edu/hitsz/application/server/ServerGameLoop.java`
 - Create: `src/edu/hitsz/application/server/WorldSnapshotFactory.java`
 - Modify: `src/edu/hitsz/application/Game.java`
-- Test: `test/edu/hitsz/server/ServerWorldLoopTest.java`
+- Test: `modules/server/test/edu/hitsz/server/ServerWorldLoopTest.java`
 
 **Step 1: Write the failing test**
 - 验证服务端世界 tick 可以推进。
 - 验证权威世界能够输出 `WorldSnapshot`。
 
 **Step 2: Run test to verify it fails**
-- `javac -encoding UTF-8 $(find src test -name '*.java') -d /tmp/aircraftwar-build`
+- `javac -encoding UTF-8 $(find src modules/common/src test modules/client-desktop/test modules/server/test -name '*.java') -d /tmp/aircraftwar-build`
 - `java -ea -cp /tmp/aircraftwar-build edu.hitsz.server.ServerWorldLoopTest`
 
 **Step 3: Write minimal implementation**
@@ -321,7 +457,7 @@ public interface ServerSkillResolver {
 **Step 4: Run test to verify it passes**
 - 重新运行同一组编译与测试命令。
 
-### Task 5: Add Client Snapshot State And Snapshot Applier
+### Task 5: Add Client Snapshot State And Snapshot Applier `(Completed)`
 
 **Files:**
 - Create: `src/edu/hitsz/application/client/ClientWorldState.java`
@@ -329,14 +465,14 @@ public interface ServerSkillResolver {
 - Create: `src/edu/hitsz/application/client/DefaultSnapshotApplier.java`
 - Modify: `src/edu/hitsz/application/Game.java`
 - Modify: `src/edu/hitsz/application/HeroController.java`
-- Test: `test/edu/hitsz/client/SnapshotApplyTest.java`
+- Test: `modules/client-desktop/test/edu/hitsz/client/SnapshotApplyTest.java`
 
 **Step 1: Write the failing test**
 - 验证客户端能把 `WorldSnapshot` 应用到本地渲染态。
 - 验证 `HeroAircraft` 和 `OtherPlayer` 可以根据快照更新。
 
 **Step 2: Run test to verify it fails**
-- `javac -encoding UTF-8 $(find src test -name '*.java') -d /tmp/aircraftwar-build`
+- `javac -encoding UTF-8 $(find src modules/common/src test modules/client-desktop/test modules/server/test -name '*.java') -d /tmp/aircraftwar-build`
 - `java -ea -cp /tmp/aircraftwar-build edu.hitsz.client.SnapshotApplyTest`
 
 **Step 3: Write minimal implementation**
@@ -347,7 +483,7 @@ public interface ServerSkillResolver {
 **Step 4: Run test to verify it passes**
 - 重新运行同一组编译与测试命令。
 
-### Task 6: Introduce Freeze, Bomb, Shield And Level Scaling
+### Task 6: Introduce Freeze, Bomb, Shield And Level Scaling `(Completed)`
 
 **Files:**
 - Create: `src/edu/hitsz/application/server/skill/SkillType.java`
@@ -357,15 +493,15 @@ public interface ServerSkillResolver {
 - Create: `src/edu/hitsz/application/server/skill/ServerSkillResolver.java`
 - Modify: `src/edu/hitsz/basic/BombSupply.java`
 - Modify: `src/edu/hitsz/basic/FreezeSupply.java`
-- Test: `test/edu/hitsz/server/SkillScalingTest.java`
-- Test: `test/edu/hitsz/server/FreezeBombShieldTest.java`
+- Test: `modules/server/test/edu/hitsz/server/SkillScalingTest.java`
+- Test: `modules/server/test/edu/hitsz/server/FreezeBombShieldTest.java`
 
 **Step 1: Write the failing tests**
 - 验证等级越高，冻结时长、炸弹伤害、护盾时长越大。
 - 验证三种技能都能在服务端被正确识别和结算。
 
 **Step 2: Run tests to verify they fail**
-- `javac -encoding UTF-8 $(find src test -name '*.java') -d /tmp/aircraftwar-build`
+- `javac -encoding UTF-8 $(find src modules/common/src test modules/client-desktop/test modules/server/test -name '*.java') -d /tmp/aircraftwar-build`
 - `java -ea -cp /tmp/aircraftwar-build edu.hitsz.server.SkillScalingTest`
 - `java -ea -cp /tmp/aircraftwar-build edu.hitsz.server.FreezeBombShieldTest`
 
@@ -378,46 +514,45 @@ public interface ServerSkillResolver {
 **Step 4: Run tests to verify they pass**
 - 重新运行同一组编译与测试命令。
 
-### Task 7: Bridge Client And Server With An In-Memory Transport
+### Task 7: Bridge Client And Server With An In-Memory Transport `(Completed In Spirit, Implemented With Socket-Based Smoke Flow)`
 
 **Files:**
 - Create: `src/edu/hitsz/application/client/ClientCommandPublisher.java`
-- Create: `src/edu/hitsz/application/protocol/InMemoryTransport.java`
 - Modify: `src/edu/hitsz/application/client/DefaultSnapshotApplier.java`
 - Modify: `src/edu/hitsz/application/server/ServerCommandRouter.java`
-- Test: `test/edu/hitsz/e2e/AuthorityFlowSmokeTest.java`
+- Test: `modules/client-desktop/test/edu/hitsz/e2e/AuthorityFlowSmokeTest.java`
 
 **Step 1: Write the failing test**
 - 验证客户端发出的移动/技能指令能通过内存传输到服务端。
 - 验证服务端返回快照后客户端能正确消费。
 
 **Step 2: Run test to verify it fails**
-- `javac -encoding UTF-8 $(find src test -name '*.java') -d /tmp/aircraftwar-build`
+- `javac -encoding UTF-8 $(find src modules/common/src test modules/client-desktop/test modules/server/test -name '*.java') -d /tmp/aircraftwar-build`
 - `java -ea -cp /tmp/aircraftwar-build edu.hitsz.e2e.AuthorityFlowSmokeTest`
 
 **Step 3: Write minimal implementation**
-- 使用内存版 `Transport` 模拟客户端和服务器通信。
-- 证明整个权威链路先能在单进程内闭环跑通。
+- 本实现没有单独落 `InMemoryTransport`，而是直接使用本地 Socket smoke flow 跑通权威链路。
+- 当前目标已经达到：客户端发命令，服务端推进世界，客户端消费快照。
 
 **Step 4: Run test to verify it passes**
 - 重新运行同一组编译与测试命令。
 
-### Task 8: Plug In Java Socket And JSON Codec
+### Task 8: Plug In Java Socket And JSON Codec `(Completed)`
 
 **Files:**
-- Create: `src/edu/hitsz/application/protocol/json/JsonMessageCodec.java`
-- Create: `src/edu/hitsz/application/protocol/socket/SocketClientTransport.java`
-- Create: `src/edu/hitsz/application/protocol/socket/SocketServerTransport.java`
-- Create: `src/edu/hitsz/application/protocol/socket/LineMessageFramer.java`
+- Create: `modules/common/src/edu/hitsz/common/protocol/json/JsonMessageCodec.java`
+- Create: `modules/common/src/edu/hitsz/common/protocol/socket/SocketClientTransport.java`
+- Create: `modules/common/src/edu/hitsz/common/protocol/socket/SocketServerTransport.java`
+- Create: `modules/common/src/edu/hitsz/common/protocol/socket/LineMessageFramer.java`
 - Test: `test/edu/hitsz/protocol/JsonCodecSmokeTest.java`
-- Test: `test/edu/hitsz/e2e/SocketAuthoritySmokeTest.java`
+- Test: `modules/client-desktop/test/edu/hitsz/e2e/SocketAuthoritySmokeTest.java`
 
 **Step 1: Write the failing tests**
 - 验证消息对象和 JSON 之间可以往返编解码。
 - 验证一个本地客户端能连上服务端并收到世界快照。
 
 **Step 2: Run tests to verify they fail**
-- `javac -encoding UTF-8 $(find src test -name '*.java') -d /tmp/aircraftwar-build`
+- `javac -encoding UTF-8 $(find src modules/common/src test modules/client-desktop/test modules/server/test -name '*.java') -d /tmp/aircraftwar-build`
 - `java -ea -cp /tmp/aircraftwar-build edu.hitsz.protocol.JsonCodecSmokeTest`
 - `java -ea -cp /tmp/aircraftwar-build edu.hitsz.e2e.SocketAuthoritySmokeTest`
 
@@ -428,9 +563,76 @@ public interface ServerSkillResolver {
 **Step 4: Run tests to verify they pass**
 - 重新运行同一组编译与测试命令。
 
+### Task 9: Broadcast Snapshot + Client Session Identification `(Completed)`
+
+**Goal:**
+- 保持服务端广播统一世界快照。
+- 客户端不再依赖服务端写入 `localPlayer` 标记，而是根据本地 `SessionID` 识别自己。
+
+**Files:**
+- Modify: `modules/common/src/edu/hitsz/common/protocol/dto/PlayerSnapshot.java`
+- Modify: `modules/common/src/edu/hitsz/common/protocol/json/WorldSnapshotJsonMapper.java`
+- Modify: `modules/server/src/edu/hitsz/server/WorldSnapshotFactory.java`
+- Modify: `modules/server/src/edu/hitsz/server/LocalAuthorityServer.java`
+- Modify: `modules/client-desktop/src/edu/hitsz/client/DefaultSnapshotApplier.java`
+- Modify: `modules/client-desktop/src/edu/hitsz/client/SocketClientSession.java`
+- Test: `modules/client-desktop/test/edu/hitsz/client/SnapshotApplyTest.java`
+- Test: `modules/client-desktop/test/edu/hitsz/e2e/AuthorityFlowSmokeTest.java`
+
+### Task 10: Remove Legacy Offline Combat Fallback From Game `(Completed)`
+
+**Goal:**
+- 让 `Game` 在联机模式下成为纯渲染层，不再保留旧单机权威循环作为主要路径。
+- 当前已完成：`Game` 只负责输入转发、快照应用和渲染，敌机生成、碰撞、掉落、伤害结算均已移至服务端。
+
+**Files:**
+- Modify: `modules/client-desktop/src/edu/hitsz/client/Game.java`
+- Modify: `modules/client-desktop/src/edu/hitsz/client/HeroController.java`
+- Modify: `modules/client-desktop/src/edu/hitsz/client/SocketClientSession.java`
+- Test: `modules/client-desktop/test/edu/hitsz/client/GameClientBoundaryTest.java`
+- Test: `modules/client-desktop/test/edu/hitsz/client/ClientEdtSnapshotTest.java`
+
+### Task 11: Expand Server-Side Drop Pool And Item Effects `(Completed)`
+
+**Goal:**
+- 把 `BombSupply` / `FreezeSupply` 纳入掉落池。
+- 当前已完成：所有道具都统一成“服务端结算、客户端只消费结果”的模式。
+
+**Files:**
+- Modify: `modules/server/src/edu/hitsz/server/ServerWorldState.java`
+- Modify: `modules/server/src/edu/hitsz/server/skill/DefaultServerSkillResolver.java`
+- Test: `modules/server/test/edu/hitsz/server/ItemPickupEffectTest.java`
+- Test: `modules/server/test/edu/hitsz/server/SupplyDropCoverageTest.java`
+
+### Task 12: Add Disconnect/Reconnect Session Lifecycle `(Completed)`
+
+**Goal:**
+- 客户端断线后应从广播快照里隐藏。
+- 同一个 `SessionID` 重连时，应恢复原有玩家状态而不是创建一份全新状态。
+- 断线会话在保留窗口后可被服务端清理。
+
+**Files:**
+- Add: `modules/common/src/edu/hitsz/common/protocol/socket/ServerConnectionListener.java`
+- Modify: `modules/common/src/edu/hitsz/common/protocol/socket/SocketServerTransport.java`
+- Modify: `modules/server/src/edu/hitsz/server/PlayerSession.java`
+- Modify: `modules/server/src/edu/hitsz/server/SessionRegistry.java`
+- Modify: `modules/server/src/edu/hitsz/server/ServerWorldState.java`
+- Modify: `modules/server/src/edu/hitsz/server/LocalAuthorityServer.java`
+- Test: `modules/client-desktop/test/edu/hitsz/e2e/ReconnectLifecycleSmokeTest.java`
+
+### Task 13: Gate World Start On First Player Join `(Completed)`
+
+**Goal:**
+- 服务端在没有在线玩家前不推进世界。
+- 玩家延迟入场时，第一帧应该从“新开局”状态开始，而不是接到已经运行很久的战场快照。
+
+**Files:**
+- Modify: `modules/server/src/edu/hitsz/server/LocalAuthorityServer.java`
+- Test: `modules/client-desktop/test/edu/hitsz/e2e/DelayedJoinStartsFreshTest.java`
+
 ## 8. Recommended Execution Order
 
-按下面顺序实现，返工最少：
+已完成：
 
 1. Hero/OtherPlayer 拆分
 2. 协议对象与快照 DTO
@@ -438,26 +640,39 @@ public interface ServerSkillResolver {
 4. 服务端权威世界
 5. 客户端快照应用
 6. 技能与等级缩放
-7. 内存传输闭环
+7. 权威链路 smoke flow
 8. Java Socket + JSON 落地
+
+接下来建议顺序：
+
+10. 收敛服务端素材尺寸依赖
+11. 如果需要，再补更严格的房间制/连接认证/重连令牌
 
 ## 9. Risks And Notes
 
 - 如果碰撞尺寸仍依赖图片资源，服务端会继续和本地素材耦合。
-- 如果 `Game` 继续同时承担权威逻辑和快照渲染，后续多人同步会很难维护。
 - 如果远端玩家不是由快照驱动，而是由客户端自己推断，状态很容易漂移。
 - 如果技能时长/伤害分散硬编码在多个类里，冻结和护盾行为会很快失控。
-- 如果先写 Socket 再稳定协议对象，会很容易重写两遍网络层。
+- 如果客户端没有稳定保存自己的 `sessionId`，广播快照下会把本地玩家识别错。
 
 ## 10. Acceptance Criteria
 
-- 客户端 `HeroAircraft` 仍为单例，但只代表当前本地操作者。
-- 客户端存在 `OtherPlayer`，并能按服务器快照创建、更新和销毁。
-- `Game` 至少在数据结构上维护玩家集合，而不是只默认一架英雄机。
-- 服务器维护 `PlayerSession` 列表，且每条输入都必须通过 `SessionID` 校验。
-- 冻结技能能让全体敌人在服务端停止移动 `n` 秒。
-- 炸弹技能能对全体敌机造成 `n` 点伤害。
-- 护盾技能能让玩家在 `n` 秒内免伤。
-- `n` 随等级增长，并通过统一配置对象读取。
-- 协议层与 Java Socket 实现解耦，消息统一使用 JSON。
-- 客户端最终以服务器快照为准，不再把本地 `Game` 作为权威战斗逻辑源头。
+- 已达成：
+  - 客户端 `HeroAircraft` 仍为单例，但只代表当前本地操作者。
+  - 客户端存在 `OtherPlayer`，并能按服务器快照创建、更新。
+  - `Game` 已维护玩家集合，并可按快照更新敌机、子弹、道具和分数。
+  - 服务器维护 `PlayerSession` 列表，且每条输入都必须通过 `SessionID` 校验。
+  - 冻结技能能让全体敌人在服务端停止移动 `n` 秒。
+  - 炸弹技能能对全体敌机造成 `n` 点伤害。
+  - 护盾技能能让玩家在 `n` 秒内免伤。
+  - `n` 随等级增长，并通过统一配置对象读取。
+  - 协议层与 Java Socket 实现解耦，消息统一使用 JSON。
+  - 单人模式已不再把本地 `Game` 作为主要权威战斗逻辑源头。
+  - `BombSupply` / `FreezeSupply` 已进入掉落池，并由服务端统一结算。
+  - 客户端与服务端实体树已彻底模块化，旧共享实体树已删除。
+  - `WorldSnapshot` 已切换为公共广播语义，客户端按本地 `sessionId` 自识别自己。
+  - 两个客户端连接同一个本地 authority server 时，能够收到同一份广播快照并各自识别自己。
+  - 客户端断线后会从广播快照中隐藏，并可通过同一 `sessionId` 重连恢复原状态。
+  - 服务端在首个玩家 `HELLO` 前不会推进世界，延迟入场时会从 fresh-start 状态开始。
+- 未完全达成：
+  - 服务端碰撞尺寸对图片素材尺寸的依赖仍可继续收敛。

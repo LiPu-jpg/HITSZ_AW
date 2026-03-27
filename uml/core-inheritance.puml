@@ -1,0 +1,75 @@
+@startuml core_inheritance
+title 核心继承骨架类图
+
+skinparam classAttributeIconSize 10
+skinparam shadowing false
+skinparam linetype ortho
+
+package "basic 基础包" {
+  abstract class "AbstractFlyingObject\n抽象飞行物" as AbstractFlyingObject {
+    # locationX : int
+    # locationY : int
+    # speedX : int
+    # speedY : int
+    # image : BufferedImage
+    # width : int
+    # height : int
+    # isValid : boolean
+    + forward() : void
+    + crash(obj : AbstractFlyingObject) : boolean
+    + vanish() : void
+  }
+
+  abstract class "AbstractItem\n抽象道具" as AbstractItem {
+    + activate(hero : HeroAircraft) : void
+    + forward() : void
+  }
+}
+
+package "aircraft 飞机包" {
+  abstract class "AbstractAircraft\n抽象飞机" as AbstractAircraft {
+    # maxHp : int
+    # hp : int
+    + decreaseHp(decrease : int) : void
+    + increaseHp(increase : int) : void
+    + getHp() : int
+    + shoot() : List<BaseBullet>
+  }
+}
+
+package "bullet 子弹包" {
+  abstract class "BaseBullet\n基础子弹" as BaseBullet {
+    # power : int
+    + forward() : void
+    + getPower() : int
+  }
+}
+
+note top of AbstractFlyingObject
+根节点。
+所有可飞行、可移动、可碰撞的对象
+最终都继承自该抽象类。
+end note
+
+note right of AbstractAircraft
+飞机公共父类。
+封装生命值、受伤、回血
+以及射击接口。
+end note
+
+note right of AbstractItem
+道具公共父类。
+具体子类通过 activate(hero)
+对英雄机或战场产生效果。
+end note
+
+note right of BaseBullet
+子弹公共父类。
+统一封装伤害值和前进逻辑。
+end note
+
+AbstractFlyingObject <|-- AbstractAircraft
+AbstractFlyingObject <|-- AbstractItem
+AbstractFlyingObject <|-- BaseBullet
+
+@enduml

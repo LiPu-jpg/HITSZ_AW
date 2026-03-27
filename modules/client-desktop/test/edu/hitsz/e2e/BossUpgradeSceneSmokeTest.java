@@ -1,0 +1,94 @@
+package edu.hitsz.e2e;
+
+import edu.hitsz.common.ChapterId;
+import edu.hitsz.common.GamePhase;
+import edu.hitsz.common.UpgradeChoice;
+import edu.hitsz.common.protocol.ProtocolMessage;
+import edu.hitsz.common.protocol.dto.WorldSnapshot;
+import edu.hitsz.common.protocol.json.JsonMessageCodec;
+import edu.hitsz.common.protocol.json.WorldSnapshotJsonMapper;
+import edu.hitsz.common.protocol.socket.SocketClientTransport;
+import edu.hitsz.server.LocalAuthorityServer;
+import edu.hitsz.server.PlayerSession;
+import edu.hitsz.server.ProgressionPolicy;
+import edu.hitsz.server.RoomRegistry;
+import edu.hitsz.server.RoomRuntime;
+import edu.hitsz.server.ServerWorldState;
+
+import java.util.concurrent.atomic.AtomicReference;
+
+public class BossUpgradeSceneSmokeTest {
+
+    public static void main(String[] args) throws Exception {
+        LocalAuthorityServer server = new LocalAuthorityServer(0);
+        server.start();
+
+        JsonMessageCodec codec = new JsonMessageCodec();
+        WorldSnapshotJsonMapper snapshotMapper = new WorldSnapshotJsonMapper();
+        AtomicReference<WorldSnapshot> snapshotRef = new AtomicReference<>();
+
+        SocketClientTransport client = new SocketClientTransport("127.0.0.1", server.getPort(), codec);
+        client.setListener(message -> RoomTestSupport.captureSnapshot(message, snapshotMapper, snapshotRef));
+        client.start();
+
+        client.send(RoomTestSupport.createRoomMessage("session-local", 1L, "NORMAL"));
+        RoomTestSupport.waitUntil(() -> snapshotRef.get() != null, 3000L);
+        client.send(RoomTestSupport.readyMessage("session-local", 2L, true));
+        client.send(RoomTestSupport.startGameMessage("session-local", 3L));
+        RoomTestSupport.waitUntil(() -> snapshotRef.get() != null && snapshotRef.get().isGameStarted(), 3000L);
+
+        RoomRuntime roomRuntime = extractRoomRegistry(server).findBySession("session-local");
+        ServerWorldState worldState = extractWorldState(roomRuntime);
+        PlayerSession session = roomRuntime.findSession("session-local");
+        long nowMillis = System.currentTimeMillis();
+        session.getPlayerState().setScore(ProgressionPolicy.defaultPolicy().bossThreshold(edu.hitsz.common.Difficulty.NORMAL, 0));
+        worldState.syncProgressionState(nowMillis);
+        worldState.getEnemyAircrafts().clear();
+        worldState.syncProgressionState(nowMillis + 100L);
+
+        RoomTestSupport.waitUntil(() ->
+                        snapshotRef.get() != null && snapshotRef.get().getGamePhase() == GamePhase.UPGRADE_SELECTION,
+                3000L
+        );
+        RoomTestSupport.waitUntil(() ->
+                        snapshotRef.get() != null && !snapshotRef.get().isChapterTransitionFlash(),
+                3000L
+        );
+        client.send(RoomTestSupport.upgradeChoiceMessage("session-local", 4L, UpgradeChoice.BULLET_POWER.name()));
+
+        RoomTestSupport.waitUntil(() ->
+                        snapshotRef.get() != null
+                                && snapshotRef.get().getGamePhase() == GamePhase.BATTLE
+                                && snapshotRef.get().getChapterId() == ChapterId.CH2,
+                5000L
+        );
+
+        client.stop();
+        server.stop();
+
+        WorldSnapshot snapshot = snapshotRef.get();
+        assert snapshot != null : "Smoke test should receive snapshots";
+        assert RoomTestSupport.findPlayer(snapshot, "session-local").getSelectedUpgradeChoice() == UpgradeChoice.BULLET_POWER
+                : "Selected upgrade should round-trip back through the server snapshot";
+    }
+
+    private static RoomRegistry extractRoomRegistry(LocalAuthorityServer server) {
+        try {
+            java.lang.reflect.Field field = LocalAuthorityServer.class.getDeclaredField("roomRegistry");
+            field.setAccessible(true);
+            return (RoomRegistry) field.get(server);
+        } catch (ReflectiveOperationException e) {
+            throw new AssertionError("LocalAuthorityServer should retain a RoomRegistry", e);
+        }
+    }
+
+    private static ServerWorldState extractWorldState(RoomRuntime roomRuntime) {
+        try {
+            java.lang.reflect.Field field = RoomRuntime.class.getDeclaredField("worldState");
+            field.setAccessible(true);
+            return (ServerWorldState) field.get(roomRuntime);
+        } catch (ReflectiveOperationException e) {
+            throw new AssertionError("RoomRuntime should retain a ServerWorldState", e);
+        }
+    }
+}

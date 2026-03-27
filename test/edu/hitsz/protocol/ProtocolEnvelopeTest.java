@@ -1,7 +1,7 @@
 package edu.hitsz.protocol;
 
-import edu.hitsz.application.protocol.MessageType;
-import edu.hitsz.application.protocol.ProtocolMessage;
+import edu.hitsz.common.protocol.MessageType;
+import edu.hitsz.common.protocol.ProtocolMessage;
 
 public class ProtocolEnvelopeTest {
 

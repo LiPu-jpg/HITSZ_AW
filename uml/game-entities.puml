@@ -1,0 +1,99 @@
+@startuml game_entities
+title 具体游戏实体类图
+
+skinparam classAttributeIconSize 10
+skinparam shadowing false
+skinparam linetype ortho
+
+package "aircraft 飞机包" {
+  abstract class "AbstractAircraft\n抽象飞机" as AbstractAircraft
+
+  class "HeroAircraft\n英雄机" as HeroAircraft {
+    - shootNum : int
+    - power : int
+    - direction : int
+    + forward() : void
+    + shoot() : List<BaseBullet>
+  }
+
+  class "OtherPlayer\n其他玩家飞机" as OtherPlayer {
+    - playerId : String
+    + getPlayerId() : String
+    + forward() : void
+    + shoot() : List<BaseBullet>
+  }
+
+  class "MobEnemy\n普通敌机" as MobEnemy {
+    + forward() : void
+    + shoot() : List<BaseBullet>
+  }
+
+  class "EliteEnemy\n精英敌机" as EliteEnemy {
+    - shootNum : int
+    - power : int
+    - direction : int
+    + forward() : void
+    + shoot() : List<BaseBullet>
+  }
+
+  class "ElitePlusEnemy\n强化精英敌机" as ElitePlusEnemy
+  class "AceEnemy\n王牌敌机" as AceEnemy
+  class "BossEnemy\nBoss 敌机" as BossEnemy
+}
+
+package "bullet 子弹包" {
+  abstract class "BaseBullet\n基础子弹" as BaseBullet
+  class "HeroBullet\n英雄子弹" as HeroBullet
+  class "EnemyBullet\n敌机子弹" as EnemyBullet
+}
+
+package "basic 基础包" {
+  abstract class "AbstractItem\n抽象道具" as AbstractItem
+  class "BloodSupply\n加血道具" as BloodSupply
+  class "FireSupply\n火力道具" as FireSupply
+  class "FirePlusSupply\n超级火力道具" as FirePlusSupply
+  class "BombSupply\n炸弹道具" as BombSupply
+  class "FreezeSupply\n冻结道具" as FreezeSupply
+}
+
+note top of HeroAircraft
+当前操作者控制的本机。
+在联机架构下仍保持单例。
+end note
+
+note top of OtherPlayer
+服务器同步过来的其他玩家。
+不是单例，可存在多个实例。
+end note
+
+note right of EliteEnemy
+精英敌机是精英系列的父类。
+其子类通过继承扩展强度和行为。
+end note
+
+note right of AbstractItem
+所有掉落道具统一继承自 AbstractItem。
+end note
+
+AbstractAircraft <|-- HeroAircraft
+AbstractAircraft <|-- OtherPlayer
+AbstractAircraft <|-- MobEnemy
+AbstractAircraft <|-- EliteEnemy
+EliteEnemy <|-- ElitePlusEnemy
+EliteEnemy <|-- AceEnemy
+EliteEnemy <|-- BossEnemy
+
+BaseBullet <|-- HeroBullet
+BaseBullet <|-- EnemyBullet
+
+AbstractItem <|-- BloodSupply
+AbstractItem <|-- FireSupply
+AbstractItem <|-- FirePlusSupply
+AbstractItem <|-- BombSupply
+AbstractItem <|-- FreezeSupply
+
+HeroAircraft ..> HeroBullet : 发射英雄子弹
+EliteEnemy ..> EnemyBullet : 发射敌机子弹
+AbstractItem ..> HeroAircraft : 对英雄机生效
+
+@enduml
