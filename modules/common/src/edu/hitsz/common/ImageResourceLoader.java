@@ -21,6 +21,15 @@ public final class ImageResourceLoader {
             return imageFromClasspath;
         }
 
+        Path directPath = Paths.get(fileName);
+        if (Files.exists(directPath)) {
+            try (InputStream inputStream = Files.newInputStream(directPath)) {
+                return ImageIO.read(inputStream);
+            } catch (IOException e) {
+                throw new IllegalStateException("Failed to read image file: " + directPath.toAbsolutePath(), e);
+            }
+        }
+
         Path fallbackPath = Paths.get("src", IMAGE_ROOT, fileName);
         if (Files.exists(fallbackPath)) {
             try (InputStream inputStream = Files.newInputStream(fallbackPath)) {

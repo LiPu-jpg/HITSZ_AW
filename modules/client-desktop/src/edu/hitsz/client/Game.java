@@ -5,6 +5,7 @@ import edu.hitsz.client.aircraft.HeroAircraft;
 import edu.hitsz.client.basic.AbstractFlyingObject;
 import edu.hitsz.client.basic.AbstractItem;
 import edu.hitsz.client.bullet.BaseBullet;
+import edu.hitsz.common.AircraftBranch;
 import edu.hitsz.common.ChapterId;
 import edu.hitsz.common.EntityRenderSizing;
 import edu.hitsz.common.GameConstants;
@@ -47,8 +48,10 @@ public class Game extends JPanel {
     private int score = 0;
     private int level = 1;
     private String localSelectedSkill;
+    private AircraftBranch localAircraftBranch = AircraftBranch.STARTER_BLUE;
     private boolean localBranchUnlocked;
     private long localSkillCooldownRemainingMillis;
+    private List<AircraftBranch> localAvailableBranchChoices = java.util.Collections.emptyList();
     private List<UpgradeChoice> localAvailableUpgradeChoices = java.util.Collections.emptyList();
     private UpgradeChoice localSelectedUpgradeChoice;
     private boolean localReady;
@@ -112,6 +115,22 @@ public class Game extends JPanel {
 
     public void handleLocalSkillSelection(String skillType) {
         // Lobby-time skill selection has been removed for now.
+    }
+
+    public void handleLocalBranchChoice(String branch) {
+        if (commandPublisher != null && isBranchSelectionVisible()) {
+            commandPublisher.publishBranchChoice(branch);
+        }
+    }
+
+    public void handleLocalBranchChoiceByIndex(int index) {
+        if (!isBranchSelectionVisible()) {
+            return;
+        }
+        if (index < 0 || index >= localAvailableBranchChoices.size()) {
+            return;
+        }
+        handleLocalBranchChoice(localAvailableBranchChoices.get(index).name());
     }
 
     public void handleLocalUpgradeChoice(String choice) {
@@ -178,8 +197,10 @@ public class Game extends JPanel {
         score = clientWorldState.getLocalScore();
         level = clientWorldState.getLocalLevel();
         localSelectedSkill = clientWorldState.getLocalSelectedSkill();
+        localAircraftBranch = clientWorldState.getLocalAircraftBranch();
         localBranchUnlocked = clientWorldState.isLocalBranchUnlocked();
         localSkillCooldownRemainingMillis = clientWorldState.getLocalSkillCooldownRemainingMillis();
+        localAvailableBranchChoices = clientWorldState.getLocalAvailableBranchChoices();
         localAvailableUpgradeChoices = clientWorldState.getLocalAvailableUpgradeChoices();
         localSelectedUpgradeChoice = clientWorldState.getLocalSelectedUpgradeChoice();
         localReady = clientWorldState.isLocalReady();
@@ -214,6 +235,10 @@ public class Game extends JPanel {
         return localHp;
     }
 
+    public AircraftBranch getLocalAircraftBranch() {
+        return localAircraftBranch;
+    }
+
     public boolean isLocalPlayerAlive() {
         return localHp > 0;
     }
@@ -231,6 +256,13 @@ public class Game extends JPanel {
                 && gamePhase == GamePhase.UPGRADE_SELECTION
                 && !chapterTransitionFlash
                 && !localAvailableUpgradeChoices.isEmpty();
+    }
+
+    public boolean isBranchSelectionVisible() {
+        return gameStarted
+                && gamePhase == GamePhase.BRANCH_SELECTION
+                && !chapterTransitionFlash
+                && !localAvailableBranchChoices.isEmpty();
     }
 
     /**
@@ -280,6 +312,7 @@ public class Game extends JPanel {
         //绘制得分和生命值
         paintScoreAndLife(g);
         paintLobbyHint(g);
+        paintBranchSelectionOverlay(g);
         paintUpgradeSelectionOverlay(g);
 
     }
@@ -382,13 +415,30 @@ public class Game extends JPanel {
         }
     }
 
+    private void paintBranchSelectionOverlay(Graphics g) {
+        if (!isBranchSelectionVisible()) {
+            return;
+        }
+        g.setColor(new Color(245, 245, 255, 220));
+        g.fillRoundRect(40, GameConstants.WINDOW_HEIGHT / 2 - 108, 432, 216, 18, 18);
+        g.setColor(Color.BLACK);
+        g.setFont(new Font("SansSerif", Font.BOLD, 20));
+        g.drawString("Choose Branch", 178, GameConstants.WINDOW_HEIGHT / 2 - 68);
+        g.setFont(new Font("SansSerif", Font.PLAIN, 16));
+        int y = GameConstants.WINDOW_HEIGHT / 2 - 30;
+        for (int i = 0; i < localAvailableBranchChoices.size(); i++) {
+            g.drawString((i + 1) + ". " + branchChoiceLabel(localAvailableBranchChoices.get(i)), 80, y);
+            y += 28;
+        }
+    }
+
     private String[] buildLobbyOverlayLines() {
         return new String[]{
                 "Enter ready   Host uses S to start",
                 "Ready " + readyPlayerCount + "/" + connectedPlayerCount
                         + "   You " + (localReady ? "READY" : "WAITING"),
                 "Host " + displayHostLabel() + "   Room " + displayRoomCode(),
-                "Diff " + difficulty + "   Skill " + displaySelectedSkill(),
+                "Diff " + difficulty + "   Plane " + displayAircraftBranch(),
                 "Boss at " + nextBossScoreThreshold + "   Total " + totalScore
         };
     }
@@ -418,11 +468,32 @@ public class Game extends JPanel {
     }
 
     private String buildSkillStatusText() {
+        if (localSelectedSkill == null || localSelectedSkill.trim().isEmpty()) {
+            return "AIRCRAFT: " + displayAircraftBranch();
+        }
         if (localSkillCooldownRemainingMillis <= 0L) {
             return "SKILL: " + displaySelectedSkill() + " (READY)";
         }
         double cooldownSeconds = localSkillCooldownRemainingMillis / 1000.0;
         return String.format(Locale.US, "SKILL: %s (CD %.1fs)", displaySelectedSkill(), cooldownSeconds);
+    }
+
+    private String displayAircraftBranch() {
+        if (localAircraftBranch == null) {
+            return "-";
+        }
+        switch (localAircraftBranch) {
+            case STARTER_BLUE:
+                return "Starter Blue";
+            case RED_SPEED:
+                return "Red Speed";
+            case GREEN_DEFENSE:
+                return "Green Defense";
+            case BLACK_HEAVY:
+                return "Black Heavy";
+            default:
+                return localAircraftBranch.name();
+        }
     }
 
     private String displaySelectedSkill() {
@@ -444,6 +515,20 @@ public class Game extends JPanel {
                 return "Light bullet tracking";
             default:
                 return choice.name();
+        }
+    }
+
+    private String branchChoiceLabel(AircraftBranch branch) {
+        switch (branch) {
+            case RED_SPEED:
+                return "Red Speed";
+            case GREEN_DEFENSE:
+                return "Green Defense";
+            case BLACK_HEAVY:
+                return "Black Heavy";
+            case STARTER_BLUE:
+            default:
+                return "Starter Blue";
         }
     }
 

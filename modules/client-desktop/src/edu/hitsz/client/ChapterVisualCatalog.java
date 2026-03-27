@@ -4,7 +4,9 @@ import edu.hitsz.client.aircraft.AceEnemy;
 import edu.hitsz.client.aircraft.BossEnemy;
 import edu.hitsz.client.aircraft.EliteEnemy;
 import edu.hitsz.client.aircraft.ElitePlusEnemy;
+import edu.hitsz.client.aircraft.HeroAircraft;
 import edu.hitsz.client.aircraft.MobEnemy;
+import edu.hitsz.client.aircraft.OtherPlayer;
 import edu.hitsz.common.ChapterId;
 
 import java.awt.Color;
@@ -49,6 +51,26 @@ public final class ChapterVisualCatalog {
             return image;
         }
         return ImageManager.get(className);
+    }
+
+    public static BufferedImage aircraftImageFor(ChapterId chapterId, String className) {
+        if (HeroAircraft.class.getName().equals(className)) {
+            return ImageManager.aircraftImageFor(HeroAircraft.getSingleton().getAircraftBranch());
+        }
+        if (OtherPlayer.class.getName().equals(className)) {
+            return null;
+        }
+        return null;
+    }
+
+    public static BufferedImage aircraftImageFor(ChapterId chapterId, Object aircraft) {
+        if (aircraft instanceof HeroAircraft) {
+            return ImageManager.aircraftImageFor(((HeroAircraft) aircraft).getAircraftBranch());
+        }
+        if (aircraft instanceof OtherPlayer) {
+            return ImageManager.aircraftImageFor(((OtherPlayer) aircraft).getAircraftBranch());
+        }
+        return null;
     }
 
     private static Map<String, BufferedImage> baseEnemyMap() {

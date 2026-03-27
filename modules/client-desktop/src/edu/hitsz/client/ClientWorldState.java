@@ -3,6 +3,7 @@ package edu.hitsz.client;
 import edu.hitsz.client.aircraft.AbstractAircraft;
 import edu.hitsz.client.basic.AbstractItem;
 import edu.hitsz.client.bullet.BaseBullet;
+import edu.hitsz.common.AircraftBranch;
 import edu.hitsz.common.ChapterId;
 import edu.hitsz.common.GamePhase;
 import edu.hitsz.common.UpgradeChoice;
@@ -21,8 +22,10 @@ public class ClientWorldState {
     private int localScore;
     private int localLevel = 1;
     private String localSelectedSkill;
+    private AircraftBranch localAircraftBranch = AircraftBranch.STARTER_BLUE;
     private boolean localBranchUnlocked;
     private long localSkillCooldownRemainingMillis;
+    private List<AircraftBranch> localAvailableBranchChoices = java.util.Collections.emptyList();
     private List<UpgradeChoice> localAvailableUpgradeChoices = java.util.Collections.emptyList();
     private UpgradeChoice localSelectedUpgradeChoice;
     private boolean localReady;
@@ -100,6 +103,14 @@ public class ClientWorldState {
         this.localSelectedSkill = localSelectedSkill;
     }
 
+    public AircraftBranch getLocalAircraftBranch() {
+        return localAircraftBranch;
+    }
+
+    public void setLocalAircraftBranch(AircraftBranch localAircraftBranch) {
+        this.localAircraftBranch = localAircraftBranch == null ? AircraftBranch.STARTER_BLUE : localAircraftBranch;
+    }
+
     public boolean isLocalBranchUnlocked() {
         return localBranchUnlocked;
     }
@@ -114,6 +125,16 @@ public class ClientWorldState {
 
     public void setLocalSkillCooldownRemainingMillis(long localSkillCooldownRemainingMillis) {
         this.localSkillCooldownRemainingMillis = localSkillCooldownRemainingMillis;
+    }
+
+    public List<AircraftBranch> getLocalAvailableBranchChoices() {
+        return localAvailableBranchChoices;
+    }
+
+    public void setLocalAvailableBranchChoices(List<AircraftBranch> localAvailableBranchChoices) {
+        this.localAvailableBranchChoices = localAvailableBranchChoices == null
+                ? java.util.Collections.emptyList()
+                : java.util.Collections.unmodifiableList(new java.util.ArrayList<>(localAvailableBranchChoices));
     }
 
     public List<UpgradeChoice> getLocalAvailableUpgradeChoices() {

@@ -17,6 +17,7 @@ import edu.hitsz.client.basic.FreezeSupply;
 import edu.hitsz.client.bullet.BaseBullet;
 import edu.hitsz.client.bullet.EnemyBullet;
 import edu.hitsz.client.bullet.HeroBullet;
+import edu.hitsz.common.AircraftBranch;
 import edu.hitsz.common.UpgradeChoice;
 import edu.hitsz.common.protocol.SnapshotTypes;
 import edu.hitsz.common.protocol.dto.BulletSnapshot;
@@ -38,7 +39,9 @@ public class DefaultSnapshotApplier implements SnapshotApplier {
         int nextLocalScore = 0;
         int nextLocalLevel = 1;
         String nextLocalSelectedSkill = null;
+        AircraftBranch nextLocalAircraftBranch = AircraftBranch.STARTER_BLUE;
         long nextLocalSkillCooldownRemainingMillis = 0L;
+        java.util.List<AircraftBranch> nextLocalAvailableBranchChoices = java.util.Collections.emptyList();
         java.util.List<UpgradeChoice> nextLocalAvailableUpgradeChoices = java.util.Collections.emptyList();
         UpgradeChoice nextLocalSelectedUpgradeChoice = null;
         boolean nextLocalReady = false;
@@ -52,7 +55,9 @@ public class DefaultSnapshotApplier implements SnapshotApplier {
                 nextLocalScore = playerSnapshot.getScore();
                 nextLocalLevel = playerSnapshot.getLevel();
                 nextLocalSelectedSkill = playerSnapshot.getSelectedSkill();
+                nextLocalAircraftBranch = playerSnapshot.getAircraftBranch();
                 nextLocalSkillCooldownRemainingMillis = playerSnapshot.getSkillCooldownRemainingMillis();
+                nextLocalAvailableBranchChoices = playerSnapshot.getAvailableBranchChoices();
                 nextLocalAvailableUpgradeChoices = playerSnapshot.getAvailableUpgradeChoices();
                 nextLocalSelectedUpgradeChoice = playerSnapshot.getSelectedUpgradeChoice();
                 nextLocalReady = playerSnapshot.isReady();
@@ -68,7 +73,8 @@ public class DefaultSnapshotApplier implements SnapshotApplier {
                     playerSnapshot.getY(),
                     0,
                     0,
-                    playerSnapshot.getHp()
+                    playerSnapshot.getHp(),
+                    playerSnapshot.getAircraftBranch()
             ));
         }
 
@@ -94,7 +100,9 @@ public class DefaultSnapshotApplier implements SnapshotApplier {
         state.setLocalScore(nextLocalScore);
         state.setLocalLevel(nextLocalLevel);
         state.setLocalSelectedSkill(nextLocalSelectedSkill);
+        state.setLocalAircraftBranch(nextLocalAircraftBranch);
         state.setLocalSkillCooldownRemainingMillis(nextLocalSkillCooldownRemainingMillis);
+        state.setLocalAvailableBranchChoices(nextLocalAvailableBranchChoices);
         state.setLocalAvailableUpgradeChoices(nextLocalAvailableUpgradeChoices);
         state.setLocalSelectedUpgradeChoice(nextLocalSelectedUpgradeChoice);
         state.setLocalReady(nextLocalReady);
@@ -112,11 +120,14 @@ public class DefaultSnapshotApplier implements SnapshotApplier {
         state.setChapterId(snapshot.getChapterId());
         state.setGamePhase(snapshot.getGamePhase());
         state.setChapterTransitionFlash(snapshot.isChapterTransitionFlash());
-        if (localPlayerSnapshot != null && localPlayerSnapshot.getHp() > 0) {
+        if (localPlayerSnapshot != null) {
             HeroAircraft heroAircraft = HeroAircraft.getSingleton();
+            heroAircraft.setAircraftBranch(localPlayerSnapshot.getAircraftBranch());
             heroAircraft.setLocation(localPlayerSnapshot.getX(), localPlayerSnapshot.getY());
             heroAircraft.setHp(localPlayerSnapshot.getHp());
-            nextPlayers.add(heroAircraft);
+            if (localPlayerSnapshot.getHp() > 0) {
+                nextPlayers.add(heroAircraft);
+            }
         }
         state.getPlayerAircrafts().addAll(nextPlayers);
         state.getEnemyAircrafts().addAll(nextEnemies);

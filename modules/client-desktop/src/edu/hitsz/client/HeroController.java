@@ -43,17 +43,23 @@ public class HeroController {
                 super.keyPressed(e);
                 switch (e.getKeyCode()) {
                     case KeyEvent.VK_1:
-                        if (game.isUpgradeSelectionVisible()) {
+                        if (game.isBranchSelectionVisible()) {
+                            game.handleLocalBranchChoiceByIndex(0);
+                        } else if (game.isUpgradeSelectionVisible()) {
                             game.handleLocalUpgradeChoiceByIndex(0);
                         }
                         break;
                     case KeyEvent.VK_2:
-                        if (game.isUpgradeSelectionVisible()) {
+                        if (game.isBranchSelectionVisible()) {
+                            game.handleLocalBranchChoiceByIndex(1);
+                        } else if (game.isUpgradeSelectionVisible()) {
                             game.handleLocalUpgradeChoiceByIndex(1);
                         }
                         break;
                     case KeyEvent.VK_3:
-                        if (game.isUpgradeSelectionVisible()) {
+                        if (game.isBranchSelectionVisible()) {
+                            game.handleLocalBranchChoiceByIndex(2);
+                        } else if (game.isUpgradeSelectionVisible()) {
                             game.handleLocalUpgradeChoiceByIndex(2);
                         }
                         break;

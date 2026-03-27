@@ -2,6 +2,7 @@ package edu.hitsz.client.aircraft;
 
 import edu.hitsz.client.ImageManager;
 import edu.hitsz.client.bullet.BaseBullet;
+import edu.hitsz.common.AircraftBranch;
 import edu.hitsz.common.EntityRenderSizing;
 import edu.hitsz.common.EntitySizing;
 import edu.hitsz.common.GameConstants;
@@ -16,6 +17,7 @@ import java.util.List;
 public class HeroAircraft extends AbstractAircraft {
 
     private static volatile HeroAircraft singleton;
+    private AircraftBranch aircraftBranch = AircraftBranch.STARTER_BLUE;
 
     private HeroAircraft(int locationX, int locationY, int speedX, int speedY, int hp) {
         super(locationX, locationY, speedX, speedY, hp);
@@ -39,6 +41,14 @@ public class HeroAircraft extends AbstractAircraft {
             }
         }
         return singleton;
+    }
+
+    public AircraftBranch getAircraftBranch() {
+        return aircraftBranch;
+    }
+
+    public void setAircraftBranch(AircraftBranch aircraftBranch) {
+        this.aircraftBranch = aircraftBranch == null ? AircraftBranch.STARTER_BLUE : aircraftBranch;
     }
 
     @Override

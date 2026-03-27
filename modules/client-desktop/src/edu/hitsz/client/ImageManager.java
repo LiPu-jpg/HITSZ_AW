@@ -14,6 +14,7 @@ import edu.hitsz.client.basic.FireSupply;
 import edu.hitsz.client.basic.FreezeSupply;
 import edu.hitsz.client.bullet.EnemyBullet;
 import edu.hitsz.client.bullet.HeroBullet;
+import edu.hitsz.common.AircraftBranch;
 import edu.hitsz.common.ChapterId;
 import edu.hitsz.common.ImageResourceLoader;
 
@@ -41,6 +42,10 @@ public class ImageManager {
     public static BufferedImage HARD_BACKGROUND_IMAGE;
     public static BufferedImage BOSS_BACKGROUND_IMAGE;
     public static BufferedImage HERO_IMAGE;
+    public static BufferedImage STARTER_BLUE_IMAGE;
+    public static BufferedImage RED_SPEED_IMAGE;
+    public static BufferedImage GREEN_DEFENSE_IMAGE;
+    public static BufferedImage BLACK_HEAVY_IMAGE;
     public static BufferedImage HERO_BULLET_IMAGE;
     public static BufferedImage ENEMY_BULLET_IMAGE;
     public static BufferedImage MOB_ENEMY_IMAGE;
@@ -63,6 +68,10 @@ public class ImageManager {
         BACKGROUND_IMAGE = NORMAL_BACKGROUND_IMAGE;
 
         HERO_IMAGE = ImageResourceLoader.load("hero.png");
+        STARTER_BLUE_IMAGE = ImageResourceLoader.load("最终素材/初始飞机.png");
+        RED_SPEED_IMAGE = ImageResourceLoader.load("最终素材/速度分支.png");
+        GREEN_DEFENSE_IMAGE = ImageResourceLoader.load("最终素材/防御分支.png");
+        BLACK_HEAVY_IMAGE = ImageResourceLoader.load("最终素材/重轰分支.png");
         MOB_ENEMY_IMAGE = ImageResourceLoader.load("mob.png");
         ELITE_ENEMY_IMAGE = ImageResourceLoader.load("elite.png");
         ELITE_PLUS_ENEMY_IMAGE = ImageResourceLoader.load("elitePlus.png");
@@ -106,12 +115,35 @@ public class ImageManager {
         if (obj == null) {
             return null;
         }
+        BufferedImage aircraftImage = ChapterVisualCatalog.aircraftImageFor(chapterId, obj);
+        if (aircraftImage != null) {
+            return aircraftImage;
+        }
         return get(obj.getClass().getName(), chapterId);
     }
 
     public static BufferedImage get(String className, ChapterId chapterId) {
+        BufferedImage aircraftImage = ChapterVisualCatalog.aircraftImageFor(chapterId, className);
+        if (aircraftImage != null) {
+            return aircraftImage;
+        }
         BufferedImage chapterImage = ChapterVisualCatalog.enemyImageFor(chapterId, className);
         return chapterImage == null ? get(className) : chapterImage;
+    }
+
+    public static BufferedImage aircraftImageFor(AircraftBranch branch) {
+        AircraftBranch resolvedBranch = branch == null ? AircraftBranch.STARTER_BLUE : branch;
+        switch (resolvedBranch) {
+            case RED_SPEED:
+                return RED_SPEED_IMAGE;
+            case GREEN_DEFENSE:
+                return GREEN_DEFENSE_IMAGE;
+            case BLACK_HEAVY:
+                return BLACK_HEAVY_IMAGE;
+            case STARTER_BLUE:
+            default:
+                return STARTER_BLUE_IMAGE;
+        }
     }
 
     private static void putMappings(BufferedImage image, String... classNames) {
