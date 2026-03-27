@@ -13,5 +13,9 @@ javac -encoding UTF-8 \
 
 mkdir -p "$OUT_DIR/images"
 cp "$ROOT_DIR"/src/images/* "$OUT_DIR/images/"
+if [ -d "$ROOT_DIR/最终素材" ]; then
+  mkdir -p "$OUT_DIR/images/最终素材"
+  find "$ROOT_DIR/最终素材" -maxdepth 1 -type f ! -name '.DS_Store' -exec cp {} "$OUT_DIR/images/最终素材/" \;
+fi
 
 echo "Runtime build ready at: $OUT_DIR"
