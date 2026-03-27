@@ -1,6 +1,7 @@
 package edu.hitsz.protocol;
 
 import edu.hitsz.common.AircraftBranch;
+import edu.hitsz.common.GamePhase;
 import edu.hitsz.common.UpgradeChoice;
 import edu.hitsz.common.protocol.dto.PlayerSnapshot;
 import edu.hitsz.common.protocol.dto.WorldSnapshot;
@@ -33,6 +34,7 @@ public class BranchSnapshotProtocolTest {
 
     private static void branchStateRoundTripsInWorldSnapshot() {
         WorldSnapshot snapshot = new WorldSnapshot(99L);
+        snapshot.setGamePhase(GamePhase.BRANCH_SELECTION);
         snapshot.setFirstBossBranchSelection(true);
         snapshot.addPlayerSnapshot(playerSnapshotWithBranchState(
                 "session-branch",
@@ -55,6 +57,8 @@ public class BranchSnapshotProtocolTest {
 
         WorldSnapshot decoded = roundTrip(snapshot);
 
+        assert GamePhase.BRANCH_SELECTION == decoded.getGamePhase()
+                : "WorldSnapshot should serialize branch selection phase";
         assert decoded.isFirstBossBranchSelection()
                 : "WorldSnapshot should serialize firstBossBranchSelection";
         PlayerSnapshot playerSnapshot = decoded.getPlayerSnapshots().get(0);
