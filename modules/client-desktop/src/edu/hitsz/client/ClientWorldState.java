@@ -21,6 +21,7 @@ public class ClientWorldState {
     private int localScore;
     private int localLevel = 1;
     private String localSelectedSkill;
+    private boolean localBranchUnlocked;
     private long localSkillCooldownRemainingMillis;
     private List<UpgradeChoice> localAvailableUpgradeChoices = java.util.Collections.emptyList();
     private UpgradeChoice localSelectedUpgradeChoice;
@@ -97,6 +98,14 @@ public class ClientWorldState {
 
     public void setLocalSelectedSkill(String localSelectedSkill) {
         this.localSelectedSkill = localSelectedSkill;
+    }
+
+    public boolean isLocalBranchUnlocked() {
+        return localBranchUnlocked;
+    }
+
+    public void setLocalBranchUnlocked(boolean localBranchUnlocked) {
+        this.localBranchUnlocked = localBranchUnlocked;
     }
 
     public long getLocalSkillCooldownRemainingMillis() {

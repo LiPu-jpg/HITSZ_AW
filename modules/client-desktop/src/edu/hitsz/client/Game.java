@@ -47,6 +47,7 @@ public class Game extends JPanel {
     private int score = 0;
     private int level = 1;
     private String localSelectedSkill;
+    private boolean localBranchUnlocked;
     private long localSkillCooldownRemainingMillis;
     private List<UpgradeChoice> localAvailableUpgradeChoices = java.util.Collections.emptyList();
     private UpgradeChoice localSelectedUpgradeChoice;
@@ -130,7 +131,7 @@ public class Game extends JPanel {
     }
 
     public void handleLocalSkillCast() {
-        if (localSelectedSkill != null) {
+        if (localBranchUnlocked && localSelectedSkill != null) {
             handleLocalSkillInput(localSelectedSkill);
         }
     }
@@ -177,6 +178,7 @@ public class Game extends JPanel {
         score = clientWorldState.getLocalScore();
         level = clientWorldState.getLocalLevel();
         localSelectedSkill = clientWorldState.getLocalSelectedSkill();
+        localBranchUnlocked = clientWorldState.isLocalBranchUnlocked();
         localSkillCooldownRemainingMillis = clientWorldState.getLocalSkillCooldownRemainingMillis();
         localAvailableUpgradeChoices = clientWorldState.getLocalAvailableUpgradeChoices();
         localSelectedUpgradeChoice = clientWorldState.getLocalSelectedUpgradeChoice();

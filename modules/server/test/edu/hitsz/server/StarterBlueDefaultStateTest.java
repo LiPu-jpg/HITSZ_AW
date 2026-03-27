@@ -24,6 +24,14 @@ public class StarterBlueDefaultStateTest {
                 : "Snapshots should not advertise a preselected skill for starter-blue players";
         assert AircraftBranch.STARTER_BLUE == roomRuntime.buildSnapshot().getPlayerSnapshots().get(0).getAircraftBranch()
                 : "Snapshots should serialize the starter-blue branch default";
+
+        roomRuntime.updateReady("host-session", true);
+        roomRuntime.startRoundIfHost("host-session");
+        session.getPlayerState().setSelectedSkill("FREEZE");
+        roomRuntime.handleSkill("host-session", "FREEZE", 1L, 1200L);
+
+        assert !extractWorldState(roomRuntime).getWorldEffectState().isFrozen(1200L)
+                : "Starter-blue players should not be able to cast skills before branch unlock";
     }
 
     private static AircraftBranch invokeAircraftBranch(Object playerState) {
@@ -32,6 +40,16 @@ public class StarterBlueDefaultStateTest {
             return (AircraftBranch) method.invoke(playerState);
         } catch (ReflectiveOperationException e) {
             throw new AssertionError("PlayerRuntimeState should expose an aircraft branch", e);
+        }
+    }
+
+    private static ServerWorldState extractWorldState(RoomRuntime roomRuntime) {
+        try {
+            java.lang.reflect.Field field = RoomRuntime.class.getDeclaredField("worldState");
+            field.setAccessible(true);
+            return (ServerWorldState) field.get(roomRuntime);
+        } catch (ReflectiveOperationException e) {
+            throw new AssertionError("RoomRuntime should retain a ServerWorldState", e);
         }
     }
 }

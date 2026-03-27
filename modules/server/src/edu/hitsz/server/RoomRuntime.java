@@ -155,7 +155,8 @@ public class RoomRuntime {
             return;
         }
         PlayerSession session = commandRouter.route(new SkillCommand(sessionId, skillType, sequence, timestamp));
-        if (session.getPlayerState().getSelectedSkill() == null) {
+        if (!session.getPlayerState().isBranchUnlocked()
+                || session.getPlayerState().getSelectedSkill() == null) {
             return;
         }
         try {
@@ -298,6 +299,9 @@ public class RoomRuntime {
 
     private boolean shouldResetForLobby(PlayerSession session) {
         return session.getPlayerState().getAircraft().notValid()
+                || session.getPlayerState().getAircraftBranch() != edu.hitsz.common.AircraftBranch.STARTER_BLUE
+                || session.getPlayerState().isBranchUnlocked()
+                || session.getPlayerState().getSelectedSkill() != null
                 || session.getPlayerState().getScore() > 0
                 || session.isReady();
     }

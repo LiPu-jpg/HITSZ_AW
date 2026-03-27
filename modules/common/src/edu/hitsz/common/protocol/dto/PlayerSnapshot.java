@@ -29,11 +29,11 @@ public class PlayerSnapshot {
     private final boolean branchUnlocked;
 
     public PlayerSnapshot(String sessionId, String playerId, int x, int y, int hp, int score) {
-        this(sessionId, playerId, x, y, hp, score, false, 1, "FREEZE", 0L, LEGACY_DEFAULT_MAX_HP, Collections.emptyList(), null, null, Collections.emptyList(), false);
+        this(sessionId, playerId, x, y, hp, score, false, 1, null, 0L, LEGACY_DEFAULT_MAX_HP, Collections.emptyList(), null, null, Collections.emptyList(), false);
     }
 
     public PlayerSnapshot(String sessionId, String playerId, int x, int y, int hp, int score, boolean ready) {
-        this(sessionId, playerId, x, y, hp, score, ready, 1, "FREEZE", 0L, LEGACY_DEFAULT_MAX_HP, Collections.emptyList(), null, null, Collections.emptyList(), false);
+        this(sessionId, playerId, x, y, hp, score, ready, 1, null, 0L, LEGACY_DEFAULT_MAX_HP, Collections.emptyList(), null, null, Collections.emptyList(), false);
     }
 
     public PlayerSnapshot(

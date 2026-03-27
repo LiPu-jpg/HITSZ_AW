@@ -42,6 +42,7 @@ public class DefaultSnapshotApplier implements SnapshotApplier {
         java.util.List<UpgradeChoice> nextLocalAvailableUpgradeChoices = java.util.Collections.emptyList();
         UpgradeChoice nextLocalSelectedUpgradeChoice = null;
         boolean nextLocalReady = false;
+        boolean nextLocalBranchUnlocked = false;
         PlayerSnapshot localPlayerSnapshot = null;
 
         for (PlayerSnapshot playerSnapshot : snapshot.getPlayerSnapshots()) {
@@ -55,6 +56,7 @@ public class DefaultSnapshotApplier implements SnapshotApplier {
                 nextLocalAvailableUpgradeChoices = playerSnapshot.getAvailableUpgradeChoices();
                 nextLocalSelectedUpgradeChoice = playerSnapshot.getSelectedUpgradeChoice();
                 nextLocalReady = playerSnapshot.isReady();
+                nextLocalBranchUnlocked = playerSnapshot.isBranchUnlocked();
                 continue;
             }
             if (playerSnapshot.getHp() <= 0) {
@@ -96,6 +98,7 @@ public class DefaultSnapshotApplier implements SnapshotApplier {
         state.setLocalAvailableUpgradeChoices(nextLocalAvailableUpgradeChoices);
         state.setLocalSelectedUpgradeChoice(nextLocalSelectedUpgradeChoice);
         state.setLocalReady(nextLocalReady);
+        state.setLocalBranchUnlocked(nextLocalBranchUnlocked);
         state.setGameStarted(snapshot.isGameStarted());
         state.setReadyPlayerCount(snapshot.getReadyPlayerCount());
         state.setConnectedPlayerCount(snapshot.getConnectedPlayerCount());
