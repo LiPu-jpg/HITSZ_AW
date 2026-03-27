@@ -1,6 +1,7 @@
 package edu.hitsz.server;
 
 import edu.hitsz.common.AircraftBranch;
+import edu.hitsz.common.protocol.SnapshotTypes;
 import edu.hitsz.server.aircraft.EliteEnemy;
 
 import java.lang.reflect.Method;
@@ -31,10 +32,17 @@ public class BlackHeavyAirburstDamageTest {
 
         assert worldState.getHeroBullets().isEmpty()
                 : "BLACK_HEAVY normal fire should not use standard hero bullets";
+        assert new WorldSnapshotFactory().create(worldState).getHeroBulletSnapshots().size() == 1
+                : "BLACK_HEAVY should expose one in-flight projectile snapshot after shooting";
+        assert SnapshotTypes.Bullet.HERO_EXPLOSIVE.equals(
+                new WorldSnapshotFactory().create(worldState).getHeroBulletSnapshots().get(0).getType()
+        ) : "BLACK_HEAVY in-flight projectile should use the explosive hero bullet type";
 
         Method burstAction = ServerWorldState.class.getDeclaredMethod("burstAction", long.class);
         burstAction.setAccessible(true);
-        burstAction.invoke(worldState, 0L);
+        for (int i = 0; i < 8; i++) {
+            burstAction.invoke(worldState, (long) i * GameplayBalance.WORLD_TICK_INTERVAL_MILLIS);
+        }
 
         assert nearTargetEnemy.getHp() < 120
                 : "BLACK_HEAVY burst should damage enemies near the target point";

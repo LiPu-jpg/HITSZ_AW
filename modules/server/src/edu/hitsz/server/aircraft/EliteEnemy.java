@@ -51,4 +51,8 @@ public class EliteEnemy extends AbstractAircraft {
         }
         return bullets;
     }
+
+    public int getPower() {
+        return power;
+    }
 }

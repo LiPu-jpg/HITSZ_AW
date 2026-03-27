@@ -23,6 +23,7 @@ import edu.hitsz.server.basic.FirePlusSupply;
 import edu.hitsz.server.basic.FireSupply;
 import edu.hitsz.server.basic.FreezeSupply;
 import edu.hitsz.server.bullet.BaseBullet;
+import edu.hitsz.server.bullet.ExplosiveEnemyBullet;
 import edu.hitsz.server.skill.SkillType;
 
 public class WorldSnapshotFactory {
@@ -74,14 +75,21 @@ public class WorldSnapshotFactory {
         }
         for (BaseBullet bullet : worldState.getHeroBullets()) {
             snapshot.addHeroBulletSnapshot(new BulletSnapshot(
-                    SnapshotTypes.Bullet.HERO,
+                    heroBulletTypeOf(bullet),
                     bullet.getLocationX(),
                     bullet.getLocationY()
             ));
         }
+        for (AirburstProjectileState projectile : worldState.getAirburstProjectiles()) {
+            snapshot.addHeroBulletSnapshot(new BulletSnapshot(
+                    SnapshotTypes.Bullet.HERO_EXPLOSIVE,
+                    projectile.getCurrentX(),
+                    projectile.getCurrentY()
+            ));
+        }
         for (BaseBullet bullet : worldState.getEnemyBullets()) {
             snapshot.addEnemyBulletSnapshot(new BulletSnapshot(
-                    SnapshotTypes.Bullet.ENEMY,
+                    enemyBulletTypeOf(bullet),
                     bullet.getLocationX(),
                     bullet.getLocationY()
             ));
@@ -148,6 +156,17 @@ public class WorldSnapshotFactory {
             return SnapshotTypes.Item.FREEZE;
         }
         throw new IllegalArgumentException("Unknown item snapshot type for " + item.getClass().getName());
+    }
+
+    private String heroBulletTypeOf(BaseBullet bullet) {
+        return SnapshotTypes.Bullet.HERO;
+    }
+
+    private String enemyBulletTypeOf(BaseBullet bullet) {
+        if (bullet instanceof ExplosiveEnemyBullet) {
+            return SnapshotTypes.Bullet.ENEMY_EXPLOSIVE;
+        }
+        return SnapshotTypes.Bullet.ENEMY;
     }
 
     private String enemyTypeOf(AbstractAircraft enemyAircraft) {

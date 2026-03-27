@@ -16,6 +16,8 @@ import edu.hitsz.client.basic.FireSupply;
 import edu.hitsz.client.basic.FreezeSupply;
 import edu.hitsz.client.bullet.BaseBullet;
 import edu.hitsz.client.bullet.EnemyBullet;
+import edu.hitsz.client.bullet.ExplosiveEnemyBullet;
+import edu.hitsz.client.bullet.ExplosiveHeroBullet;
 import edu.hitsz.client.bullet.HeroBullet;
 import edu.hitsz.common.AircraftBranch;
 import edu.hitsz.common.BranchUpgradeChoice;
@@ -165,8 +167,14 @@ public class DefaultSnapshotApplier implements SnapshotApplier {
     }
 
     private BaseBullet createBullet(BulletSnapshot bulletSnapshot) {
+        if (SnapshotTypes.Bullet.ENEMY_EXPLOSIVE.equals(bulletSnapshot.getType())) {
+            return new ExplosiveEnemyBullet(bulletSnapshot.getX(), bulletSnapshot.getY(), 0, 0, 0);
+        }
         if (SnapshotTypes.Bullet.ENEMY.equals(bulletSnapshot.getType())) {
             return new EnemyBullet(bulletSnapshot.getX(), bulletSnapshot.getY(), 0, 0, 0);
+        }
+        if (SnapshotTypes.Bullet.HERO_EXPLOSIVE.equals(bulletSnapshot.getType())) {
+            return new ExplosiveHeroBullet(bulletSnapshot.getX(), bulletSnapshot.getY(), 0, 0, 0);
         }
         if (SnapshotTypes.Bullet.HERO.equals(bulletSnapshot.getType())) {
             return new HeroBullet(bulletSnapshot.getX(), bulletSnapshot.getY(), 0, 0, 0);

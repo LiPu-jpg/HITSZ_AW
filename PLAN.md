@@ -25,8 +25,9 @@
   - 分支基础武器已接入：
     - `RED_SPEED` 激光
     - `GREEN_DEFENSE` 散射
-    - `BLACK_HEAVY` 空爆
+    - `BLACK_HEAVY` 可见在途空爆弹 + 空爆
   - 通用四选一升级已替换为分支专属升级池
+  - `CH2/CH3` 章节敌机与 Boss 已有独立弹幕差异；`CH3` 使用爆炸弹贴图
   - Hero/OtherPlayer 模型拆分
   - 协议包络、JSON codec、Socket 传输层
   - Session 注册与 `SessionID` 校验

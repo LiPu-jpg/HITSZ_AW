@@ -16,7 +16,9 @@ public final class ServerImageManager {
 
     public static BufferedImage HERO_IMAGE;
     public static BufferedImage HERO_BULLET_IMAGE;
+    public static BufferedImage EXPLOSIVE_HERO_BULLET_IMAGE;
     public static BufferedImage ENEMY_BULLET_IMAGE;
+    public static BufferedImage EXPLOSIVE_ENEMY_BULLET_IMAGE;
     public static BufferedImage MOB_ENEMY_IMAGE;
     public static BufferedImage ELITE_ENEMY_IMAGE;
     public static BufferedImage ELITE_PLUS_ENEMY_IMAGE;
@@ -31,7 +33,9 @@ public final class ServerImageManager {
     static {
         HERO_IMAGE = ImageResourceLoader.loadOrFallback("最终素材/初始飞机.png", "hero.png");
         HERO_BULLET_IMAGE = ImageResourceLoader.loadOrFallback("最终素材/普通子弹-友.png", "bullet_hero.png");
+        EXPLOSIVE_HERO_BULLET_IMAGE = ImageResourceLoader.loadOrFallback("最终素材/爆炸子弹-友.png", "bullet_hero.png");
         ENEMY_BULLET_IMAGE = ImageResourceLoader.loadOrFallback("最终素材/普通子弹-敌.png", "bullet_enemy.png");
+        EXPLOSIVE_ENEMY_BULLET_IMAGE = ImageResourceLoader.loadOrFallback("最终素材/爆炸子弹-敌.png", "bullet_enemy.png");
         MOB_ENEMY_IMAGE = ImageResourceLoader.loadOrFallback("最终素材/通用杂兵.png", "mob.png");
         ELITE_ENEMY_IMAGE = ImageResourceLoader.loadOrFallback("最终素材/1号地图-精英兵.png", "elite.png");
         ELITE_PLUS_ENEMY_IMAGE = ImageResourceLoader.loadOrFallback("最终素材/通用普通兵.png", "elitePlus.png");
@@ -51,6 +55,7 @@ public final class ServerImageManager {
         putMappings(BOSS_ENEMY_IMAGE, SERVER_AIRCRAFT_PACKAGE + "BossEnemy");
         putMappings(HERO_BULLET_IMAGE, SERVER_BULLET_PACKAGE + "HeroBullet", ServerHeroBullet.class.getName());
         putMappings(ENEMY_BULLET_IMAGE, SERVER_BULLET_PACKAGE + "EnemyBullet");
+        putMappings(EXPLOSIVE_ENEMY_BULLET_IMAGE, SERVER_BULLET_PACKAGE + "ExplosiveEnemyBullet");
         putMappings(BLOOD_SUPPLY_IMAGE, SERVER_BASIC_PACKAGE + "BloodSupply");
         putMappings(FIRE_SUPPLY_IMAGE, SERVER_BASIC_PACKAGE + "FireSupply");
         putMappings(FIRE_PLUS_SUPPLY_IMAGE, SERVER_BASIC_PACKAGE + "FirePlusSupply");

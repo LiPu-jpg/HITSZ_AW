@@ -17,6 +17,7 @@ import edu.hitsz.server.basic.FirePlusSupply;
 import edu.hitsz.server.basic.FireSupply;
 import edu.hitsz.server.basic.FreezeSupply;
 import edu.hitsz.server.bullet.BaseBullet;
+import edu.hitsz.server.bullet.ExplosiveEnemyBullet;
 import edu.hitsz.common.GameConstants;
 import edu.hitsz.common.protocol.dto.ExplosionSnapshot;
 import edu.hitsz.server.skill.DefaultServerSkillResolver;
@@ -103,6 +104,10 @@ public class ServerWorldState {
         return enemyBullets;
     }
 
+    public List<AirburstProjectileState> getAirburstProjectiles() {
+        return airburstProjectiles;
+    }
+
     public List<LaserBeamState> getActiveLasers() {
         return activeLasers;
     }
@@ -174,8 +179,8 @@ public class ServerWorldState {
         enemySpawnCounter++;
         createEnemyAction();
         shootAction(nowMillis);
-        burstAction(nowMillis);
         bulletsMoveAction();
+        burstAction(nowMillis);
         stepEnemies(nowMillis);
         itemsMoveAction();
         crashCheckAction(nowMillis);
@@ -364,7 +369,7 @@ public class ServerWorldState {
 
         for (AbstractAircraft enemyAircraft : enemyAircrafts) {
             if (!enemyAircraft.notValid()) {
-                enemyBullets.addAll(enemyAircraft.shoot());
+                enemyBullets.addAll(buildEnemyVolleyForCurrentChapter(enemyAircraft));
             }
         }
     }
@@ -601,12 +606,18 @@ public class ServerWorldState {
     }
 
     private void burstAction(long nowMillis) {
-        for (AirburstProjectileState projectile : airburstProjectiles) {
+        java.util.Iterator<AirburstProjectileState> iterator = airburstProjectiles.iterator();
+        while (iterator.hasNext()) {
+            AirburstProjectileState projectile = iterator.next();
+            projectile.advance();
+            if (!projectile.isReadyToBurst()) {
+                continue;
+            }
             ExplosionSnapshot explosion = projectile.resolveBurst();
             activeExplosionStates.add(new ActiveExplosionState(explosion));
             applyAirburstDamage(projectile, explosion, nowMillis);
+            iterator.remove();
         }
-        airburstProjectiles.clear();
     }
 
     private void advanceExplosionAction() {
@@ -744,6 +755,80 @@ public class ServerWorldState {
                 }
             }
         }
+    }
+
+    List<BaseBullet> buildEnemyVolleyForCurrentChapter(AbstractAircraft enemyAircraft) {
+        if (getChapterId() == null || getChapterId() == edu.hitsz.common.ChapterId.CH1) {
+            return enemyAircraft.shoot();
+        }
+        if (enemyAircraft instanceof BossEnemy) {
+            return buildBossVolley((BossEnemy) enemyAircraft);
+        }
+        if (enemyAircraft.getClass() == EliteEnemy.class) {
+            return buildEliteVolley((EliteEnemy) enemyAircraft);
+        }
+        if (enemyAircraft instanceof ElitePlusEnemy) {
+            return buildElitePlusVolley((ElitePlusEnemy) enemyAircraft);
+        }
+        if (enemyAircraft instanceof AceEnemy) {
+            return buildAceVolley((AceEnemy) enemyAircraft);
+        }
+        return enemyAircraft.shoot();
+    }
+
+    private List<BaseBullet> buildEliteVolley(EliteEnemy enemyAircraft) {
+        if (getChapterId() == edu.hitsz.common.ChapterId.CH2) {
+            return buildSpreadVolley(enemyAircraft, new int[]{-GameplayBalance.CH2_ELITE_SPREAD_X_SPEED_STEP, 0, GameplayBalance.CH2_ELITE_SPREAD_X_SPEED_STEP}, false);
+        }
+        if (getChapterId() == edu.hitsz.common.ChapterId.CH3) {
+            return buildSpreadVolley(enemyAircraft, new int[]{-GameplayBalance.CH3_ELITE_SPREAD_X_SPEED_STEP, 0, GameplayBalance.CH3_ELITE_SPREAD_X_SPEED_STEP}, true);
+        }
+        return enemyAircraft.shoot();
+    }
+
+    private List<BaseBullet> buildElitePlusVolley(ElitePlusEnemy enemyAircraft) {
+        if (getChapterId() == edu.hitsz.common.ChapterId.CH3) {
+            return buildSpreadVolley(enemyAircraft, new int[]{-4, -2, 0, 2, 4}, true);
+        }
+        return enemyAircraft.shoot();
+    }
+
+    private List<BaseBullet> buildAceVolley(AceEnemy enemyAircraft) {
+        if (getChapterId() == edu.hitsz.common.ChapterId.CH2) {
+            return buildSpreadVolley(enemyAircraft, new int[]{-6, -4, -2, 0, 2, 4, 6}, false);
+        }
+        if (getChapterId() == edu.hitsz.common.ChapterId.CH3) {
+            return buildSpreadVolley(enemyAircraft, new int[]{-6, -4, -2, 0, 2, 4, 6}, true);
+        }
+        return enemyAircraft.shoot();
+    }
+
+    private List<BaseBullet> buildBossVolley(BossEnemy enemyAircraft) {
+        if (getChapterId() == edu.hitsz.common.ChapterId.CH2) {
+            return buildSpreadVolley(enemyAircraft, new int[]{-8, -6, -4, -2, 0, 2, 4, 6, 8}, false);
+        }
+        if (getChapterId() == edu.hitsz.common.ChapterId.CH3) {
+            return buildSpreadVolley(enemyAircraft, new int[]{-6, -4, -2, 0, 2, 4, 6}, true);
+        }
+        return enemyAircraft.shoot();
+    }
+
+    private List<BaseBullet> buildSpreadVolley(EliteEnemy enemyAircraft, int[] spread, boolean explosive) {
+        List<BaseBullet> bullets = new LinkedList<>();
+        int x = enemyAircraft.getLocationX();
+        int y = enemyAircraft.getLocationY() + 2;
+        int speedY = enemyAircraft.getSpeedY() + 5;
+        for (int lateralSpeed : spread) {
+            bullets.add(createEnemyBullet(x + lateralSpeed * 8, y, lateralSpeed, speedY, enemyAircraft.getPower(), explosive));
+        }
+        return bullets;
+    }
+
+    private BaseBullet createEnemyBullet(int x, int y, int speedX, int speedY, int power, boolean explosive) {
+        if (explosive) {
+            return new ExplosiveEnemyBullet(x, y, speedX, speedY, power);
+        }
+        return new edu.hitsz.server.bullet.EnemyBullet(x, y, speedX, speedY, power);
     }
 
     private void replaceActiveLaser(LaserBeamState laser) {

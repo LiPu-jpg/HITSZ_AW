@@ -45,7 +45,13 @@ public final class GameplayBalance {
     public static final int RED_SPEED_LASER_DURATION_TICKS = 4;
     public static final int BLACK_HEAVY_AIRBURST_RADIUS = 90;
     public static final int BLACK_HEAVY_AIRBURST_MAX_RANGE = 280;
+    public static final int BLACK_HEAVY_AIRBURST_PROJECTILE_SPEED = 28;
     public static final int BLACK_HEAVY_EXPLOSION_DURATION_TICKS = 3;
+
+    public static final int CH2_ELITE_SPREAD_X_SPEED_STEP = 2;
+    public static final int CH2_BOSS_SPREAD_X_SPEED_STEP = 2;
+    public static final int CH3_ELITE_SPREAD_X_SPEED_STEP = 3;
+    public static final int CH3_BOSS_SPREAD_X_SPEED_STEP = 2;
 
     public static final double ITEM_DROP_PROBABILITY = 0.6;
 

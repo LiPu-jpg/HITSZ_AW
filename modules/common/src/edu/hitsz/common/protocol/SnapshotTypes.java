@@ -29,7 +29,9 @@ public final class SnapshotTypes {
 
     public static final class Bullet {
         public static final String HERO = "HERO";
+        public static final String HERO_EXPLOSIVE = "HERO_EXPLOSIVE";
         public static final String ENEMY = "ENEMY";
+        public static final String ENEMY_EXPLOSIVE = "ENEMY_EXPLOSIVE";
 
         private Bullet() {
         }

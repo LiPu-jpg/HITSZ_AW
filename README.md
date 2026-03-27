@@ -99,7 +99,11 @@ Notes:
 - current branch weapon baselines are:
   - `RED_SPEED`: forward laser sweep
   - `GREEN_DEFENSE`: spread-shot pattern
-  - `BLACK_HEAVY`: target-point or max-range airburst
+  - `BLACK_HEAVY`: visible explosive shell -> target-point or max-range airburst
+- enemy attack baselines now vary by chapter:
+  - `CH1`: original patterns
+  - `CH2`: denser elite and boss spreads
+  - `CH3`: explosive-shell elite and boss volleys
 - the older `FREEZE / BOMB / SHIELD` server skill system still exists in code, but it is not part of the current branch-aircraft runtime flow
 
 Background mapping:

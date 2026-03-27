@@ -13,6 +13,8 @@ import edu.hitsz.client.basic.FirePlusSupply;
 import edu.hitsz.client.basic.FireSupply;
 import edu.hitsz.client.basic.FreezeSupply;
 import edu.hitsz.client.bullet.EnemyBullet;
+import edu.hitsz.client.bullet.ExplosiveEnemyBullet;
+import edu.hitsz.client.bullet.ExplosiveHeroBullet;
 import edu.hitsz.client.bullet.HeroBullet;
 import edu.hitsz.common.AircraftBranch;
 import edu.hitsz.common.ChapterId;
@@ -47,7 +49,9 @@ public class ImageManager {
     public static BufferedImage GREEN_DEFENSE_IMAGE;
     public static BufferedImage BLACK_HEAVY_IMAGE;
     public static BufferedImage HERO_BULLET_IMAGE;
+    public static BufferedImage EXPLOSIVE_HERO_BULLET_IMAGE;
     public static BufferedImage ENEMY_BULLET_IMAGE;
+    public static BufferedImage EXPLOSIVE_ENEMY_BULLET_IMAGE;
     public static BufferedImage MOB_ENEMY_IMAGE;
     public static BufferedImage COMMON_SOLDIER_IMAGE;
     public static BufferedImage ELITE_ENEMY_IMAGE;
@@ -94,7 +98,9 @@ public class ImageManager {
         BOSS_ENEMY_IMAGE = CH1_BOSS_ENEMY_IMAGE;
 
         HERO_BULLET_IMAGE = ImageResourceLoader.loadOrFallback("最终素材/普通子弹-友.png", "bullet_hero.png");
+        EXPLOSIVE_HERO_BULLET_IMAGE = ImageResourceLoader.loadOrFallback("最终素材/爆炸子弹-友.png", "bullet_hero.png");
         ENEMY_BULLET_IMAGE = ImageResourceLoader.loadOrFallback("最终素材/普通子弹-敌.png", "bullet_enemy.png");
+        EXPLOSIVE_ENEMY_BULLET_IMAGE = ImageResourceLoader.loadOrFallback("最终素材/爆炸子弹-敌.png", "bullet_enemy.png");
         BLOOD_SUPPLY_IMAGE = ImageResourceLoader.loadOrFallback("最终素材/回血道具.png", "prop_blood.png");
         FIRE_SUPPLY_IMAGE = ImageResourceLoader.loadOrFallback("最终素材/子弹增强道具.png", "prop_bullet.png");
         FIRE_PLUS_SUPPLY_IMAGE = ImageResourceLoader.loadOrFallback("最终素材/奇怪的标识.png", "prop_bulletPlus.png");
@@ -108,7 +114,9 @@ public class ImageManager {
         putMappings(ACE_ENEMY_IMAGE, AceEnemy.class.getName());
         putMappings(BOSS_ENEMY_IMAGE, BossEnemy.class.getName());
         putMappings(HERO_BULLET_IMAGE, HeroBullet.class.getName());
+        putMappings(EXPLOSIVE_HERO_BULLET_IMAGE, ExplosiveHeroBullet.class.getName());
         putMappings(ENEMY_BULLET_IMAGE, EnemyBullet.class.getName());
+        putMappings(EXPLOSIVE_ENEMY_BULLET_IMAGE, ExplosiveEnemyBullet.class.getName());
         putMappings(BLOOD_SUPPLY_IMAGE, BloodSupply.class.getName());
         putMappings(FIRE_SUPPLY_IMAGE, FireSupply.class.getName());
         putMappings(FIRE_PLUS_SUPPLY_IMAGE, FirePlusSupply.class.getName());

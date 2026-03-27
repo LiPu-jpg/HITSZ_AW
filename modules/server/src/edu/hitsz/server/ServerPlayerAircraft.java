@@ -105,6 +105,7 @@ public class ServerPlayerAircraft extends AbstractAircraft {
                 targetX,
                 targetY,
                 maxRange,
+                GameplayBalance.BLACK_HEAVY_AIRBURST_PROJECTILE_SPEED,
                 burstRadius,
                 bulletPower
         );
