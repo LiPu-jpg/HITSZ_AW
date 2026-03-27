@@ -1,10 +1,10 @@
 package edu.hitsz.server;
 
 import edu.hitsz.common.AircraftBranch;
+import edu.hitsz.common.BranchUpgradeChoice;
 import edu.hitsz.common.ChapterId;
 import edu.hitsz.common.Difficulty;
 import edu.hitsz.common.GamePhase;
-import edu.hitsz.common.UpgradeChoice;
 
 import java.lang.reflect.Field;
 
@@ -43,7 +43,7 @@ public class UpgradeSelectionAutoAdvanceTest {
         assert roomRuntime.getGamePhase() == GamePhase.UPGRADE_SELECTION
                 : "Room should remain paused after the flash window until upgrade choices are submitted";
 
-        roomRuntime.handleUpgradeChoice("host-session", UpgradeChoice.BULLET_POWER.name(), 1L, flashUntilMillis + 10L);
+        roomRuntime.handleUpgradeChoice("host-session", BranchUpgradeChoice.LASER_DAMAGE.name(), 1L, flashUntilMillis + 10L);
         roomRuntime.tick(flashUntilMillis + 10L, 10_000L);
         assert roomRuntime.getGamePhase() == GamePhase.BATTLE
                 : "Room should resume battle after the required upgrade choices are submitted";

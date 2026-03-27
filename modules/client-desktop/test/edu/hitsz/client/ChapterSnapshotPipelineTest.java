@@ -33,7 +33,7 @@ public class ChapterSnapshotPipelineTest {
 
         assert clientWorldState.getChapterId() == ChapterId.CH1
                 : "Server->JSON->client pipeline should preserve chapter";
-        assert clientWorldState.getGamePhase() == GamePhase.UPGRADE_SELECTION
+        assert clientWorldState.getGamePhase() == GamePhase.BRANCH_SELECTION
                 : "Server->JSON->client pipeline should preserve phase";
 
         WorldSnapshot deterministicFlashSnapshot = new WorldSnapshotFactory().create(

@@ -1,8 +1,8 @@
 package edu.hitsz.client;
 
 import edu.hitsz.common.AircraftBranch;
+import edu.hitsz.common.BranchUpgradeChoice;
 import edu.hitsz.common.GamePhase;
-import edu.hitsz.common.UpgradeChoice;
 import edu.hitsz.common.protocol.dto.PlayerSnapshot;
 import edu.hitsz.common.protocol.dto.WorldSnapshot;
 
@@ -82,7 +82,7 @@ public class BranchSelectionOverlayTest {
                 "FREEZE",
                 0L,
                 1000,
-                Arrays.asList(UpgradeChoice.FIRE_RATE, UpgradeChoice.BULLET_POWER, UpgradeChoice.LIGHT_TRACKING),
+                Arrays.asList(BranchUpgradeChoice.SPREAD_COUNT, BranchUpgradeChoice.BULLET_DAMAGE, BranchUpgradeChoice.MAX_HP),
                 null,
                 AircraftBranch.GREEN_DEFENSE,
                 java.util.Collections.emptyList(),
@@ -94,7 +94,7 @@ public class BranchSelectionOverlayTest {
         assert game.isUpgradeSelectionVisible() : "Upgrade overlay should still work";
 
         pressKey(game, KeyEvent.VK_2);
-        assert "BULLET_POWER".equals(publisher.lastUpgradeChoice)
+        assert "BULLET_DAMAGE".equals(publisher.lastUpgradeChoice)
                 : "Number keys should keep upgrade routing when branch overlay is inactive";
     }
 

@@ -4,9 +4,9 @@ import edu.hitsz.client.aircraft.AbstractAircraft;
 import edu.hitsz.client.basic.AbstractItem;
 import edu.hitsz.client.bullet.BaseBullet;
 import edu.hitsz.common.AircraftBranch;
+import edu.hitsz.common.BranchUpgradeChoice;
 import edu.hitsz.common.ChapterId;
 import edu.hitsz.common.GamePhase;
-import edu.hitsz.common.UpgradeChoice;
 import edu.hitsz.common.protocol.dto.ExplosionSnapshot;
 import edu.hitsz.common.protocol.dto.LaserSnapshot;
 
@@ -30,8 +30,8 @@ public class ClientWorldState {
     private boolean localBranchUnlocked;
     private long localSkillCooldownRemainingMillis;
     private List<AircraftBranch> localAvailableBranchChoices = java.util.Collections.emptyList();
-    private List<UpgradeChoice> localAvailableUpgradeChoices = java.util.Collections.emptyList();
-    private UpgradeChoice localSelectedUpgradeChoice;
+    private List<BranchUpgradeChoice> localAvailableUpgradeChoices = java.util.Collections.emptyList();
+    private BranchUpgradeChoice localSelectedUpgradeChoice;
     private boolean localReady;
     private boolean gameStarted;
     private int readyPlayerCount;
@@ -161,21 +161,21 @@ public class ClientWorldState {
                 : java.util.Collections.unmodifiableList(new java.util.ArrayList<>(localAvailableBranchChoices));
     }
 
-    public List<UpgradeChoice> getLocalAvailableUpgradeChoices() {
+    public List<BranchUpgradeChoice> getLocalAvailableUpgradeChoices() {
         return localAvailableUpgradeChoices;
     }
 
-    public void setLocalAvailableUpgradeChoices(List<UpgradeChoice> localAvailableUpgradeChoices) {
+    public void setLocalAvailableUpgradeChoices(List<BranchUpgradeChoice> localAvailableUpgradeChoices) {
         this.localAvailableUpgradeChoices = localAvailableUpgradeChoices == null
                 ? java.util.Collections.emptyList()
                 : java.util.Collections.unmodifiableList(new java.util.ArrayList<>(localAvailableUpgradeChoices));
     }
 
-    public UpgradeChoice getLocalSelectedUpgradeChoice() {
+    public BranchUpgradeChoice getLocalSelectedUpgradeChoice() {
         return localSelectedUpgradeChoice;
     }
 
-    public void setLocalSelectedUpgradeChoice(UpgradeChoice localSelectedUpgradeChoice) {
+    public void setLocalSelectedUpgradeChoice(BranchUpgradeChoice localSelectedUpgradeChoice) {
         this.localSelectedUpgradeChoice = localSelectedUpgradeChoice;
     }
 

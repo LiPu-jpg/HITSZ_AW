@@ -1,10 +1,10 @@
 package edu.hitsz.server;
 
 import edu.hitsz.common.AircraftBranch;
+import edu.hitsz.common.BranchUpgradeChoice;
 import edu.hitsz.common.ChapterId;
 import edu.hitsz.common.Difficulty;
 import edu.hitsz.common.GamePhase;
-import edu.hitsz.common.UpgradeChoice;
 
 import java.lang.reflect.Field;
 
@@ -36,7 +36,7 @@ public class SubmittedDisconnectedUpgradeDoesNotBlockTransitionTest {
         worldState.syncProgressionState(nowMillis + 300L);
 
         long flashUntilMillis = roomRuntime.getChapterProgressionState().getFlashUntilMillis();
-        roomRuntime.handleUpgradeChoice("host-session", UpgradeChoice.BULLET_POWER.name(), 1L, flashUntilMillis);
+        roomRuntime.handleUpgradeChoice("host-session", BranchUpgradeChoice.LASER_DAMAGE.name(), 1L, flashUntilMillis);
         session.markDisconnected(flashUntilMillis + 1L);
         roomRuntime.tick(flashUntilMillis + 1L, 10_000L);
 

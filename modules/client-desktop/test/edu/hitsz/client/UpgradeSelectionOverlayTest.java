@@ -1,7 +1,8 @@
 package edu.hitsz.client;
 
+import edu.hitsz.common.AircraftBranch;
+import edu.hitsz.common.BranchUpgradeChoice;
 import edu.hitsz.common.GamePhase;
-import edu.hitsz.common.UpgradeChoice;
 import edu.hitsz.common.protocol.dto.PlayerSnapshot;
 import edu.hitsz.common.protocol.dto.WorldSnapshot;
 
@@ -29,8 +30,11 @@ public class UpgradeSelectionOverlayTest {
                 "FREEZE",
                 0L,
                 1000,
-                Arrays.asList(UpgradeChoice.FIRE_RATE, UpgradeChoice.BULLET_POWER),
-                null
+                Arrays.asList(BranchUpgradeChoice.LASER_DAMAGE, BranchUpgradeChoice.LASER_WIDTH),
+                null,
+                AircraftBranch.RED_SPEED,
+                java.util.Collections.emptyList(),
+                true
         ));
         game.applyWorldSnapshot(selectionSnapshot);
 

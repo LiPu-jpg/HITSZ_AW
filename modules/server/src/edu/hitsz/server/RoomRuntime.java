@@ -5,7 +5,7 @@ import edu.hitsz.common.GameConstants;
 import edu.hitsz.common.ChapterId;
 import edu.hitsz.common.GamePhase;
 import edu.hitsz.common.AircraftBranch;
-import edu.hitsz.common.UpgradeChoice;
+import edu.hitsz.common.BranchUpgradeChoice;
 import edu.hitsz.common.protocol.dto.WorldSnapshot;
 import edu.hitsz.server.command.MoveCommand;
 import edu.hitsz.server.command.SkillCommand;
@@ -184,7 +184,7 @@ public class RoomRuntime {
             return;
         }
         try {
-            session.getPlayerState().applyUpgradeChoice(UpgradeChoice.valueOf(choice));
+            session.getPlayerState().applyUpgradeChoice(BranchUpgradeChoice.valueOf(choice));
         } catch (IllegalArgumentException ignored) {
             // Ignore invalid upgrade choices from the client.
         }

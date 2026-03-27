@@ -19,12 +19,20 @@
 - Plan last refreshed on `2026-03-27`.
 - Repository: `https://github.com/LiPu-jpg/HITSZ_AW`
 - Completed:
+  - 开局统一 `STARTER_BLUE` 初始机，无大厅预选技能
+  - 服务器权威目标点追踪移动已替换原瞬移移动
+  - 首个 Boss 后的 `BRANCH_SELECTION` 已生效，玩家可独立选择 `RED_SPEED / GREEN_DEFENSE / BLACK_HEAVY`
+  - 分支基础武器已接入：
+    - `RED_SPEED` 激光
+    - `GREEN_DEFENSE` 散射
+    - `BLACK_HEAVY` 空爆
+  - 通用四选一升级已替换为分支专属升级池
   - Hero/OtherPlayer 模型拆分
   - 协议包络、JSON codec、Socket 传输层
   - Session 注册与 `SessionID` 校验
   - 房间制多人模型：创建房间 / 加入房间 / 6 位房号 / 房主开局
   - 每个房间独立 `ServerWorldState`、独立快照、独立进度与 Boss 状态
-  - 服务端技能系统：冻结、炸弹、护盾、等级缩放
+  - 服务端技能系统：冻结、炸弹、护盾、等级缩放（旧能力仍保留在代码中）
   - 本地 authority server 启动链路
   - 单人模式走本地 authority server
   - 玩家、敌机、子弹、道具、分数进入 `WorldSnapshot`
@@ -43,7 +51,7 @@
   - Boss 击败后已进入 `UPGRADE_SELECTION`，并由每个玩家单独提交升级方向
   - 升级输入已经是服务器权威时钟判定，不再信任客户端时间戳
   - 死亡玩家已从客户端可渲染飞机列表中移除
-  - 本地运行目录已刷新：`/tmp/aircraftwar-scene-runtime`
+  - 本地运行目录已刷新：`/tmp/aircraftwar-branch-runtime`
 - Verified:
   - 本地 socket authority smoke test 通过
   - 本地 runtime session test 通过
@@ -74,7 +82,7 @@
   - 服务端碰撞尺寸仍通过素材尺寸读取，未来可继续抽成无图片依赖的纯数值配置
   - 非法房号 / 入房失败的客户端提示仍可继续补强
   - 当前章节视觉仍基于现有素材做映射和染色，后续可继续替换为每章独立敌机/Boss 美术资源
-  - 升级分支已接入权威状态与基础战斗参数，后续可继续加强独立 HUD 表现和更丰富的弹道差异
+  - 分支升级已接入权威状态与基础战斗参数，后续可继续加强独立 HUD 表现和更丰富的弹道差异
 
 ## 1. Current Status
 
@@ -82,11 +90,18 @@
 - 客户端已新增独立启动页：选择 `Create Room` 或 `Join Room`。
 - 创建房间时：
   - 房主选择房间难度 `EASY / NORMAL / HARD`
-  - 房主选择自己的技能 `FREEZE / BOMB / SHIELD`
 - 加入房间时：
   - 玩家手动输入房号
-  - 玩家只选择自己的技能
 - 当前开局语义已经调整为“房间大厅 -> 玩家 ready -> 房主 start -> 全灭回房间大厅”。
+- 当前每局开场统一使用 `STARTER_BLUE`：
+  - 蓝色均衡机
+  - 基础普通弹
+  - 无主动技能
+- 首个 Boss 击败后进入 `BRANCH_SELECTION`：
+  - `RED_SPEED`：激光机
+  - `GREEN_DEFENSE`：散射防御机
+  - `BLACK_HEAVY`：空爆重轰机
+- 后续 Boss 击败后进入 `UPGRADE_SELECTION`，升级池按当前分支生成，不再是全局通用选项。
 - 战斗背景已经切为章节分层：
   - 启动页 `bg.jpg`
   - `CH1 -> bg2.jpg`
@@ -123,11 +138,12 @@
   - 子弹/飞机/道具碰撞
   - 分数结算
   - 精英敌机掉落
-- 技能体系已在服务端生效：
+- 旧技能体系仍在服务端保留：
   - 冻结：停全体敌机移动与敌机射击推进
   - 炸弹：群体伤害
   - 护盾：免伤
   - 数值随等级增长
+  - 但当前分支机主流程的战斗差异主要来自 `RED_SPEED / GREEN_DEFENSE / BLACK_HEAVY` 的基础武器和分支升级，而不是大厅技能预选
 - 进度系统已在服务端生效：
   - 玩家分数驱动升级
   - 升级会增强技能数值，并提高玩家机火力
@@ -135,9 +151,13 @@
   - 房间总分达到阈值后触发 Boss 战
   - 敌机梯度已扩展为 `Mob -> Elite -> ElitePlus -> Ace -> Boss`
   - 不同敌机层级已有不同弹幕密度与散射方式
-  - 章节流转已生效：`CH1 -> boss -> white flash -> per-player upgrade -> next chapter`
+  - 章节流转已生效：`CH1 -> first boss -> branch selection -> next chapter -> later boss -> branch upgrade -> next chapter`
 - 升级选择系统已在服务端和客户端闭环：
-  - `FIRE_RATE / BULLET_POWER / SPREAD_SHOT / LIGHT_TRACKING`
+  - 首个 Boss 后触发独立分支选择，而不是数值升级
+  - 分支升级池已按当前飞机路线生成：
+    - `RED_SPEED -> LASER_DAMAGE / LASER_WIDTH / LASER_DURATION / MOVE_SPEED`
+    - `GREEN_DEFENSE -> SPREAD_COUNT / SPREAD_WIDTH / BULLET_DAMAGE / MAX_HP`
+    - `BLACK_HEAVY -> AIRBURST_DAMAGE / AIRBURST_RADIUS / AIRBURST_RANGE / MAX_HP`
   - 只有白光结束后服务器才接受升级提交
   - 所有存活玩家提交后才推进下一章
   - 选择结果会回写到玩家快照

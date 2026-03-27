@@ -1,8 +1,8 @@
 package edu.hitsz.protocol;
 
 import edu.hitsz.common.AircraftBranch;
+import edu.hitsz.common.BranchUpgradeChoice;
 import edu.hitsz.common.GamePhase;
-import edu.hitsz.common.UpgradeChoice;
 import edu.hitsz.common.protocol.dto.PlayerSnapshot;
 import edu.hitsz.common.protocol.dto.WorldSnapshot;
 import edu.hitsz.common.protocol.json.WorldSnapshotJsonMapper;
@@ -48,8 +48,8 @@ public class BranchSnapshotProtocolTest {
                 "BOMB",
                 1800L,
                 1400,
-                Arrays.asList(UpgradeChoice.FIRE_RATE),
-                UpgradeChoice.FIRE_RATE,
+                Arrays.asList(BranchUpgradeChoice.LASER_DAMAGE),
+                BranchUpgradeChoice.LASER_DAMAGE,
                 AircraftBranch.GREEN_DEFENSE,
                 Arrays.asList(AircraftBranch.STARTER_BLUE, AircraftBranch.GREEN_DEFENSE),
                 true
@@ -96,8 +96,8 @@ public class BranchSnapshotProtocolTest {
                 + "\"selectedSkill\":\"BOMB\","
                 + "\"skillCooldownRemainingMillis\":1800,"
                 + "\"maxHp\":1400,"
-                + "\"availableUpgradeChoices\":[\"FIRE_RATE\"],"
-                + "\"selectedUpgradeChoice\":\"FIRE_RATE\""
+                + "\"availableUpgradeChoices\":[\"LASER_DAMAGE\"],"
+                + "\"selectedUpgradeChoice\":\"LASER_DAMAGE\""
                 + "}],"
                 + "\"enemies\":[],"
                 + "\"heroBullets\":[],"
@@ -135,8 +135,8 @@ public class BranchSnapshotProtocolTest {
             String selectedSkill,
             long cooldownRemainingMillis,
             int maxHp,
-            List<UpgradeChoice> availableUpgradeChoices,
-            UpgradeChoice selectedUpgradeChoice,
+            List<BranchUpgradeChoice> availableUpgradeChoices,
+            BranchUpgradeChoice selectedUpgradeChoice,
             AircraftBranch aircraftBranch,
             List<AircraftBranch> availableBranchChoices,
             boolean branchUnlocked
@@ -155,7 +155,7 @@ public class BranchSnapshotProtocolTest {
                     long.class,
                     int.class,
                     List.class,
-                    UpgradeChoice.class,
+                    BranchUpgradeChoice.class,
                     AircraftBranch.class,
                     List.class,
                     boolean.class

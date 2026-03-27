@@ -6,11 +6,11 @@ import edu.hitsz.client.basic.AbstractFlyingObject;
 import edu.hitsz.client.basic.AbstractItem;
 import edu.hitsz.client.bullet.BaseBullet;
 import edu.hitsz.common.AircraftBranch;
+import edu.hitsz.common.BranchUpgradeChoice;
 import edu.hitsz.common.ChapterId;
 import edu.hitsz.common.EntityRenderSizing;
 import edu.hitsz.common.GameConstants;
 import edu.hitsz.common.GamePhase;
-import edu.hitsz.common.UpgradeChoice;
 import edu.hitsz.common.protocol.dto.LaserSnapshot;
 import edu.hitsz.common.protocol.dto.ExplosionSnapshot;
 import edu.hitsz.common.protocol.dto.WorldSnapshot;
@@ -56,8 +56,8 @@ public class Game extends JPanel {
     private boolean localBranchUnlocked;
     private long localSkillCooldownRemainingMillis;
     private List<AircraftBranch> localAvailableBranchChoices = java.util.Collections.emptyList();
-    private List<UpgradeChoice> localAvailableUpgradeChoices = java.util.Collections.emptyList();
-    private UpgradeChoice localSelectedUpgradeChoice;
+    private List<BranchUpgradeChoice> localAvailableUpgradeChoices = java.util.Collections.emptyList();
+    private BranchUpgradeChoice localSelectedUpgradeChoice;
     private boolean localReady;
     private boolean gameStarted;
     private int readyPlayerCount;
@@ -483,7 +483,7 @@ public class Game extends JPanel {
         g.setFont(new Font("SansSerif", Font.PLAIN, 16));
         int y = GameConstants.WINDOW_HEIGHT / 2 - 18;
         for (int i = 0; i < localAvailableUpgradeChoices.size(); i++) {
-            UpgradeChoice choice = localAvailableUpgradeChoices.get(i);
+            BranchUpgradeChoice choice = localAvailableUpgradeChoices.get(i);
             String line = (i + 1) + ". " + upgradeChoiceLabel(choice);
             if (choice == localSelectedUpgradeChoice) {
                 line += " (SELECTED)";
@@ -581,16 +581,30 @@ public class Game extends JPanel {
         return localSelectedSkill;
     }
 
-    private String upgradeChoiceLabel(UpgradeChoice choice) {
+    private String upgradeChoiceLabel(BranchUpgradeChoice choice) {
         switch (choice) {
-            case FIRE_RATE:
-                return "Faster firing";
-            case BULLET_POWER:
-                return "Higher bullet power";
-            case SPREAD_SHOT:
-                return "Wider spread shot";
-            case LIGHT_TRACKING:
-                return "Light bullet tracking";
+            case LASER_DAMAGE:
+                return "Laser damage";
+            case LASER_WIDTH:
+                return "Laser width";
+            case LASER_DURATION:
+                return "Laser duration";
+            case MOVE_SPEED:
+                return "Move speed";
+            case SPREAD_COUNT:
+                return "More spread shots";
+            case SPREAD_WIDTH:
+                return "Wider spread";
+            case BULLET_DAMAGE:
+                return "Bullet damage";
+            case MAX_HP:
+                return "Max HP";
+            case AIRBURST_DAMAGE:
+                return "Airburst damage";
+            case AIRBURST_RADIUS:
+                return "Airburst radius";
+            case AIRBURST_RANGE:
+                return "Airburst range";
             default:
                 return choice.name();
         }

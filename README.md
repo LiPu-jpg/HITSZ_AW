@@ -21,10 +21,10 @@ Runtime build with bundled images:
 ./scripts/build_runtime_with_assets.sh /tmp/aircraftwar-runtime-with-assets
 ```
 
-Latest local runtime bundle refreshed during Task 8:
+Latest local runtime bundle refreshed during Task 9:
 
 ```bash
-./scripts/build_runtime_with_assets.sh /tmp/aircraftwar-scene-runtime
+./scripts/build_runtime_with_assets.sh /tmp/aircraftwar-branch-runtime
 ```
 
 ## Run
@@ -45,34 +45,39 @@ Client startup flow:
 
 - first enter the launcher page
 - choose `Create Room` or `Join Room`
-- room host chooses difficulty and skill when creating a room
-- joiners manually input room code and choose their own skill
+- room host chooses room difficulty when creating a room
+- joiners manually input room code
 - click `Enter Room`
 - then use the in-room ready/start flow
 
 Round and chapter flow:
 
 - room lobby -> all connected players ready -> host starts round
-- battle begins in `CH1`
+- battle begins in `CH1` with the same `STARTER_BLUE` aircraft for every player
 - when the room reaches the current boss threshold, boss battle starts
 - boss defeat enters a short white-flash transition
-- after the flash ends, each alive player gets an individual upgrade selection
+- after the first boss flash ends, each alive player gets an individual branch selection
+- after later boss flashes end, each alive player gets an individual branch-local upgrade selection
 - after all required upgrade choices are submitted, the room advances to the next chapter
 - after the final chapter boss and upgrade resolution, the room returns to lobby
 
 After the client enters a room lobby:
 
-- `1 / 2 / 3`: select `FREEZE / BOMB / SHIELD`
 - `Enter`: toggle ready
 - `S`: host starts the room after everyone is ready
 
 During battle:
 
-- `Space`: cast the selected skill
+- drag the mouse to update the authoritative movement target
+- branch weapons are fired by the server cadence after branch unlock
+
+During first branch selection:
+
+- `1 / 2 / 3`: choose `RED_SPEED / GREEN_DEFENSE / BLACK_HEAVY`
 
 During upgrade selection:
 
-- `1 / 2 / 3 / 4`: choose the upgrade shown in the on-screen list
+- `1 / 2 / 3 / 4`: choose the branch-local upgrade shown in the on-screen list
 
 Upgrade selection notes:
 
@@ -83,9 +88,19 @@ Upgrade selection notes:
 Notes:
 
 - room difficulty is room-level and chosen by the host
-- non-host players can only change their own selected skill
 - the round starts only when all connected players are ready and the host sends start
 - difficulty affects battle pacing and progression tempo; chapter visuals are driven by `chapterId`
+- all players start as `STARTER_BLUE` and only use the starter baseline weapon before the first branch unlock
+- the first boss unlocks aircraft branches instead of numeric upgrades
+- later boss upgrades are branch-specific:
+  - `RED_SPEED`: laser damage / width / duration / move speed
+  - `GREEN_DEFENSE`: spread count / width / bullet damage / max HP
+  - `BLACK_HEAVY`: airburst damage / radius / range / max HP
+- current branch weapon baselines are:
+  - `RED_SPEED`: forward laser sweep
+  - `GREEN_DEFENSE`: spread-shot pattern
+  - `BLACK_HEAVY`: target-point or max-range airburst
+- the older `FREEZE / BOMB / SHIELD` server skill system still exists in code, but it is not part of the current branch-aircraft runtime flow
 
 Background mapping:
 

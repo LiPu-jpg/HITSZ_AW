@@ -1,10 +1,10 @@
 package edu.hitsz.server;
 
 import edu.hitsz.common.AircraftBranch;
+import edu.hitsz.common.BranchUpgradeChoice;
 import edu.hitsz.common.ChapterId;
 import edu.hitsz.common.Difficulty;
 import edu.hitsz.common.GamePhase;
-import edu.hitsz.common.UpgradeChoice;
 
 import java.lang.reflect.Method;
 
@@ -47,7 +47,7 @@ public class BranchSelectionOnlyHappensOnceTest {
 
         assert roomRuntime.getGamePhase() == GamePhase.UPGRADE_SELECTION
                 : "Later boss defeats should use normal upgrade selection after the first branch choice";
-        assert session.getPlayerState().getAvailableUpgradeChoices().contains(UpgradeChoice.BULLET_POWER)
+        assert session.getPlayerState().getAvailableUpgradeChoices().contains(BranchUpgradeChoice.AIRBURST_DAMAGE)
                 : "Later boss defeats should still grant the normal upgrade choices";
     }
 

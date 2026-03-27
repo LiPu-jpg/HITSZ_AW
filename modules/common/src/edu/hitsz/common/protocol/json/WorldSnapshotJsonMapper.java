@@ -1,9 +1,9 @@
 package edu.hitsz.common.protocol.json;
 
 import edu.hitsz.common.AircraftBranch;
+import edu.hitsz.common.BranchUpgradeChoice;
 import edu.hitsz.common.ChapterId;
 import edu.hitsz.common.GamePhase;
-import edu.hitsz.common.UpgradeChoice;
 import edu.hitsz.common.protocol.dto.BulletSnapshot;
 import edu.hitsz.common.protocol.dto.ExplosionSnapshot;
 import edu.hitsz.common.protocol.dto.EnemySnapshot;
@@ -267,7 +267,7 @@ public class WorldSnapshotJsonMapper {
         return builder.toString();
     }
 
-    private String upgradeChoicesToJson(List<UpgradeChoice> values) {
+    private String upgradeChoicesToJson(List<BranchUpgradeChoice> values) {
         StringBuilder builder = new StringBuilder("[");
         for (int i = 0; i < values.size(); i++) {
             if (i > 0) {
@@ -279,19 +279,19 @@ public class WorldSnapshotJsonMapper {
         return builder.toString();
     }
 
-    private List<UpgradeChoice> splitUpgradeChoices(String jsonArray) {
+    private List<BranchUpgradeChoice> splitUpgradeChoices(String jsonArray) {
         if (jsonArray == null || "null".equals(jsonArray.trim())) {
             return new java.util.LinkedList<>();
         }
-        List<UpgradeChoice> choices = new java.util.LinkedList<>();
+        List<BranchUpgradeChoice> choices = new java.util.LinkedList<>();
         for (String choiceJson : SimpleJsonSupport.splitTopLevelArray(jsonArray)) {
-            choices.add(UpgradeChoice.valueOf(SimpleJsonSupport.unquote(choiceJson)));
+            choices.add(BranchUpgradeChoice.valueOf(SimpleJsonSupport.unquote(choiceJson)));
         }
         return choices;
     }
 
-    private UpgradeChoice parseUpgradeChoice(String value) {
-        return value == null ? null : UpgradeChoice.valueOf(value);
+    private BranchUpgradeChoice parseUpgradeChoice(String value) {
+        return value == null ? null : BranchUpgradeChoice.valueOf(value);
     }
 
     private String branchChoicesToJson(List<AircraftBranch> values) {

@@ -2,7 +2,7 @@ package edu.hitsz.protocol;
 
 import edu.hitsz.common.ChapterId;
 import edu.hitsz.common.GamePhase;
-import edu.hitsz.common.UpgradeChoice;
+import edu.hitsz.common.BranchUpgradeChoice;
 import edu.hitsz.common.protocol.dto.PlayerSnapshot;
 import edu.hitsz.common.protocol.dto.WorldSnapshot;
 import edu.hitsz.common.protocol.json.WorldSnapshotJsonMapper;
@@ -28,8 +28,8 @@ public class ChapterSceneProtocolTest {
                 : "WorldSnapshot chapterId should be typed as ChapterId";
         assert returnType(PlayerSnapshot.class, "getAvailableUpgradeChoices") == java.util.List.class
                 : "PlayerSnapshot upgrade choices should be a List";
-        assert returnType(PlayerSnapshot.class, "getSelectedUpgradeChoice") == UpgradeChoice.class
-                : "PlayerSnapshot selected upgrade choice should be typed as UpgradeChoice";
+        assert returnType(PlayerSnapshot.class, "getSelectedUpgradeChoice") == BranchUpgradeChoice.class
+                : "PlayerSnapshot selected upgrade choice should be typed as BranchUpgradeChoice";
 
         WorldSnapshot snapshot = new WorldSnapshot(12L);
         snapshot.setGameStarted(true);
@@ -48,8 +48,8 @@ public class ChapterSceneProtocolTest {
                 "FREEZE",
                 1500L,
                 1200,
-                Arrays.asList(UpgradeChoice.FIRE_RATE, UpgradeChoice.BULLET_POWER),
-                UpgradeChoice.FIRE_RATE
+                Arrays.asList(BranchUpgradeChoice.LASER_DAMAGE, BranchUpgradeChoice.LASER_WIDTH),
+                BranchUpgradeChoice.LASER_DAMAGE
         ));
 
         WorldSnapshot decoded = roundTrip(snapshot);
@@ -65,9 +65,9 @@ public class ChapterSceneProtocolTest {
                 : "PlayerSnapshot should serialize max hp";
         assert playerSnapshot.getAvailableUpgradeChoices().size() == 2
                 : "PlayerSnapshot should serialize available upgrade choices";
-        assert playerSnapshot.getAvailableUpgradeChoices().contains(UpgradeChoice.FIRE_RATE)
+        assert playerSnapshot.getAvailableUpgradeChoices().contains(BranchUpgradeChoice.LASER_DAMAGE)
                 : "PlayerSnapshot should serialize available upgrade choices";
-        assert UpgradeChoice.FIRE_RATE == playerSnapshot.getSelectedUpgradeChoice()
+        assert BranchUpgradeChoice.LASER_DAMAGE == playerSnapshot.getSelectedUpgradeChoice()
                 : "PlayerSnapshot should serialize selected upgrade choice";
     }
 
@@ -91,7 +91,7 @@ public class ChapterSceneProtocolTest {
         assert snapshot.getAvailableUpgradeChoices().isEmpty()
                 : "Null availableUpgradeChoices should normalize to empty list";
         try {
-            snapshot.getAvailableUpgradeChoices().add(UpgradeChoice.FIRE_RATE);
+            snapshot.getAvailableUpgradeChoices().add(BranchUpgradeChoice.LASER_DAMAGE);
             throw new AssertionError("Normalized availableUpgradeChoices should be immutable");
         } catch (UnsupportedOperationException expected) {
             // expected
@@ -172,8 +172,8 @@ public class ChapterSceneProtocolTest {
             String selectedSkill,
             long cooldownRemainingMillis,
             int maxHp,
-            java.util.List<UpgradeChoice> availableUpgradeChoices,
-            UpgradeChoice selectedUpgradeChoice
+            java.util.List<BranchUpgradeChoice> availableUpgradeChoices,
+            BranchUpgradeChoice selectedUpgradeChoice
     ) {
         try {
             Constructor<PlayerSnapshot> constructor = PlayerSnapshot.class.getConstructor(
@@ -189,7 +189,7 @@ public class ChapterSceneProtocolTest {
                     long.class,
                     int.class,
                     java.util.List.class,
-                    UpgradeChoice.class
+                    BranchUpgradeChoice.class
             );
             return constructor.newInstance(
                     sessionId,

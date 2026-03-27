@@ -1,9 +1,10 @@
 package edu.hitsz.server;
 
+import edu.hitsz.common.AircraftBranch;
+import edu.hitsz.common.BranchUpgradeChoice;
 import edu.hitsz.common.ChapterId;
 import edu.hitsz.common.Difficulty;
 import edu.hitsz.common.GamePhase;
-import edu.hitsz.common.UpgradeChoice;
 
 import java.lang.reflect.Field;
 
@@ -17,11 +18,13 @@ public class FinalChapterCompletionTest {
         roomRuntime.startRoundIfHost("host-session");
 
         ServerWorldState worldState = extractWorldState(roomRuntime);
+        worldState.getChapterProgressionState().markFirstBossBranchSelectionCompleted();
         worldState.getChapterProgressionState().advanceToNextChapter();
         worldState.getChapterProgressionState().advanceToNextChapter();
         assert roomRuntime.getChapterId() == ChapterId.CH3 : "Precondition failed: room should be at the terminal chapter";
 
         PlayerSession session = roomRuntime.findSession("host-session");
+        session.getPlayerState().applyBranchChoice(AircraftBranch.RED_SPEED);
         long nowMillis = System.currentTimeMillis();
         session.getPlayerState().setScore(ProgressionPolicy.defaultPolicy().bossThreshold(Difficulty.NORMAL, 0));
 
@@ -34,7 +37,7 @@ public class FinalChapterCompletionTest {
         assert roomRuntime.getGamePhase() == GamePhase.UPGRADE_SELECTION
                 : "Terminal chapter should also wait for upgrade submission before ending the round";
 
-        roomRuntime.handleUpgradeChoice("host-session", UpgradeChoice.FIRE_RATE.name(), 1L, flashUntilMillis + 10L);
+        roomRuntime.handleUpgradeChoice("host-session", BranchUpgradeChoice.LASER_DAMAGE.name(), 1L, flashUntilMillis + 10L);
         roomRuntime.tick(flashUntilMillis + 10L, 10_000L);
 
         assert !roomRuntime.isGameStarted() : "Room should return to lobby after the terminal chapter completes";

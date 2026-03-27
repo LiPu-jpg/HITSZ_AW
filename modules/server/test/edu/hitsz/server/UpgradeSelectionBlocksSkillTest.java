@@ -1,5 +1,6 @@
 package edu.hitsz.server;
 
+import edu.hitsz.common.AircraftBranch;
 import edu.hitsz.common.Difficulty;
 import edu.hitsz.common.GamePhase;
 
@@ -21,6 +22,17 @@ public class UpgradeSelectionBlocksSkillTest {
         worldState.syncProgressionState(1000L);
         worldState.getEnemyAircrafts().clear();
         worldState.syncProgressionState(1100L);
+
+        assert roomRuntime.getGamePhase() == GamePhase.BRANCH_SELECTION
+                : "Precondition failed: first boss defeat should open branch selection";
+        roomRuntime.handleBranchChoice("host-session", AircraftBranch.RED_SPEED.name(), 1L, 1120L);
+        roomRuntime.tick(1120L, 10_000L);
+
+        session.getPlayerState().setSelectedSkill("FREEZE");
+        session.getPlayerState().setScore(ProgressionPolicy.defaultPolicy().bossThreshold(Difficulty.NORMAL, 1));
+        worldState.syncProgressionState(1200L);
+        worldState.getEnemyAircrafts().clear();
+        worldState.syncProgressionState(1300L);
 
         assert roomRuntime.getGamePhase() == GamePhase.UPGRADE_SELECTION
                 : "Precondition failed: room should be in upgrade selection";

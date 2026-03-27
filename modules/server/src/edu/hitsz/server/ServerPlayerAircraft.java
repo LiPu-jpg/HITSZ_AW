@@ -54,15 +54,23 @@ public class ServerPlayerAircraft extends AbstractAircraft {
     }
 
     public List<BaseBullet> shootSpread(String ownerSessionId, int trackingSpeedX) {
+        return shootSpread(
+                ownerSessionId,
+                trackingSpeedX,
+                Math.max(shootNum, GameplayBalance.GREEN_DEFENSE_SPREAD_BULLET_COUNT),
+                GameplayBalance.GREEN_DEFENSE_SPREAD_X_SPEED_STEP
+        );
+    }
+
+    public List<BaseBullet> shootSpread(String ownerSessionId, int trackingSpeedX, int spreadNum, int spreadStep) {
         List<BaseBullet> bullets = new LinkedList<>();
-        int spreadNum = Math.max(shootNum, GameplayBalance.GREEN_DEFENSE_SPREAD_BULLET_COUNT);
         int x = this.getLocationX();
         int y = this.getLocationY() + DIRECTION * 2;
         int speedY = this.getSpeedY() + DIRECTION * GameplayBalance.PLAYER_BULLET_SPEED;
         int centerIndex = spreadNum / 2;
 
         for (int i = 0; i < spreadNum; i++) {
-            int speedX = trackingSpeedX + (i - centerIndex) * GameplayBalance.GREEN_DEFENSE_SPREAD_X_SPEED_STEP;
+            int speedX = trackingSpeedX + (i - centerIndex) * spreadStep;
             bullets.add(new ServerHeroBullet(
                     ownerSessionId,
                     x + (i * 2 - spreadNum + 1) * 10,
@@ -76,14 +84,28 @@ public class ServerPlayerAircraft extends AbstractAircraft {
     }
 
     public AirburstProjectileState shootAirburst(String ownerSessionId, int targetX, int targetY) {
+        return shootAirburst(
+                ownerSessionId,
+                targetX,
+                targetY,
+                GameplayBalance.BLACK_HEAVY_AIRBURST_MAX_RANGE,
+                GameplayBalance.BLACK_HEAVY_AIRBURST_RADIUS
+        );
+    }
+
+    public AirburstProjectileState shootAirburst(String ownerSessionId,
+                                                 int targetX,
+                                                 int targetY,
+                                                 int maxRange,
+                                                 int burstRadius) {
         return new AirburstProjectileState(
                 ownerSessionId,
                 getLocationX(),
                 getLocationY() + DIRECTION * 2,
                 targetX,
                 targetY,
-                GameplayBalance.BLACK_HEAVY_AIRBURST_MAX_RANGE,
-                GameplayBalance.BLACK_HEAVY_AIRBURST_RADIUS,
+                maxRange,
+                burstRadius,
                 bulletPower
         );
     }
@@ -116,6 +138,14 @@ public class ServerPlayerAircraft extends AbstractAircraft {
 
     public int getBulletPower() {
         return bulletPower;
+    }
+
+    public void increaseMaxHp(int amount) {
+        if (amount <= 0) {
+            return;
+        }
+        maxHp += amount;
+        hp += amount;
     }
 
     public void resetForRound(int x, int y) {

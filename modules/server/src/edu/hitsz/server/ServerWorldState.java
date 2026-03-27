@@ -332,13 +332,15 @@ public class ServerWorldState {
         } else if (playerState.usesSpreadWeapon()) {
             heroBullets.addAll(playerState.getAircraft().shootSpread(
                     session.getSessionId(),
-                    playerState.trackingSpeedXForTarget(nearestEnemyX(playerState.getX()))
+                    playerState.trackingSpeedXForTarget(nearestEnemyX(playerState.getX())),
+                    playerState.currentGreenSpreadBulletCount(),
+                    playerState.currentGreenSpreadWidthStep()
             ));
         } else if (playerState.usesAirburstWeapon()) {
             AbstractAircraft targetEnemy = nearestEnemy(playerState);
             int targetX = targetEnemy == null ? playerState.getX() : targetEnemy.getLocationX();
             int targetY = targetEnemy == null
-                    ? Math.max(0, playerState.getY() - GameplayBalance.BLACK_HEAVY_AIRBURST_MAX_RANGE)
+                    ? -GameConstants.WINDOW_HEIGHT
                     : targetEnemy.getLocationY();
             airburstProjectiles.add(playerState.createAirburstProjectile(session.getSessionId(), targetX, targetY));
         } else {

@@ -1,7 +1,8 @@
 package edu.hitsz.e2e;
 
+import edu.hitsz.common.AircraftBranch;
+import edu.hitsz.common.BranchUpgradeChoice;
 import edu.hitsz.common.GamePhase;
-import edu.hitsz.common.UpgradeChoice;
 import edu.hitsz.common.protocol.json.JsonMessageCodec;
 import edu.hitsz.common.protocol.json.WorldSnapshotJsonMapper;
 import edu.hitsz.common.protocol.socket.SocketClientTransport;
@@ -44,14 +45,26 @@ public class UpgradeChoiceIgnoresClientTimestampSmokeTest {
         worldState.syncProgressionState(nowMillis + 100L);
 
         RoomTestSupport.waitUntil(() ->
+                        snapshotRef.get() != null && snapshotRef.get().getGamePhase() == GamePhase.BRANCH_SELECTION,
+                3000L
+        );
+        client.send(RoomTestSupport.branchChoiceMessage("session-local", 4L, AircraftBranch.RED_SPEED.name()));
+        roomRuntime.tick(nowMillis + 120L, 10_000L);
+
+        session.getPlayerState().setScore(ProgressionPolicy.defaultPolicy().bossThreshold(edu.hitsz.common.Difficulty.NORMAL, 1));
+        worldState.syncProgressionState(nowMillis + 200L);
+        worldState.getEnemyAircrafts().clear();
+        worldState.syncProgressionState(nowMillis + 300L);
+
+        RoomTestSupport.waitUntil(() ->
                         snapshotRef.get() != null && snapshotRef.get().getGamePhase() == GamePhase.UPGRADE_SELECTION,
                 3000L
         );
 
         client.send(RoomTestSupport.upgradeChoiceMessage(
                 "session-local",
-                4L,
-                UpgradeChoice.BULLET_POWER.name(),
+                5L,
+                BranchUpgradeChoice.LASER_DAMAGE.name(),
                 System.currentTimeMillis() + 60_000L
         ));
         Thread.sleep(150L);

@@ -32,8 +32,8 @@ public class RoomSnapshotProgressionStateTest {
 
         WorldSnapshot upgradeSnapshot = roomRuntime.buildSnapshot();
         assert upgradeSnapshot.getChapterId() == ChapterId.CH1
-                : "Snapshot should preserve the current chapter while waiting for upgrade selection";
-        assert upgradeSnapshot.getGamePhase() == GamePhase.UPGRADE_SELECTION
+                : "Snapshot should preserve the current chapter while waiting for branch selection";
+        assert upgradeSnapshot.getGamePhase() == GamePhase.BRANCH_SELECTION
                 : "Snapshot should expose the current game phase";
         assert upgradeSnapshot.isChapterTransitionFlash()
                 : "Snapshot should expose an active chapter transition flash window";

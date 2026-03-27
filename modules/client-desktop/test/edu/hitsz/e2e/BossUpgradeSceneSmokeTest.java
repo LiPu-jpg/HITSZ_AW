@@ -1,8 +1,9 @@
 package edu.hitsz.e2e;
 
+import edu.hitsz.common.AircraftBranch;
+import edu.hitsz.common.BranchUpgradeChoice;
 import edu.hitsz.common.ChapterId;
 import edu.hitsz.common.GamePhase;
-import edu.hitsz.common.UpgradeChoice;
 import edu.hitsz.common.protocol.ProtocolMessage;
 import edu.hitsz.common.protocol.dto.WorldSnapshot;
 import edu.hitsz.common.protocol.json.JsonMessageCodec;
@@ -47,6 +48,18 @@ public class BossUpgradeSceneSmokeTest {
         worldState.syncProgressionState(nowMillis + 100L);
 
         RoomTestSupport.waitUntil(() ->
+                        snapshotRef.get() != null && snapshotRef.get().getGamePhase() == GamePhase.BRANCH_SELECTION,
+                3000L
+        );
+        client.send(RoomTestSupport.branchChoiceMessage("session-local", 4L, AircraftBranch.RED_SPEED.name()));
+        roomRuntime.tick(nowMillis + 120L, 10_000L);
+
+        session.getPlayerState().setScore(ProgressionPolicy.defaultPolicy().bossThreshold(edu.hitsz.common.Difficulty.NORMAL, 1));
+        worldState.syncProgressionState(nowMillis + 200L);
+        worldState.getEnemyAircrafts().clear();
+        worldState.syncProgressionState(nowMillis + 300L);
+
+        RoomTestSupport.waitUntil(() ->
                         snapshotRef.get() != null && snapshotRef.get().getGamePhase() == GamePhase.UPGRADE_SELECTION,
                 3000L
         );
@@ -54,12 +67,12 @@ public class BossUpgradeSceneSmokeTest {
                         snapshotRef.get() != null && !snapshotRef.get().isChapterTransitionFlash(),
                 3000L
         );
-        client.send(RoomTestSupport.upgradeChoiceMessage("session-local", 4L, UpgradeChoice.BULLET_POWER.name()));
+        client.send(RoomTestSupport.upgradeChoiceMessage("session-local", 5L, BranchUpgradeChoice.LASER_DAMAGE.name()));
 
         RoomTestSupport.waitUntil(() ->
                         snapshotRef.get() != null
                                 && snapshotRef.get().getGamePhase() == GamePhase.BATTLE
-                                && snapshotRef.get().getChapterId() == ChapterId.CH2,
+                                && snapshotRef.get().getChapterId() == ChapterId.CH3,
                 5000L
         );
 
@@ -68,7 +81,7 @@ public class BossUpgradeSceneSmokeTest {
 
         WorldSnapshot snapshot = snapshotRef.get();
         assert snapshot != null : "Smoke test should receive snapshots";
-        assert RoomTestSupport.findPlayer(snapshot, "session-local").getSelectedUpgradeChoice() == UpgradeChoice.BULLET_POWER
+        assert RoomTestSupport.findPlayer(snapshot, "session-local").getSelectedUpgradeChoice() == BranchUpgradeChoice.LASER_DAMAGE
                 : "Selected upgrade should round-trip back through the server snapshot";
     }
 

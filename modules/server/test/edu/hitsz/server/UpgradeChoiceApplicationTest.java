@@ -1,9 +1,9 @@
 package edu.hitsz.server;
 
 import edu.hitsz.common.AircraftBranch;
+import edu.hitsz.common.BranchUpgradeChoice;
 import edu.hitsz.common.Difficulty;
 import edu.hitsz.common.GamePhase;
-import edu.hitsz.common.UpgradeChoice;
 
 public class UpgradeChoiceApplicationTest {
 
@@ -35,20 +35,20 @@ public class UpgradeChoiceApplicationTest {
 
         assert roomRuntime.getGamePhase() == GamePhase.UPGRADE_SELECTION
                 : "Later boss defeats should open the upgrade selection phase";
-        assert session.getPlayerState().getAvailableUpgradeChoices().contains(UpgradeChoice.BULLET_POWER)
+        assert session.getPlayerState().getAvailableUpgradeChoices().contains(BranchUpgradeChoice.LASER_DAMAGE)
                 : "Player should receive upgrade choices during later upgrade selection";
 
         roomRuntime.handleUpgradeChoice(
                 "host-session",
-                UpgradeChoice.BULLET_POWER.name(),
+                BranchUpgradeChoice.LASER_DAMAGE.name(),
                 1L,
                 roomRuntime.getChapterProgressionState().getFlashUntilMillis()
         );
 
-        assert session.getPlayerState().getSelectedUpgradeChoice() == UpgradeChoice.BULLET_POWER
+        assert session.getPlayerState().getSelectedUpgradeChoice() == BranchUpgradeChoice.LASER_DAMAGE
                 : "Submitted upgrade choice should be stored on the player state";
         assert session.getPlayerState().getBulletPowerUpgradeLevel() == 1
-                : "Choosing BULLET_POWER should modify the player's build";
+                : "Choosing LASER_DAMAGE should modify the player's build";
     }
 
     private static ServerWorldState extractWorldState(RoomRuntime roomRuntime) {

@@ -3,6 +3,8 @@ package edu.hitsz.client;
 import edu.hitsz.client.aircraft.HeroAircraft;
 import edu.hitsz.client.Game;
 import edu.hitsz.client.ClientCommandPublisher;
+import edu.hitsz.common.AircraftBranch;
+import edu.hitsz.common.BranchUpgradeChoice;
 import edu.hitsz.common.protocol.SnapshotTypes;
 import edu.hitsz.common.protocol.dto.EnemySnapshot;
 import edu.hitsz.common.protocol.dto.ItemSnapshot;
@@ -80,14 +82,17 @@ public class GameClientBoundaryTest {
                 "FREEZE",
                 0L,
                 1000,
-                Arrays.asList(edu.hitsz.common.UpgradeChoice.LIGHT_TRACKING, edu.hitsz.common.UpgradeChoice.BULLET_POWER),
-                null
+                Arrays.asList(BranchUpgradeChoice.LASER_DURATION, BranchUpgradeChoice.MOVE_SPEED),
+                null,
+                AircraftBranch.RED_SPEED,
+                java.util.Collections.emptyList(),
+                true
         ));
 
         game.applyWorldSnapshot(snapshot);
         game.handleLocalUpgradeChoiceByIndex(0);
 
-        assert "LIGHT_TRACKING".equals(publisher.lastUpgradeChoice)
+        assert "LASER_DURATION".equals(publisher.lastUpgradeChoice)
                 : "Upgrade input should follow the server-provided choice order";
     }
 

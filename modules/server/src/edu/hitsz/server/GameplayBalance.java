@@ -27,6 +27,17 @@ public final class GameplayBalance {
     public static final int PLAYER_SPREAD_SHOT_UPGRADE_BONUS = 1;
     public static final int GREEN_DEFENSE_SPREAD_BULLET_COUNT = 3;
     public static final int GREEN_DEFENSE_SPREAD_X_SPEED_STEP = 2;
+    public static final int RED_SPEED_MOVE_SPEED_UPGRADE_BONUS = 1;
+    public static final int RED_SPEED_LASER_DAMAGE_UPGRADE_BONUS = 8;
+    public static final int RED_SPEED_LASER_WIDTH_UPGRADE_BONUS = 6;
+    public static final int RED_SPEED_LASER_DURATION_UPGRADE_BONUS = 1;
+    public static final int GREEN_DEFENSE_SPREAD_COUNT_UPGRADE_BONUS = 1;
+    public static final int GREEN_DEFENSE_SPREAD_WIDTH_UPGRADE_BONUS = 1;
+    public static final int GREEN_DEFENSE_BULLET_DAMAGE_UPGRADE_BONUS = 8;
+    public static final int BRANCH_MAX_HP_UPGRADE_BONUS = 120;
+    public static final int BLACK_HEAVY_AIRBURST_DAMAGE_UPGRADE_BONUS = 12;
+    public static final int BLACK_HEAVY_AIRBURST_RADIUS_UPGRADE_BONUS = 20;
+    public static final int BLACK_HEAVY_AIRBURST_RANGE_UPGRADE_BONUS = 40;
     public static final int PLAYER_LIGHT_TRACKING_SPEED_STEP = 1;
     public static final int PLAYER_LIGHT_TRACKING_MAX_SPEED = 4;
     public static final double RED_SPEED_LASER_ANGLE = -Math.PI / 2.0;

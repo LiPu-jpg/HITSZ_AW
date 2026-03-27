@@ -61,6 +61,16 @@ final class RoomTestSupport {
         return upgradeChoiceMessage(sessionId, sequence, choice, System.currentTimeMillis());
     }
 
+    static ProtocolMessage branchChoiceMessage(String sessionId, long sequence, String branch) {
+        return new ProtocolMessage(
+                MessageType.INPUT_BRANCH_CHOICE,
+                sessionId,
+                sequence,
+                System.currentTimeMillis(),
+                "{\"branch\":\"" + branch + "\"}"
+        );
+    }
+
     static ProtocolMessage upgradeChoiceMessage(String sessionId, long sequence, String choice, long timestamp) {
         return new ProtocolMessage(
                 MessageType.INPUT_UPGRADE_CHOICE,

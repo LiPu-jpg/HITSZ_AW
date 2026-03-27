@@ -1,5 +1,6 @@
 package edu.hitsz.server;
 
+import edu.hitsz.common.AircraftBranch;
 import edu.hitsz.common.Difficulty;
 import edu.hitsz.common.GamePhase;
 
@@ -22,6 +23,16 @@ public class UpgradeSelectionBlocksMoveTest {
         worldState.syncProgressionState(nowMillis);
         worldState.getEnemyAircrafts().clear();
         worldState.syncProgressionState(nowMillis + 100L);
+
+        assert roomRuntime.getGamePhase() == GamePhase.BRANCH_SELECTION
+                : "Precondition failed: first boss defeat should open branch selection";
+        roomRuntime.handleBranchChoice("host-session", AircraftBranch.RED_SPEED.name(), 1L, nowMillis + 120L);
+        roomRuntime.tick(nowMillis + 120L, 10_000L);
+
+        session.getPlayerState().setScore(ProgressionPolicy.defaultPolicy().bossThreshold(Difficulty.NORMAL, 1));
+        worldState.syncProgressionState(nowMillis + 200L);
+        worldState.getEnemyAircrafts().clear();
+        worldState.syncProgressionState(nowMillis + 300L);
 
         int xBefore = session.getPlayerState().getX();
         int yBefore = session.getPlayerState().getY();

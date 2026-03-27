@@ -1,7 +1,7 @@
 package edu.hitsz.common.protocol.dto;
 
 import edu.hitsz.common.AircraftBranch;
-import edu.hitsz.common.UpgradeChoice;
+import edu.hitsz.common.BranchUpgradeChoice;
 
 import java.util.ArrayList;
 import java.util.Collections;
@@ -22,8 +22,8 @@ public class PlayerSnapshot {
     private final String selectedSkill;
     private final long skillCooldownRemainingMillis;
     private final int maxHp;
-    private final List<UpgradeChoice> availableUpgradeChoices;
-    private final UpgradeChoice selectedUpgradeChoice;
+    private final List<BranchUpgradeChoice> availableUpgradeChoices;
+    private final BranchUpgradeChoice selectedUpgradeChoice;
     private final AircraftBranch aircraftBranch;
     private final List<AircraftBranch> availableBranchChoices;
     private final boolean branchUnlocked;
@@ -77,8 +77,8 @@ public class PlayerSnapshot {
             String selectedSkill,
             long skillCooldownRemainingMillis,
             int maxHp,
-            List<UpgradeChoice> availableUpgradeChoices,
-            UpgradeChoice selectedUpgradeChoice
+            List<BranchUpgradeChoice> availableUpgradeChoices,
+            BranchUpgradeChoice selectedUpgradeChoice
     ) {
         this(
                 sessionId,
@@ -112,8 +112,8 @@ public class PlayerSnapshot {
             String selectedSkill,
             long skillCooldownRemainingMillis,
             int maxHp,
-            List<UpgradeChoice> availableUpgradeChoices,
-            UpgradeChoice selectedUpgradeChoice,
+            List<BranchUpgradeChoice> availableUpgradeChoices,
+            BranchUpgradeChoice selectedUpgradeChoice,
             AircraftBranch aircraftBranch,
             List<AircraftBranch> availableBranchChoices,
             boolean branchUnlocked
@@ -129,7 +129,7 @@ public class PlayerSnapshot {
         this.selectedSkill = selectedSkill;
         this.skillCooldownRemainingMillis = skillCooldownRemainingMillis;
         this.maxHp = maxHp;
-        List<UpgradeChoice> normalizedChoices = availableUpgradeChoices == null
+        List<BranchUpgradeChoice> normalizedChoices = availableUpgradeChoices == null
                 ? Collections.emptyList()
                 : availableUpgradeChoices;
         this.availableUpgradeChoices = Collections.unmodifiableList(new ArrayList<>(normalizedChoices));
@@ -186,11 +186,11 @@ public class PlayerSnapshot {
         return maxHp;
     }
 
-    public List<UpgradeChoice> getAvailableUpgradeChoices() {
+    public List<BranchUpgradeChoice> getAvailableUpgradeChoices() {
         return availableUpgradeChoices;
     }
 
-    public UpgradeChoice getSelectedUpgradeChoice() {
+    public BranchUpgradeChoice getSelectedUpgradeChoice() {
         return selectedUpgradeChoice;
     }
 
