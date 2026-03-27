@@ -17,8 +17,8 @@ import edu.hitsz.server.basic.FirePlusSupply;
 import edu.hitsz.server.basic.FireSupply;
 import edu.hitsz.server.basic.FreezeSupply;
 import edu.hitsz.server.bullet.BaseBullet;
-import edu.hitsz.common.protocol.dto.ExplosionSnapshot;
 import edu.hitsz.common.GameConstants;
+import edu.hitsz.common.protocol.dto.ExplosionSnapshot;
 import edu.hitsz.server.skill.DefaultServerSkillResolver;
 import edu.hitsz.server.skill.ServerSkillResolver;
 import edu.hitsz.server.skill.SkillScalingConfig;
@@ -40,7 +40,7 @@ public class ServerWorldState {
     private final List<BaseBullet> enemyBullets;
     private final List<LaserBeamState> activeLasers;
     private final List<AirburstProjectileState> airburstProjectiles;
-    private final List<ExplosionSnapshot> explosionSnapshots;
+    private final List<ActiveExplosionState> activeExplosionStates;
     private final List<AbstractItem> items;
     private final WorldEffectState worldEffectState;
     private final ServerSkillResolver skillResolver;
@@ -60,7 +60,7 @@ public class ServerWorldState {
         this.enemyBullets = new LinkedList<>();
         this.activeLasers = new LinkedList<>();
         this.airburstProjectiles = new LinkedList<>();
-        this.explosionSnapshots = new LinkedList<>();
+        this.activeExplosionStates = new LinkedList<>();
         this.items = new LinkedList<>();
         this.worldEffectState = new WorldEffectState();
         this.skillResolver = new DefaultServerSkillResolver(SkillScalingConfig.defaultConfig());
@@ -108,7 +108,11 @@ public class ServerWorldState {
     }
 
     public List<ExplosionSnapshot> getExplosionSnapshots() {
-        return explosionSnapshots;
+        List<ExplosionSnapshot> snapshots = new LinkedList<>();
+        for (ActiveExplosionState explosionState : activeExplosionStates) {
+            snapshots.add(explosionState.toSnapshot());
+        }
+        return Collections.unmodifiableList(snapshots);
     }
 
     public List<AbstractItem> getItems() {
@@ -160,10 +164,10 @@ public class ServerWorldState {
 
     public void stepWorld(long nowMillis) {
         syncProgressionState(nowMillis);
+        advanceExplosionAction();
         if (chapterProgressionState.getGamePhase() == GamePhase.UPGRADE_SELECTION
                 || chapterProgressionState.getGamePhase() == GamePhase.BRANCH_SELECTION) {
             activeLasers.clear();
-            explosionSnapshots.clear();
             return;
         }
         movePlayersAction();
@@ -216,7 +220,7 @@ public class ServerWorldState {
         enemyBullets.clear();
         activeLasers.clear();
         airburstProjectiles.clear();
-        explosionSnapshots.clear();
+        activeExplosionStates.clear();
         items.clear();
         worldEffectState.reset();
         totalScore = 0;
@@ -242,7 +246,7 @@ public class ServerWorldState {
         enemyBullets.clear();
         activeLasers.clear();
         airburstProjectiles.clear();
-        explosionSnapshots.clear();
+        activeExplosionStates.clear();
         items.clear();
         bossActive = false;
         return chapterProgressionState.advanceToNextChapter();
@@ -595,13 +599,19 @@ public class ServerWorldState {
     }
 
     private void burstAction(long nowMillis) {
-        explosionSnapshots.clear();
         for (AirburstProjectileState projectile : airburstProjectiles) {
             ExplosionSnapshot explosion = projectile.resolveBurst();
-            explosionSnapshots.add(explosion);
+            activeExplosionStates.add(new ActiveExplosionState(explosion));
             applyAirburstDamage(projectile, explosion, nowMillis);
         }
         airburstProjectiles.clear();
+    }
+
+    private void advanceExplosionAction() {
+        for (ActiveExplosionState explosionState : activeExplosionStates) {
+            explosionState.advanceLifetime();
+        }
+        activeExplosionStates.removeIf(ActiveExplosionState::isExpired);
     }
 
     private void spawnBoss() {
