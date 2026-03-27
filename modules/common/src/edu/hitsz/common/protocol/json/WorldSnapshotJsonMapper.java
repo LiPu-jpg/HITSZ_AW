@@ -7,6 +7,7 @@ import edu.hitsz.common.UpgradeChoice;
 import edu.hitsz.common.protocol.dto.BulletSnapshot;
 import edu.hitsz.common.protocol.dto.EnemySnapshot;
 import edu.hitsz.common.protocol.dto.ItemSnapshot;
+import edu.hitsz.common.protocol.dto.LaserSnapshot;
 import edu.hitsz.common.protocol.dto.PlayerSnapshot;
 import edu.hitsz.common.protocol.dto.WorldSnapshot;
 
@@ -37,6 +38,7 @@ public class WorldSnapshotJsonMapper {
                 .append("\"enemies\":").append(enemiesToJson(snapshot.getEnemySnapshots())).append(',')
                 .append("\"heroBullets\":").append(bulletsToJson(snapshot.getHeroBulletSnapshots())).append(',')
                 .append("\"enemyBullets\":").append(bulletsToJson(snapshot.getEnemyBulletSnapshots())).append(',')
+                .append("\"lasers\":").append(lasersToJson(snapshot.getLaserSnapshots())).append(',')
                 .append("\"items\":").append(itemsToJson(snapshot.getItemSnapshots()))
                 .append('}');
         return builder.toString();
@@ -105,6 +107,20 @@ public class WorldSnapshotJsonMapper {
                     SimpleJsonSupport.extractString(bulletJson, "type"),
                     SimpleJsonSupport.extractInt(bulletJson, "x"),
                     SimpleJsonSupport.extractInt(bulletJson, "y")
+            ));
+        }
+        for (String laserJson : SimpleJsonSupport.splitTopLevelArray(
+                SimpleJsonSupport.extractJsonValueOrDefault(json, "lasers", "[]")
+        )) {
+            snapshot.addLaserSnapshot(new LaserSnapshot(
+                    SimpleJsonSupport.extractString(laserJson, "ownerSessionId"),
+                    SimpleJsonSupport.extractInt(laserJson, "originX"),
+                    SimpleJsonSupport.extractInt(laserJson, "originY"),
+                    Double.parseDouble(SimpleJsonSupport.extractJsonValue(laserJson, "angle")),
+                    SimpleJsonSupport.extractInt(laserJson, "width"),
+                    SimpleJsonSupport.extractInt(laserJson, "length"),
+                    SimpleJsonSupport.extractInt(laserJson, "durationTicks"),
+                    SimpleJsonSupport.extractInt(laserJson, "damage")
             ));
         }
         for (String itemJson : SimpleJsonSupport.splitTopLevelArray(SimpleJsonSupport.extractJsonValue(json, "items"))) {
@@ -193,6 +209,28 @@ public class WorldSnapshotJsonMapper {
                     .append("\"type\":").append(SimpleJsonSupport.quote(item.getType())).append(',')
                     .append("\"x\":").append(item.getX()).append(',')
                     .append("\"y\":").append(item.getY())
+                    .append('}');
+        }
+        builder.append(']');
+        return builder.toString();
+    }
+
+    private String lasersToJson(List<LaserSnapshot> lasers) {
+        StringBuilder builder = new StringBuilder("[");
+        for (int i = 0; i < lasers.size(); i++) {
+            LaserSnapshot laser = lasers.get(i);
+            if (i > 0) {
+                builder.append(',');
+            }
+            builder.append('{')
+                    .append("\"ownerSessionId\":").append(SimpleJsonSupport.quote(laser.getOwnerSessionId())).append(',')
+                    .append("\"originX\":").append(laser.getOriginX()).append(',')
+                    .append("\"originY\":").append(laser.getOriginY()).append(',')
+                    .append("\"angle\":").append(laser.getAngle()).append(',')
+                    .append("\"width\":").append(laser.getWidth()).append(',')
+                    .append("\"length\":").append(laser.getLength()).append(',')
+                    .append("\"durationTicks\":").append(laser.getDurationTicks()).append(',')
+                    .append("\"damage\":").append(laser.getDamage())
                     .append('}');
         }
         builder.append(']');

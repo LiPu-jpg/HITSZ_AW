@@ -27,6 +27,9 @@ public final class GameplayBalance {
     public static final int PLAYER_SPREAD_SHOT_UPGRADE_BONUS = 1;
     public static final int PLAYER_LIGHT_TRACKING_SPEED_STEP = 1;
     public static final int PLAYER_LIGHT_TRACKING_MAX_SPEED = 4;
+    public static final double RED_SPEED_LASER_ANGLE = -Math.PI / 2.0;
+    public static final int RED_SPEED_LASER_WIDTH = 24;
+    public static final int RED_SPEED_LASER_DURATION_TICKS = 4;
 
     public static final double ITEM_DROP_PROBABILITY = 0.6;
 
@@ -181,6 +184,8 @@ public final class GameplayBalance {
             return PLAYER_BASE_MOVE_SPEED;
         }
         switch (branch) {
+            case RED_SPEED:
+                return PLAYER_BASE_MOVE_SPEED + 2;
             case STARTER_BLUE:
             default:
                 return PLAYER_BASE_MOVE_SPEED;

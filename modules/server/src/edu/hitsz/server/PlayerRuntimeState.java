@@ -290,6 +290,26 @@ public class PlayerRuntimeState {
         lastPlayerShotTick = tick;
     }
 
+    public boolean usesLaserWeapon() {
+        return aircraftBranch == AircraftBranch.RED_SPEED;
+    }
+
+    public LaserBeamState createLaserBeam(String ownerSessionId) {
+        int originX = getX();
+        int originY = getY() - aircraft.getHeight() / 2;
+        int length = Math.max(0, originY);
+        return new LaserBeamState(
+                ownerSessionId,
+                originX,
+                originY,
+                GameplayBalance.RED_SPEED_LASER_ANGLE,
+                GameplayBalance.RED_SPEED_LASER_WIDTH,
+                length,
+                GameplayBalance.RED_SPEED_LASER_DURATION_TICKS,
+                aircraft.getBulletPower()
+        );
+    }
+
     public int trackingSpeedXForTarget(int targetX) {
         if (lightTrackingUpgradeLevel <= 0) {
             return 0;

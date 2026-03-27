@@ -7,6 +7,7 @@ import edu.hitsz.common.AircraftBranch;
 import edu.hitsz.common.ChapterId;
 import edu.hitsz.common.GamePhase;
 import edu.hitsz.common.UpgradeChoice;
+import edu.hitsz.common.protocol.dto.LaserSnapshot;
 
 import java.util.LinkedList;
 import java.util.List;
@@ -17,6 +18,7 @@ public class ClientWorldState {
     private final List<AbstractAircraft> enemyAircrafts;
     private final List<BaseBullet> heroBullets;
     private final List<BaseBullet> enemyBullets;
+    private List<LaserSnapshot> activeLasers = java.util.Collections.emptyList();
     private final List<AbstractItem> items;
     private int localHp;
     private int localScore;
@@ -65,6 +67,16 @@ public class ClientWorldState {
 
     public List<BaseBullet> getEnemyBullets() {
         return enemyBullets;
+    }
+
+    public List<LaserSnapshot> getActiveLasers() {
+        return activeLasers;
+    }
+
+    public void setActiveLasers(List<LaserSnapshot> activeLasers) {
+        this.activeLasers = activeLasers == null
+                ? java.util.Collections.emptyList()
+                : java.util.Collections.unmodifiableList(new java.util.ArrayList<>(activeLasers));
     }
 
     public List<AbstractItem> getItems() {

@@ -6,6 +6,7 @@ import edu.hitsz.common.protocol.SnapshotTypes;
 import edu.hitsz.common.protocol.dto.BulletSnapshot;
 import edu.hitsz.common.protocol.dto.EnemySnapshot;
 import edu.hitsz.common.protocol.dto.ItemSnapshot;
+import edu.hitsz.common.protocol.dto.LaserSnapshot;
 import edu.hitsz.common.protocol.dto.PlayerSnapshot;
 import edu.hitsz.common.protocol.dto.WorldSnapshot;
 import edu.hitsz.server.aircraft.AbstractAircraft;
@@ -82,6 +83,18 @@ public class WorldSnapshotFactory {
                     SnapshotTypes.Bullet.ENEMY,
                     bullet.getLocationX(),
                     bullet.getLocationY()
+            ));
+        }
+        for (LaserBeamState laser : worldState.getActiveLasers()) {
+            snapshot.addLaserSnapshot(new LaserSnapshot(
+                    laser.getOwnerSessionId(),
+                    laser.getOriginX(),
+                    laser.getOriginY(),
+                    laser.getAngle(),
+                    laser.getWidth(),
+                    laser.getLength(),
+                    laser.getDurationTicks(),
+                    laser.getDamage()
             ));
         }
         for (AbstractItem item : worldState.getItems()) {

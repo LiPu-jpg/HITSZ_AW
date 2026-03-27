@@ -23,6 +23,7 @@ import edu.hitsz.common.protocol.SnapshotTypes;
 import edu.hitsz.common.protocol.dto.BulletSnapshot;
 import edu.hitsz.common.protocol.dto.EnemySnapshot;
 import edu.hitsz.common.protocol.dto.ItemSnapshot;
+import edu.hitsz.common.protocol.dto.LaserSnapshot;
 import edu.hitsz.common.protocol.dto.PlayerSnapshot;
 import edu.hitsz.common.protocol.dto.WorldSnapshot;
 
@@ -34,6 +35,7 @@ public class DefaultSnapshotApplier implements SnapshotApplier {
         java.util.List<AbstractAircraft> nextEnemies = new java.util.LinkedList<>();
         java.util.List<BaseBullet> nextHeroBullets = new java.util.LinkedList<>();
         java.util.List<BaseBullet> nextEnemyBullets = new java.util.LinkedList<>();
+        java.util.List<LaserSnapshot> nextActiveLasers = new java.util.LinkedList<>();
         java.util.List<AbstractItem> nextItems = new java.util.LinkedList<>();
         int nextLocalHp = 0;
         int nextLocalScore = 0;
@@ -87,6 +89,7 @@ public class DefaultSnapshotApplier implements SnapshotApplier {
         for (BulletSnapshot bulletSnapshot : snapshot.getEnemyBulletSnapshots()) {
             nextEnemyBullets.add(createBullet(bulletSnapshot));
         }
+        nextActiveLasers.addAll(snapshot.getLaserSnapshots());
         for (ItemSnapshot itemSnapshot : snapshot.getItemSnapshots()) {
             nextItems.add(createItem(itemSnapshot));
         }
@@ -95,6 +98,7 @@ public class DefaultSnapshotApplier implements SnapshotApplier {
         state.getEnemyAircrafts().clear();
         state.getHeroBullets().clear();
         state.getEnemyBullets().clear();
+        state.setActiveLasers(nextActiveLasers);
         state.getItems().clear();
         state.setLocalHp(nextLocalHp);
         state.setLocalScore(nextLocalScore);

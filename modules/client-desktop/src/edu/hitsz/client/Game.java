@@ -11,6 +11,7 @@ import edu.hitsz.common.EntityRenderSizing;
 import edu.hitsz.common.GameConstants;
 import edu.hitsz.common.GamePhase;
 import edu.hitsz.common.UpgradeChoice;
+import edu.hitsz.common.protocol.dto.LaserSnapshot;
 import edu.hitsz.common.protocol.dto.WorldSnapshot;
 
 import javax.swing.*;
@@ -41,6 +42,7 @@ public class Game extends JPanel {
     private final List<AbstractAircraft> enemyAircrafts;
     private final List<BaseBullet> heroBullets;
     private final List<BaseBullet> enemyBullets;
+    private final List<LaserSnapshot> activeLasers;
     private final List<AbstractItem> items;
 
     //当前玩家分数
@@ -82,6 +84,7 @@ public class Game extends JPanel {
         snapshotApplier = new DefaultSnapshotApplier();
         heroBullets = new LinkedList<>();
         enemyBullets = new LinkedList<>();
+        activeLasers = new LinkedList<>();
         items = new LinkedList<>();
         playerAircrafts.add(heroAircraft);
         clientWorldState.getPlayerAircrafts().add(heroAircraft);
@@ -191,6 +194,8 @@ public class Game extends JPanel {
         heroBullets.addAll(clientWorldState.getHeroBullets());
         enemyBullets.clear();
         enemyBullets.addAll(clientWorldState.getEnemyBullets());
+        activeLasers.clear();
+        activeLasers.addAll(clientWorldState.getActiveLasers());
         items.clear();
         items.addAll(clientWorldState.getItems());
         localHp = clientWorldState.getLocalHp();
@@ -308,6 +313,7 @@ public class Game extends JPanel {
         paintImageWithPositionRevised(g, playerAircrafts);
         paintImageWithPositionRevised(g, enemyAircrafts);
         paintImageWithPositionRevised(g, items);
+        paintLaserBeams(g);
 
         //绘制得分和生命值
         paintScoreAndLife(g);
@@ -334,6 +340,40 @@ public class Game extends JPanel {
                     object.getRenderWidth(),
                     object.getRenderHeight(),
                     null);
+        }
+    }
+
+    private void paintLaserBeams(Graphics g) {
+        if (activeLasers.isEmpty()) {
+            return;
+        }
+        Graphics2D graphics = (Graphics2D) g.create();
+        try {
+            graphics.setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON);
+            for (LaserSnapshot laser : activeLasers) {
+                int endX = laser.getOriginX() + (int) Math.round(Math.cos(laser.getAngle()) * laser.getLength());
+                int endY = laser.getOriginY() + (int) Math.round(Math.sin(laser.getAngle()) * laser.getLength());
+
+                graphics.setComposite(AlphaComposite.getInstance(AlphaComposite.SRC_OVER, 0.35f));
+                graphics.setStroke(new BasicStroke(
+                        Math.max(1.0f, laser.getWidth()),
+                        BasicStroke.CAP_ROUND,
+                        BasicStroke.JOIN_ROUND
+                ));
+                graphics.setColor(new Color(255, 64, 64));
+                graphics.drawLine(laser.getOriginX(), laser.getOriginY(), endX, endY);
+
+                graphics.setComposite(AlphaComposite.getInstance(AlphaComposite.SRC_OVER, 0.75f));
+                graphics.setStroke(new BasicStroke(
+                        Math.max(2.0f, laser.getWidth() / 3.0f),
+                        BasicStroke.CAP_ROUND,
+                        BasicStroke.JOIN_ROUND
+                ));
+                graphics.setColor(new Color(255, 240, 180));
+                graphics.drawLine(laser.getOriginX(), laser.getOriginY(), endX, endY);
+            }
+        } finally {
+            graphics.dispose();
         }
     }
 

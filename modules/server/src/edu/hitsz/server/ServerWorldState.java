@@ -37,6 +37,7 @@ public class ServerWorldState {
     private final List<AbstractAircraft> enemyAircrafts;
     private final List<BaseBullet> heroBullets;
     private final List<BaseBullet> enemyBullets;
+    private final List<LaserBeamState> activeLasers;
     private final List<AbstractItem> items;
     private final WorldEffectState worldEffectState;
     private final ServerSkillResolver skillResolver;
@@ -54,6 +55,7 @@ public class ServerWorldState {
         this.enemyAircrafts = new LinkedList<>();
         this.heroBullets = new LinkedList<>();
         this.enemyBullets = new LinkedList<>();
+        this.activeLasers = new LinkedList<>();
         this.items = new LinkedList<>();
         this.worldEffectState = new WorldEffectState();
         this.skillResolver = new DefaultServerSkillResolver(SkillScalingConfig.defaultConfig());
@@ -94,6 +96,10 @@ public class ServerWorldState {
 
     public List<BaseBullet> getEnemyBullets() {
         return enemyBullets;
+    }
+
+    public List<LaserBeamState> getActiveLasers() {
+        return activeLasers;
     }
 
     public List<AbstractItem> getItems() {
@@ -147,6 +153,7 @@ public class ServerWorldState {
         syncProgressionState(nowMillis);
         if (chapterProgressionState.getGamePhase() == GamePhase.UPGRADE_SELECTION
                 || chapterProgressionState.getGamePhase() == GamePhase.BRANCH_SELECTION) {
+            activeLasers.clear();
             return;
         }
         movePlayersAction();
@@ -196,6 +203,7 @@ public class ServerWorldState {
         enemyAircrafts.clear();
         heroBullets.clear();
         enemyBullets.clear();
+        activeLasers.clear();
         items.clear();
         worldEffectState.reset();
         totalScore = 0;
@@ -219,6 +227,7 @@ public class ServerWorldState {
         shootCounter = 0;
         heroBullets.clear();
         enemyBullets.clear();
+        activeLasers.clear();
         items.clear();
         bossActive = false;
         return chapterProgressionState.advanceToNextChapter();
@@ -299,10 +308,14 @@ public class ServerWorldState {
             if (playerState.getAircraft().notValid() || !playerState.shouldShootAtTick(tick)) {
                 continue;
             }
-            heroBullets.addAll(playerState.getAircraft().shoot(
-                    session.getSessionId(),
-                    playerState.trackingSpeedXForTarget(nearestEnemyX(playerState.getX()))
-            ));
+            if (playerState.usesLaserWeapon()) {
+                replaceActiveLaser(playerState.createLaserBeam(session.getSessionId()));
+            } else {
+                heroBullets.addAll(playerState.getAircraft().shoot(
+                        session.getSessionId(),
+                        playerState.trackingSpeedXForTarget(nearestEnemyX(playerState.getX()))
+                ));
+            }
             playerState.markShotAtTick(tick);
         }
 
@@ -375,6 +388,23 @@ public class ServerWorldState {
             }
         }
 
+        for (LaserBeamState laser : activeLasers) {
+            if (laser.isExpired()) {
+                continue;
+            }
+            for (AbstractAircraft enemyAircraft : enemyAircrafts) {
+                if (enemyAircraft.notValid()) {
+                    continue;
+                }
+                if (laserHitsEnemy(laser, enemyAircraft)) {
+                    enemyAircraft.decreaseHp(laser.getDamage());
+                    if (enemyAircraft.notValid()) {
+                        awardScore(laser.getOwnerSessionId(), enemyAircraft);
+                    }
+                }
+            }
+        }
+
         for (AbstractAircraft enemyAircraft : enemyAircrafts) {
             if (enemyAircraft.notValid()) {
                 continue;
@@ -414,7 +444,11 @@ public class ServerWorldState {
         if (!(bullet instanceof ServerHeroBullet)) {
             return;
         }
-        PlayerSession session = sessionRegistry.find(((ServerHeroBullet) bullet).getOwnerSessionId());
+        awardScore(((ServerHeroBullet) bullet).getOwnerSessionId(), enemyAircraft);
+    }
+
+    private void awardScore(String ownerSessionId, AbstractAircraft enemyAircraft) {
+        PlayerSession session = sessionRegistry.find(ownerSessionId);
         if (session == null) {
             return;
         }
@@ -524,6 +558,10 @@ public class ServerWorldState {
     private void postProcessAction() {
         enemyBullets.removeIf(AbstractFlyingObject::notValid);
         heroBullets.removeIf(AbstractFlyingObject::notValid);
+        for (LaserBeamState laser : activeLasers) {
+            laser.advanceLifetime();
+        }
+        activeLasers.removeIf(this::shouldRemoveLaser);
         enemyAircrafts.removeIf(AbstractFlyingObject::notValid);
         items.removeIf(AbstractFlyingObject::notValid);
         bossActive = containsBossEnemy();
@@ -532,6 +570,7 @@ public class ServerWorldState {
     private void spawnBoss() {
         enemyAircrafts.clear();
         enemyBullets.clear();
+        activeLasers.clear();
         items.clear();
         enemyAircrafts.add(new BossEnemy(
                 GameConstants.WINDOW_WIDTH / 2,
@@ -619,5 +658,50 @@ public class ServerWorldState {
             }
         }
         return nearestEnemy == null ? fallbackX : nearestEnemy.getLocationX();
+    }
+
+    private void replaceActiveLaser(LaserBeamState laser) {
+        activeLasers.removeIf(existing -> existing.getOwnerSessionId().equals(laser.getOwnerSessionId()));
+        activeLasers.add(laser);
+    }
+
+    private boolean laserHitsEnemy(LaserBeamState laser, AbstractAircraft enemyAircraft) {
+        double distance = distanceToSegment(
+                enemyAircraft.getLocationX(),
+                enemyAircraft.getLocationY(),
+                laser.getOriginX(),
+                laser.getOriginY(),
+                laser.getEndX(),
+                laser.getEndY()
+        );
+        double hitRadius = laser.getWidth() / 2.0 + Math.max(enemyAircraft.getWidth(), enemyAircraft.getHeight()) / 4.0;
+        return distance <= hitRadius;
+    }
+
+    private double distanceToSegment(double pointX,
+                                     double pointY,
+                                     double startX,
+                                     double startY,
+                                     double endX,
+                                     double endY) {
+        double deltaX = endX - startX;
+        double deltaY = endY - startY;
+        double lengthSquared = deltaX * deltaX + deltaY * deltaY;
+        if (lengthSquared <= 0.0) {
+            return Math.hypot(pointX - startX, pointY - startY);
+        }
+        double projection = ((pointX - startX) * deltaX + (pointY - startY) * deltaY) / lengthSquared;
+        double clampedProjection = Math.max(0.0, Math.min(1.0, projection));
+        double nearestX = startX + clampedProjection * deltaX;
+        double nearestY = startY + clampedProjection * deltaY;
+        return Math.hypot(pointX - nearestX, pointY - nearestY);
+    }
+
+    private boolean shouldRemoveLaser(LaserBeamState laser) {
+        if (laser.isExpired()) {
+            return true;
+        }
+        PlayerSession owner = sessionRegistry.find(laser.getOwnerSessionId());
+        return owner == null || owner.getPlayerState().getAircraft().notValid();
     }
 }
