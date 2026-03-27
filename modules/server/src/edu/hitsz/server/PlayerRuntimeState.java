@@ -294,6 +294,10 @@ public class PlayerRuntimeState {
         return aircraftBranch == AircraftBranch.RED_SPEED;
     }
 
+    public boolean usesSpreadWeapon() {
+        return aircraftBranch == AircraftBranch.GREEN_DEFENSE;
+    }
+
     public LaserBeamState createLaserBeam(String ownerSessionId) {
         int originX = getX();
         int originY = getY() - aircraft.getHeight() / 2;

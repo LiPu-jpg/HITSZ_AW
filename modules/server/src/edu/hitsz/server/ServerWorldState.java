@@ -310,6 +310,11 @@ public class ServerWorldState {
             }
             if (playerState.usesLaserWeapon()) {
                 replaceActiveLaser(playerState.createLaserBeam(session.getSessionId()));
+            } else if (playerState.usesSpreadWeapon()) {
+                heroBullets.addAll(playerState.getAircraft().shootSpread(
+                        session.getSessionId(),
+                        playerState.trackingSpeedXForTarget(nearestEnemyX(playerState.getX()))
+                ));
             } else {
                 heroBullets.addAll(playerState.getAircraft().shoot(
                         session.getSessionId(),

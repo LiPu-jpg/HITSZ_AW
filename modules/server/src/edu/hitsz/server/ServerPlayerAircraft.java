@@ -53,6 +53,28 @@ public class ServerPlayerAircraft extends AbstractAircraft {
         return bullets;
     }
 
+    public List<BaseBullet> shootSpread(String ownerSessionId, int trackingSpeedX) {
+        List<BaseBullet> bullets = new LinkedList<>();
+        int spreadNum = Math.max(shootNum, GameplayBalance.GREEN_DEFENSE_SPREAD_BULLET_COUNT);
+        int x = this.getLocationX();
+        int y = this.getLocationY() + DIRECTION * 2;
+        int speedY = this.getSpeedY() + DIRECTION * GameplayBalance.PLAYER_BULLET_SPEED;
+        int centerIndex = spreadNum / 2;
+
+        for (int i = 0; i < spreadNum; i++) {
+            int speedX = trackingSpeedX + (i - centerIndex) * GameplayBalance.GREEN_DEFENSE_SPREAD_X_SPEED_STEP;
+            bullets.add(new ServerHeroBullet(
+                    ownerSessionId,
+                    x + (i * 2 - spreadNum + 1) * 10,
+                    y,
+                    speedX,
+                    speedY,
+                    bulletPower
+            ));
+        }
+        return bullets;
+    }
+
     public void increaseFirepower(int amount) {
         if (amount <= 0) {
             return;

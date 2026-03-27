@@ -25,6 +25,8 @@ public final class GameplayBalance {
     public static final int PLAYER_FIRE_RATE_UPGRADE_CYCLE_REDUCTION = 2;
     public static final int PLAYER_BULLET_POWER_UPGRADE_BONUS = 10;
     public static final int PLAYER_SPREAD_SHOT_UPGRADE_BONUS = 1;
+    public static final int GREEN_DEFENSE_SPREAD_BULLET_COUNT = 3;
+    public static final int GREEN_DEFENSE_SPREAD_X_SPEED_STEP = 2;
     public static final int PLAYER_LIGHT_TRACKING_SPEED_STEP = 1;
     public static final int PLAYER_LIGHT_TRACKING_MAX_SPEED = 4;
     public static final double RED_SPEED_LASER_ANGLE = -Math.PI / 2.0;
