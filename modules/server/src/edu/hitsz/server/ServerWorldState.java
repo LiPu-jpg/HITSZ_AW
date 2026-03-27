@@ -666,16 +666,21 @@ public class ServerWorldState {
     }
 
     private boolean laserHitsEnemy(LaserBeamState laser, AbstractAircraft enemyAircraft) {
-        double distance = distanceToSegment(
-                enemyAircraft.getLocationX(),
-                enemyAircraft.getLocationY(),
+        double bodyLeft = enemyAircraft.getLocationX() - enemyAircraft.getWidth() / 2.0;
+        double bodyRight = enemyAircraft.getLocationX() + enemyAircraft.getWidth() / 2.0;
+        double bodyTop = enemyAircraft.getLocationY() - enemyAircraft.getHeight() / 4.0;
+        double bodyBottom = enemyAircraft.getLocationY() + enemyAircraft.getHeight() / 4.0;
+        double distance = distanceFromSegmentToBodyRectangle(
                 laser.getOriginX(),
                 laser.getOriginY(),
                 laser.getEndX(),
-                laser.getEndY()
+                laser.getEndY(),
+                bodyLeft,
+                bodyTop,
+                bodyRight,
+                bodyBottom
         );
-        double hitRadius = laser.getWidth() / 2.0 + Math.max(enemyAircraft.getWidth(), enemyAircraft.getHeight()) / 4.0;
-        return distance <= hitRadius;
+        return distance <= laser.getWidth() / 2.0;
     }
 
     private double distanceToSegment(double pointX,
@@ -695,6 +700,103 @@ public class ServerWorldState {
         double nearestX = startX + clampedProjection * deltaX;
         double nearestY = startY + clampedProjection * deltaY;
         return Math.hypot(pointX - nearestX, pointY - nearestY);
+    }
+
+    private double distanceFromSegmentToBodyRectangle(double startX,
+                                                      double startY,
+                                                      double endX,
+                                                      double endY,
+                                                      double left,
+                                                      double top,
+                                                      double right,
+                                                      double bottom) {
+        if (pointInRectangle(startX, startY, left, top, right, bottom)
+                || pointInRectangle(endX, endY, left, top, right, bottom)
+                || segmentsIntersect(startX, startY, endX, endY, left, top, right, top)
+                || segmentsIntersect(startX, startY, endX, endY, right, top, right, bottom)
+                || segmentsIntersect(startX, startY, endX, endY, right, bottom, left, bottom)
+                || segmentsIntersect(startX, startY, endX, endY, left, bottom, left, top)) {
+            return 0.0;
+        }
+
+        double minDistance = Math.min(
+                pointToRectangleDistance(startX, startY, left, top, right, bottom),
+                pointToRectangleDistance(endX, endY, left, top, right, bottom)
+        );
+        minDistance = Math.min(minDistance, distanceToSegment(left, top, startX, startY, endX, endY));
+        minDistance = Math.min(minDistance, distanceToSegment(right, top, startX, startY, endX, endY));
+        minDistance = Math.min(minDistance, distanceToSegment(right, bottom, startX, startY, endX, endY));
+        minDistance = Math.min(minDistance, distanceToSegment(left, bottom, startX, startY, endX, endY));
+        return minDistance;
+    }
+
+    private double pointToRectangleDistance(double pointX,
+                                            double pointY,
+                                            double left,
+                                            double top,
+                                            double right,
+                                            double bottom) {
+        double nearestX = Math.max(left, Math.min(right, pointX));
+        double nearestY = Math.max(top, Math.min(bottom, pointY));
+        return Math.hypot(pointX - nearestX, pointY - nearestY);
+    }
+
+    private boolean pointInRectangle(double pointX,
+                                     double pointY,
+                                     double left,
+                                     double top,
+                                     double right,
+                                     double bottom) {
+        return pointX >= left && pointX <= right && pointY >= top && pointY <= bottom;
+    }
+
+    private boolean segmentsIntersect(double ax,
+                                      double ay,
+                                      double bx,
+                                      double by,
+                                      double cx,
+                                      double cy,
+                                      double dx,
+                                      double dy) {
+        double ab1 = cross(ax, ay, bx, by, cx, cy);
+        double ab2 = cross(ax, ay, bx, by, dx, dy);
+        double cd1 = cross(cx, cy, dx, dy, ax, ay);
+        double cd2 = cross(cx, cy, dx, dy, bx, by);
+
+        if (ab1 == 0.0 && onSegment(ax, ay, bx, by, cx, cy)) {
+            return true;
+        }
+        if (ab2 == 0.0 && onSegment(ax, ay, bx, by, dx, dy)) {
+            return true;
+        }
+        if (cd1 == 0.0 && onSegment(cx, cy, dx, dy, ax, ay)) {
+            return true;
+        }
+        if (cd2 == 0.0 && onSegment(cx, cy, dx, dy, bx, by)) {
+            return true;
+        }
+        return (ab1 > 0.0) != (ab2 > 0.0) && (cd1 > 0.0) != (cd2 > 0.0);
+    }
+
+    private double cross(double ax,
+                         double ay,
+                         double bx,
+                         double by,
+                         double px,
+                         double py) {
+        return (bx - ax) * (py - ay) - (by - ay) * (px - ax);
+    }
+
+    private boolean onSegment(double ax,
+                              double ay,
+                              double bx,
+                              double by,
+                              double px,
+                              double py) {
+        return px >= Math.min(ax, bx)
+                && px <= Math.max(ax, bx)
+                && py >= Math.min(ay, by)
+                && py <= Math.max(ay, by);
     }
 
     private boolean shouldRemoveLaser(LaserBeamState laser) {
