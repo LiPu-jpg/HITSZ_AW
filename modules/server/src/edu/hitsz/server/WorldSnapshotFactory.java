@@ -37,6 +37,7 @@ public class WorldSnapshotFactory {
         snapshot.setNextBossScoreThreshold(worldState.getNextBossScoreThreshold());
         snapshot.setChapterId(worldState.getChapterId());
         snapshot.setGamePhase(worldState.getGamePhase());
+        snapshot.setFirstBossBranchSelection(worldState.getChapterProgressionState().isFirstBossBranchSelection());
         snapshot.setChapterTransitionFlash(
                 worldState.getChapterProgressionState().isChapterTransitionFlashActive(nowMillis)
         );
@@ -57,7 +58,7 @@ public class WorldSnapshotFactory {
                     playerState.getAvailableUpgradeChoices(),
                     playerState.getSelectedUpgradeChoice(),
                     playerState.getAircraftBranch(),
-                    java.util.Collections.emptyList(),
+                    playerState.getAvailableBranchChoices(),
                     playerState.isBranchUnlocked()
             ));
         }

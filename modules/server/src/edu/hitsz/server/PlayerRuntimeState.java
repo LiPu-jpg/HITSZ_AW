@@ -24,6 +24,7 @@ public class PlayerRuntimeState {
     private int targetY;
     private boolean branchUnlocked;
     private String selectedSkill;
+    private List<AircraftBranch> availableBranchChoices;
     private List<UpgradeChoice> availableUpgradeChoices;
     private UpgradeChoice selectedUpgradeChoice;
     private int fireRateUpgradeLevel;
@@ -42,6 +43,7 @@ public class PlayerRuntimeState {
         this.targetY = aircraft.getLocationY();
         this.branchUnlocked = false;
         this.selectedSkill = null;
+        this.availableBranchChoices = Collections.emptyList();
         this.availableUpgradeChoices = Collections.emptyList();
     }
 
@@ -141,6 +143,10 @@ public class PlayerRuntimeState {
         return branchUnlocked;
     }
 
+    public List<AircraftBranch> getAvailableBranchChoices() {
+        return availableBranchChoices;
+    }
+
     public void resetForNewRound(int x, int y) {
         aircraft.resetForRound(x, y);
         skillState.reset();
@@ -151,6 +157,7 @@ public class PlayerRuntimeState {
         targetY = y;
         branchUnlocked = false;
         selectedSkill = null;
+        availableBranchChoices = Collections.emptyList();
         availableUpgradeChoices = Collections.emptyList();
         selectedUpgradeChoice = null;
         fireRateUpgradeLevel = 0;
@@ -173,12 +180,46 @@ public class PlayerRuntimeState {
         selectedUpgradeChoice = null;
     }
 
+    public void openBranchSelection(List<AircraftBranch> branchChoices) {
+        if (branchUnlocked) {
+            availableBranchChoices = Collections.emptyList();
+            return;
+        }
+        List<AircraftBranch> normalizedChoices = branchChoices == null
+                ? Collections.<AircraftBranch>emptyList()
+                : branchChoices;
+        availableBranchChoices = Collections.unmodifiableList(Arrays.asList(
+                normalizedChoices.toArray(new AircraftBranch[normalizedChoices.size()])
+        ));
+    }
+
     public void clearUpgradeSelectionState() {
         availableUpgradeChoices = Collections.emptyList();
     }
 
+    public void clearBranchSelectionState() {
+        availableBranchChoices = Collections.emptyList();
+    }
+
     public boolean hasPendingUpgradeChoice() {
         return !availableUpgradeChoices.isEmpty() && selectedUpgradeChoice == null;
+    }
+
+    public boolean hasPendingBranchChoice() {
+        return !branchUnlocked && !availableBranchChoices.isEmpty();
+    }
+
+    public void applyBranchChoice(AircraftBranch branch) {
+        if (branch == null
+                || branch == AircraftBranch.STARTER_BLUE
+                || branchUnlocked
+                || !availableBranchChoices.contains(branch)) {
+            return;
+        }
+        aircraftBranch = branch;
+        branchUnlocked = true;
+        selectedSkill = null;
+        availableBranchChoices = Collections.emptyList();
     }
 
     public void applyUpgradeChoice(UpgradeChoice choice) {

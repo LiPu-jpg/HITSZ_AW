@@ -21,4 +21,6 @@ public interface ClientCommandPublisher {
     void publishLobbyConfig(String difficulty);
 
     void publishUpgradeChoice(String choice);
+
+    void publishBranchChoice(String branch);
 }

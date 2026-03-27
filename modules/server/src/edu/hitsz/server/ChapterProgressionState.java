@@ -12,6 +12,7 @@ public class ChapterProgressionState {
     private int bossStage;
     private int nextBossScoreThreshold;
     private boolean bossEncounterActive;
+    private boolean firstBossBranchSelectionCompleted;
     private long flashUntilMillis;
 
     public ChapterProgressionState() {
@@ -58,6 +59,7 @@ public class ChapterProgressionState {
         gamePhase = GamePhase.LOBBY;
         bossStage = 0;
         bossEncounterActive = false;
+        firstBossBranchSelectionCompleted = false;
         flashUntilMillis = 0L;
         nextBossScoreThreshold = progressionPolicy.bossThreshold(difficulty, bossStage);
     }
@@ -67,6 +69,7 @@ public class ChapterProgressionState {
         gamePhase = GamePhase.BATTLE;
         bossStage = 0;
         bossEncounterActive = false;
+        firstBossBranchSelectionCompleted = false;
         flashUntilMillis = 0L;
         nextBossScoreThreshold = progressionPolicy.bossThreshold(difficulty, bossStage);
     }
@@ -85,7 +88,9 @@ public class ChapterProgressionState {
     public void reconcileBossPresence(boolean bossPresent, long nowMillis, ProgressionPolicy progressionPolicy) {
         if (bossEncounterActive && !bossPresent && gamePhase == GamePhase.BATTLE) {
             bossEncounterActive = false;
-            gamePhase = GamePhase.UPGRADE_SELECTION;
+            gamePhase = shouldOpenFirstBossBranchSelection()
+                    ? GamePhase.BRANCH_SELECTION
+                    : GamePhase.UPGRADE_SELECTION;
             flashUntilMillis = nowMillis + progressionPolicy.chapterTransitionFlashMillis();
         } else if (bossPresent) {
             bossEncounterActive = true;
@@ -101,6 +106,14 @@ public class ChapterProgressionState {
         nextBossScoreThreshold = progressionPolicy.bossThreshold(difficulty, bossStage);
     }
 
+    public boolean isFirstBossBranchSelection() {
+        return gamePhase == GamePhase.BRANCH_SELECTION && !firstBossBranchSelectionCompleted;
+    }
+
+    public void markFirstBossBranchSelectionCompleted() {
+        firstBossBranchSelectionCompleted = true;
+    }
+
     public boolean advanceToNextChapter() {
         ChapterId nextChapterId = chapterCatalog.nextChapter(chapterId);
         if (nextChapterId == null) {
@@ -111,5 +124,9 @@ public class ChapterProgressionState {
         bossEncounterActive = false;
         flashUntilMillis = 0L;
         return true;
+    }
+
+    private boolean shouldOpenFirstBossBranchSelection() {
+        return !firstBossBranchSelectionCompleted && bossStage == 1;
     }
 }

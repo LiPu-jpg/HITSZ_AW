@@ -1,5 +1,6 @@
 package edu.hitsz.server;
 
+import edu.hitsz.common.AircraftBranch;
 import edu.hitsz.common.Difficulty;
 import edu.hitsz.common.GamePhase;
 import edu.hitsz.common.UpgradeChoice;
@@ -21,12 +22,21 @@ public class UpgradeChoiceApplicationTest {
         worldState.syncProgressionState(nowMillis);
         worldState.getEnemyAircrafts().clear();
         worldState.syncProgressionState(nowMillis + 100L);
-        roomRuntime.tick(nowMillis + 150L, 10_000L);
+        assert roomRuntime.getGamePhase() == GamePhase.BRANCH_SELECTION
+                : "Precondition failed: first boss defeat should open branch selection";
+        roomRuntime.handleBranchChoice("host-session", AircraftBranch.RED_SPEED.name(), 1L, nowMillis + 120L);
+        roomRuntime.tick(nowMillis + 120L, 10_000L);
+
+        session.getPlayerState().setScore(ProgressionPolicy.defaultPolicy().bossThreshold(Difficulty.NORMAL, 1));
+        worldState.syncProgressionState(nowMillis + 200L);
+        worldState.getEnemyAircrafts().clear();
+        worldState.syncProgressionState(nowMillis + 300L);
+        roomRuntime.tick(nowMillis + 300L, 10_000L);
 
         assert roomRuntime.getGamePhase() == GamePhase.UPGRADE_SELECTION
-                : "Boss defeat should open the upgrade selection phase";
+                : "Later boss defeats should open the upgrade selection phase";
         assert session.getPlayerState().getAvailableUpgradeChoices().contains(UpgradeChoice.BULLET_POWER)
-                : "Player should receive upgrade choices during upgrade selection";
+                : "Player should receive upgrade choices during later upgrade selection";
 
         roomRuntime.handleUpgradeChoice(
                 "host-session",

@@ -1,5 +1,6 @@
 package edu.hitsz.server;
 
+import edu.hitsz.common.AircraftBranch;
 import edu.hitsz.common.Difficulty;
 import edu.hitsz.common.GamePhase;
 
@@ -18,10 +19,23 @@ public class BossToUpgradePhaseTest {
         worldState.getEnemyAircrafts().clear();
         worldState.syncProgressionState();
 
+        assert worldState.getChapterProgressionState().getGamePhase() == GamePhase.BRANCH_SELECTION
+                : "First boss defeat should now move the server into branch selection";
+        session.getPlayerState().applyBranchChoice(AircraftBranch.RED_SPEED);
+        assert worldState.advanceAfterBossSelection()
+                : "Completing first-boss branch selection should advance the chapter";
+
+        session.getPlayerState().setScore(ProgressionPolicy.defaultPolicy().bossThreshold(Difficulty.NORMAL, 1));
+        worldState.syncProgressionState();
+        assert worldState.isBossActive() : "Precondition failed: second boss should spawn before defeat";
+
+        worldState.getEnemyAircrafts().clear();
+        worldState.syncProgressionState();
+
         assert worldState.getChapterProgressionState().getGamePhase() == GamePhase.UPGRADE_SELECTION
-                : "Boss defeat should move the server into upgrade selection";
+                : "Later boss defeats should still move the server into upgrade selection";
         assert worldState.getChapterProgressionState().getFlashUntilMillis() > 0L
-                : "Boss defeat should start a chapter transition flash window";
+                : "Later boss defeats should still start a chapter transition flash window";
 
         int enemiesBeforeNextTick = worldState.getEnemyAircrafts().size();
         worldState.stepWorld(2_000L);

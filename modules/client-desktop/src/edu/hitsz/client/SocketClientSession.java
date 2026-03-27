@@ -3,6 +3,7 @@ package edu.hitsz.client;
 import edu.hitsz.common.protocol.MessageType;
 import edu.hitsz.common.protocol.ProtocolMessage;
 import edu.hitsz.common.protocol.dto.CreateRoomPayload;
+import edu.hitsz.common.protocol.dto.BranchChoicePayload;
 import edu.hitsz.common.protocol.dto.InputMovePayload;
 import edu.hitsz.common.protocol.dto.InputSkillPayload;
 import edu.hitsz.common.protocol.dto.JoinRoomPayload;
@@ -11,6 +12,7 @@ import edu.hitsz.common.protocol.dto.ReadyPayload;
 import edu.hitsz.common.protocol.dto.UpgradeChoicePayload;
 import edu.hitsz.common.protocol.dto.WorldSnapshot;
 import edu.hitsz.common.protocol.json.CreateRoomPayloadJsonMapper;
+import edu.hitsz.common.protocol.json.BranchChoicePayloadJsonMapper;
 import edu.hitsz.common.protocol.json.InputMovePayloadJsonMapper;
 import edu.hitsz.common.protocol.json.InputSkillPayloadJsonMapper;
 import edu.hitsz.common.protocol.json.JoinRoomPayloadJsonMapper;
@@ -37,6 +39,7 @@ public class SocketClientSession implements ClientCommandPublisher {
     private final LobbyConfigPayloadJsonMapper lobbyConfigPayloadJsonMapper;
     private final ReadyPayloadJsonMapper readyPayloadJsonMapper;
     private final UpgradeChoicePayloadJsonMapper upgradeChoicePayloadJsonMapper;
+    private final BranchChoicePayloadJsonMapper branchChoicePayloadJsonMapper;
     private final WorldSnapshotJsonMapper worldSnapshotJsonMapper;
 
     public SocketClientSession(String host, int port, String sessionId, Game game) {
@@ -52,6 +55,7 @@ public class SocketClientSession implements ClientCommandPublisher {
         this.lobbyConfigPayloadJsonMapper = new LobbyConfigPayloadJsonMapper();
         this.readyPayloadJsonMapper = new ReadyPayloadJsonMapper();
         this.upgradeChoicePayloadJsonMapper = new UpgradeChoicePayloadJsonMapper();
+        this.branchChoicePayloadJsonMapper = new BranchChoicePayloadJsonMapper();
         this.worldSnapshotJsonMapper = new WorldSnapshotJsonMapper();
     }
 
@@ -164,6 +168,17 @@ public class SocketClientSession implements ClientCommandPublisher {
                 nextSequence(),
                 System.currentTimeMillis(),
                 upgradeChoicePayloadJsonMapper.toJson(new UpgradeChoicePayload(choice))
+        ));
+    }
+
+    @Override
+    public void publishBranchChoice(String branch) {
+        transport.send(new ProtocolMessage(
+                MessageType.INPUT_BRANCH_CHOICE,
+                sessionId,
+                nextSequence(),
+                System.currentTimeMillis(),
+                branchChoicePayloadJsonMapper.toJson(new BranchChoicePayload(branch))
         ));
     }
 

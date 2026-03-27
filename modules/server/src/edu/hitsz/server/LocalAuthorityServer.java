@@ -4,6 +4,7 @@ import edu.hitsz.common.Difficulty;
 import edu.hitsz.common.protocol.MessageType;
 import edu.hitsz.common.protocol.ProtocolMessage;
 import edu.hitsz.common.protocol.dto.CreateRoomPayload;
+import edu.hitsz.common.protocol.dto.BranchChoicePayload;
 import edu.hitsz.common.protocol.dto.InputMovePayload;
 import edu.hitsz.common.protocol.dto.InputSkillPayload;
 import edu.hitsz.common.protocol.dto.JoinRoomPayload;
@@ -12,6 +13,7 @@ import edu.hitsz.common.protocol.dto.ReadyPayload;
 import edu.hitsz.common.protocol.dto.UpgradeChoicePayload;
 import edu.hitsz.common.protocol.dto.WorldSnapshot;
 import edu.hitsz.common.protocol.json.CreateRoomPayloadJsonMapper;
+import edu.hitsz.common.protocol.json.BranchChoicePayloadJsonMapper;
 import edu.hitsz.common.protocol.json.InputMovePayloadJsonMapper;
 import edu.hitsz.common.protocol.json.InputSkillPayloadJsonMapper;
 import edu.hitsz.common.protocol.json.JoinRoomPayloadJsonMapper;
@@ -42,6 +44,7 @@ public class LocalAuthorityServer {
     private final LobbyConfigPayloadJsonMapper lobbyConfigPayloadJsonMapper;
     private final ReadyPayloadJsonMapper readyPayloadJsonMapper;
     private final UpgradeChoicePayloadJsonMapper upgradeChoicePayloadJsonMapper;
+    private final BranchChoicePayloadJsonMapper branchChoicePayloadJsonMapper;
     private final WorldSnapshotJsonMapper snapshotJsonMapper;
     private final Timer timer;
     private final AtomicLong serverSequence;
@@ -56,6 +59,7 @@ public class LocalAuthorityServer {
         this.lobbyConfigPayloadJsonMapper = new LobbyConfigPayloadJsonMapper();
         this.readyPayloadJsonMapper = new ReadyPayloadJsonMapper();
         this.upgradeChoicePayloadJsonMapper = new UpgradeChoicePayloadJsonMapper();
+        this.branchChoicePayloadJsonMapper = new BranchChoicePayloadJsonMapper();
         this.snapshotJsonMapper = new WorldSnapshotJsonMapper();
         this.timer = new Timer("local-authority-server", true);
         this.serverSequence = new AtomicLong();
@@ -119,6 +123,9 @@ public class LocalAuthorityServer {
                 break;
             case INPUT_UPGRADE_CHOICE:
                 handleUpgradeChoice(message);
+                break;
+            case INPUT_BRANCH_CHOICE:
+                handleBranchChoice(message);
                 break;
             default:
                 break;
@@ -216,6 +223,17 @@ public class LocalAuthorityServer {
         UpgradeChoicePayload payload = upgradeChoicePayloadJsonMapper.fromJson(message.getPayload());
         long nowMillis = System.currentTimeMillis();
         room.handleUpgradeChoice(message.getSessionId(), payload.getChoice(), message.getSequence(), nowMillis);
+        sendSnapshot(room, message.getSequence(), nowMillis);
+    }
+
+    private void handleBranchChoice(ProtocolMessage message) {
+        RoomRuntime room = touchRoom(message);
+        if (room == null) {
+            return;
+        }
+        BranchChoicePayload payload = branchChoicePayloadJsonMapper.fromJson(message.getPayload());
+        long nowMillis = System.currentTimeMillis();
+        room.handleBranchChoice(message.getSessionId(), payload.getBranch(), message.getSequence(), nowMillis);
         sendSnapshot(room, message.getSequence(), nowMillis);
     }
 

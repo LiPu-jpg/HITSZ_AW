@@ -1,5 +1,6 @@
 package edu.hitsz.server;
 
+import edu.hitsz.common.AircraftBranch;
 import edu.hitsz.common.ChapterId;
 import edu.hitsz.common.Difficulty;
 import edu.hitsz.common.GamePhase;
@@ -24,6 +25,15 @@ public class SubmittedDisconnectedUpgradeDoesNotBlockTransitionTest {
         worldState.syncProgressionState(nowMillis);
         worldState.getEnemyAircrafts().clear();
         worldState.syncProgressionState(nowMillis + 100L);
+        assert roomRuntime.getGamePhase() == GamePhase.BRANCH_SELECTION
+                : "Precondition failed: first boss defeat should open branch selection";
+        roomRuntime.handleBranchChoice("host-session", AircraftBranch.RED_SPEED.name(), 1L, nowMillis + 120L);
+        roomRuntime.tick(nowMillis + 120L, 10_000L);
+
+        session.getPlayerState().setScore(ProgressionPolicy.defaultPolicy().bossThreshold(Difficulty.NORMAL, 1));
+        worldState.syncProgressionState(nowMillis + 200L);
+        worldState.getEnemyAircrafts().clear();
+        worldState.syncProgressionState(nowMillis + 300L);
 
         long flashUntilMillis = roomRuntime.getChapterProgressionState().getFlashUntilMillis();
         roomRuntime.handleUpgradeChoice("host-session", UpgradeChoice.BULLET_POWER.name(), 1L, flashUntilMillis);
@@ -32,7 +42,7 @@ public class SubmittedDisconnectedUpgradeDoesNotBlockTransitionTest {
 
         assert roomRuntime.getGamePhase() == GamePhase.BATTLE
                 : "Submitted upgrades should allow chapter progression even if the player disconnects afterward";
-        assert roomRuntime.getChapterId() == ChapterId.CH2
+        assert roomRuntime.getChapterId() == ChapterId.CH3
                 : "Room should still advance to the next chapter after all required choices are already submitted";
     }
 

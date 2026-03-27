@@ -145,7 +145,8 @@ public class ServerWorldState {
 
     public void stepWorld(long nowMillis) {
         syncProgressionState(nowMillis);
-        if (chapterProgressionState.getGamePhase() == GamePhase.UPGRADE_SELECTION) {
+        if (chapterProgressionState.getGamePhase() == GamePhase.UPGRADE_SELECTION
+                || chapterProgressionState.getGamePhase() == GamePhase.BRANCH_SELECTION) {
             return;
         }
         movePlayersAction();
@@ -206,9 +207,13 @@ public class ServerWorldState {
         chapterProgressionState.startBattle(difficulty, progressionPolicy);
     }
 
-    public boolean advanceAfterUpgradeSelection() {
+    public boolean advanceAfterBossSelection() {
         for (PlayerSession session : getAllPlayerSessions()) {
+            session.getPlayerState().clearBranchSelectionState();
             session.getPlayerState().clearUpgradeSelectionState();
+        }
+        if (chapterProgressionState.isFirstBossBranchSelection()) {
+            chapterProgressionState.markFirstBossBranchSelectionCompleted();
         }
         enemySpawnCounter = 0;
         shootCounter = 0;
@@ -480,13 +485,24 @@ public class ServerWorldState {
             totalScore += session.getPlayerState().getScore();
         }
         chapterProgressionState.reconcileBossPresence(containsBossEnemy(), nowMillis, progressionPolicy);
-        if (previousPhase != GamePhase.UPGRADE_SELECTION
-                && chapterProgressionState.getGamePhase() == GamePhase.UPGRADE_SELECTION) {
-            openUpgradeSelectionForAlivePlayers();
+        if (previousPhase != chapterProgressionState.getGamePhase()) {
+            if (chapterProgressionState.getGamePhase() == GamePhase.BRANCH_SELECTION) {
+                openBranchSelectionForAlivePlayers();
+            } else if (chapterProgressionState.getGamePhase() == GamePhase.UPGRADE_SELECTION) {
+                openUpgradeSelectionForAlivePlayers();
+            }
         }
         bossActive = chapterProgressionState.isBossEncounterActive();
         if (chapterProgressionState.shouldSpawnBoss(totalScore)) {
             spawnBoss();
+        }
+    }
+
+    private void openBranchSelectionForAlivePlayers() {
+        for (PlayerSession session : getAllPlayerSessions()) {
+            if (!session.getPlayerState().getAircraft().notValid()) {
+                session.getPlayerState().openBranchSelection(progressionPolicy.firstBossBranchChoices());
+            }
         }
     }
 

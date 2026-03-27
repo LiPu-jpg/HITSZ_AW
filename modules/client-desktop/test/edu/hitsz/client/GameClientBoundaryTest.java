@@ -143,6 +143,7 @@ public class GameClientBoundaryTest {
         private boolean lastReady;
         private String lastDifficulty;
         private String lastUpgradeChoice;
+        private String lastBranchChoice;
 
         @Override
         public void start() {
@@ -192,6 +193,11 @@ public class GameClientBoundaryTest {
         @Override
         public void publishUpgradeChoice(String choice) {
             lastUpgradeChoice = choice;
+        }
+
+        @Override
+        public void publishBranchChoice(String branch) {
+            lastBranchChoice = branch;
         }
     }
 }

@@ -1,8 +1,19 @@
 package edu.hitsz.server;
 
+import edu.hitsz.common.AircraftBranch;
 import edu.hitsz.common.Difficulty;
 
+import java.util.Arrays;
+import java.util.Collections;
+import java.util.List;
+
 public class ProgressionPolicy {
+
+    private static final List<AircraftBranch> FIRST_BOSS_BRANCH_CHOICES = Collections.unmodifiableList(Arrays.asList(
+            AircraftBranch.RED_SPEED,
+            AircraftBranch.GREEN_DEFENSE,
+            AircraftBranch.BLACK_HEAVY
+    ));
 
     public static ProgressionPolicy defaultPolicy() {
         return new ProgressionPolicy();
@@ -53,5 +64,9 @@ public class ProgressionPolicy {
 
     public long chapterTransitionFlashMillis() {
         return GameplayBalance.CHAPTER_TRANSITION_FLASH_MILLIS;
+    }
+
+    public List<AircraftBranch> firstBossBranchChoices() {
+        return FIRST_BOSS_BRANCH_CHOICES;
     }
 }

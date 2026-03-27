@@ -4,6 +4,7 @@ import edu.hitsz.common.Difficulty;
 import edu.hitsz.common.GameConstants;
 import edu.hitsz.common.ChapterId;
 import edu.hitsz.common.GamePhase;
+import edu.hitsz.common.AircraftBranch;
 import edu.hitsz.common.UpgradeChoice;
 import edu.hitsz.common.protocol.dto.WorldSnapshot;
 import edu.hitsz.server.command.MoveCommand;
@@ -189,22 +190,39 @@ public class RoomRuntime {
         }
     }
 
+    public synchronized void handleBranchChoice(String sessionId, String branch, long sequence, long timestamp) {
+        if (!gameStarted || worldState.getGamePhase() != GamePhase.BRANCH_SELECTION) {
+            return;
+        }
+        PlayerSession session = commandRouter.validate(sessionId);
+        if (session.getPlayerState().getAircraft().notValid()) {
+            return;
+        }
+        try {
+            session.getPlayerState().applyBranchChoice(AircraftBranch.valueOf(branch));
+        } catch (IllegalArgumentException ignored) {
+            // Ignore invalid branch choices from the client.
+        }
+    }
+
     public synchronized void tick(long nowMillis, long disconnectedSessionRetentionMillis) {
         worldState.getSessionRegistry().removeExpiredDisconnectedSessions(nowMillis, disconnectedSessionRetentionMillis);
         reassignHostIfNecessary();
         if (gameStarted) {
-            if (worldState.getGamePhase() == GamePhase.UPGRADE_SELECTION) {
+            if (worldState.getGamePhase() == GamePhase.UPGRADE_SELECTION
+                    || worldState.getGamePhase() == GamePhase.BRANCH_SELECTION) {
                 if (worldState.getSessionRegistry().allSessions().isEmpty()) {
                     returnToLobby();
                     return;
                 }
-                if (nowMillis < worldState.getFlashUntilMillis()) {
+                if (worldState.getGamePhase() == GamePhase.UPGRADE_SELECTION
+                        && nowMillis < worldState.getFlashUntilMillis()) {
                     return;
                 }
-                if (!allAlivePlayersSelectedUpgrade()) {
+                if (!selectionRequirementsSatisfied()) {
                     return;
                 }
-                if (!worldState.advanceAfterUpgradeSelection()) {
+                if (!worldState.advanceAfterBossSelection()) {
                     returnToLobby();
                     return;
                 }
@@ -243,6 +261,25 @@ public class RoomRuntime {
             }
         }
         return true;
+    }
+
+    private boolean allAlivePlayersSelectedBranch() {
+        for (PlayerSession session : worldState.getSessionRegistry().allSessions()) {
+            if (session.getPlayerState().getAircraft().notValid()) {
+                continue;
+            }
+            if (session.getPlayerState().hasPendingBranchChoice()) {
+                return false;
+            }
+        }
+        return true;
+    }
+
+    private boolean selectionRequirementsSatisfied() {
+        if (worldState.getGamePhase() == GamePhase.BRANCH_SELECTION) {
+            return allAlivePlayersSelectedBranch();
+        }
+        return allAlivePlayersSelectedUpgrade();
     }
 
     public synchronized WorldSnapshot buildSnapshot() {
