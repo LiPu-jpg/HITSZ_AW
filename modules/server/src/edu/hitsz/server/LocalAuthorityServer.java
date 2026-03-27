@@ -130,7 +130,7 @@ public class LocalAuthorityServer {
         if (room == null) {
             return;
         }
-        room.addOrReconnectPlayer(message.getSessionId(), derivePlayerId(message.getSessionId()), null, message.getTimestamp());
+        room.addOrReconnectPlayer(message.getSessionId(), derivePlayerId(message.getSessionId()), message.getTimestamp());
         sendSnapshot(room, message.getSequence(), System.currentTimeMillis());
     }
 

@@ -8,10 +8,6 @@ public class JoinRoomPayload {
         this.roomCode = roomCode;
     }
 
-    public JoinRoomPayload(String roomCode, String selectedSkill) {
-        this(roomCode);
-    }
-
     public String getRoomCode() {
         return roomCode;
     }

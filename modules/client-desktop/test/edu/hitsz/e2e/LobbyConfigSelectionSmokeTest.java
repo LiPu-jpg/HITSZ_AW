@@ -52,7 +52,7 @@ public class LobbyConfigSelectionSmokeTest {
                 "session-local",
                 2L,
                 1100L,
-                lobbyConfigMapper.toJson(new LobbyConfigPayload(Difficulty.HARD.name(), "BOMB"))
+                lobbyConfigMapper.toJson(new LobbyConfigPayload(Difficulty.HARD.name()))
         ));
 
         RoomTestSupport.waitUntil(() ->
@@ -67,7 +67,7 @@ public class LobbyConfigSelectionSmokeTest {
                 "session-2",
                 3L,
                 1200L,
-                lobbyConfigMapper.toJson(new LobbyConfigPayload(Difficulty.EASY.name(), "SHIELD"))
+                lobbyConfigMapper.toJson(new LobbyConfigPayload(Difficulty.EASY.name()))
         ));
 
         Thread.sleep(150L);

@@ -80,11 +80,6 @@ public class SocketClientSession implements ClientCommandPublisher {
     }
 
     @Override
-    public void publishCreateRoom(String difficulty, String selectedSkill) {
-        publishCreateRoom(difficulty);
-    }
-
-    @Override
     public void publishCreateRoom(String difficulty) {
         transport.send(new ProtocolMessage(
                 MessageType.CREATE_ROOM,
@@ -93,11 +88,6 @@ public class SocketClientSession implements ClientCommandPublisher {
                 System.currentTimeMillis(),
                 createRoomPayloadJsonMapper.toJson(new CreateRoomPayload(difficulty))
         ));
-    }
-
-    @Override
-    public void publishJoinRoom(String roomCode, String selectedSkill) {
-        publishJoinRoom(roomCode);
     }
 
     @Override
@@ -153,11 +143,6 @@ public class SocketClientSession implements ClientCommandPublisher {
                 System.currentTimeMillis(),
                 readyPayloadJsonMapper.toJson(new ReadyPayload(ready))
         ));
-    }
-
-    @Override
-    public void publishLobbyConfig(String difficulty, String selectedSkill) {
-        publishLobbyConfig(difficulty);
     }
 
     @Override

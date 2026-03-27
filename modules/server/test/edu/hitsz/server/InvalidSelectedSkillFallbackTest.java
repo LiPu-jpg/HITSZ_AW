@@ -8,7 +8,7 @@ public class InvalidSelectedSkillFallbackTest {
 
     public static void main(String[] args) {
         RoomRuntime roomRuntime = new RoomRuntime("ROOM-1", "host-session", edu.hitsz.common.Difficulty.NORMAL);
-        roomRuntime.addOrReconnectPlayer("host-session", "player-local", "NOT_A_SKILL", 0L);
+        roomRuntime.addOrReconnectPlayer("host-session", "player-local", 0L);
 
         assert roomRuntime.findSession("host-session").getPlayerState().getSelectedSkill() == null
                 : "Unknown selected skills should be ignored once lobby skill selection is removed";

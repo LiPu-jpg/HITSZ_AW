@@ -20,7 +20,7 @@ public class LocalRuntimeSessionTest {
         );
         game.attachCommandPublisher(session);
         session.start();
-        session.publishCreateRoom("NORMAL", "FREEZE");
+        session.publishCreateRoom("NORMAL");
 
         waitUntil(() -> game.getPlayerAircrafts().size() == 1, 3000L);
         game.handleLocalReadyToggle();

@@ -127,6 +127,7 @@ public class PlayerRuntimeState {
         score = 0;
         aircraftBranch = AircraftBranch.STARTER_BLUE;
         branchUnlocked = false;
+        selectedSkill = null;
         availableUpgradeChoices = Collections.emptyList();
         selectedUpgradeChoice = null;
         fireRateUpgradeLevel = 0;

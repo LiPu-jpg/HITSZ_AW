@@ -19,16 +19,6 @@ public class RoomRegistry {
             String sessionId,
             String playerId,
             Difficulty difficulty,
-            String selectedSkill,
-            long nowMillis
-    ) {
-        return createRoom(sessionId, playerId, difficulty, nowMillis);
-    }
-
-    public synchronized RoomRuntime createRoom(
-            String sessionId,
-            String playerId,
-            Difficulty difficulty,
             long nowMillis
     ) {
         leaveCurrentRoom(sessionId);
@@ -38,16 +28,6 @@ public class RoomRegistry {
         sessionToRoomCode.put(sessionId, roomCode);
         room.addOrReconnectPlayer(sessionId, playerId, nowMillis);
         return room;
-    }
-
-    public synchronized RoomRuntime joinRoom(
-            String sessionId,
-            String playerId,
-            String roomCode,
-            String selectedSkill,
-            long nowMillis
-    ) {
-        return joinRoom(sessionId, playerId, roomCode, nowMillis);
     }
 
     public synchronized RoomRuntime joinRoom(

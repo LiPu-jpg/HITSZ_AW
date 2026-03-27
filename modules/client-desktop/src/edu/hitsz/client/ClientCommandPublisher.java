@@ -6,17 +6,9 @@ public interface ClientCommandPublisher {
 
     void stop();
 
-    void publishCreateRoom(String difficulty, String selectedSkill);
+    void publishCreateRoom(String difficulty);
 
-    default void publishCreateRoom(String difficulty) {
-        publishCreateRoom(difficulty, null);
-    }
-
-    void publishJoinRoom(String roomCode, String selectedSkill);
-
-    default void publishJoinRoom(String roomCode) {
-        publishJoinRoom(roomCode, null);
-    }
+    void publishJoinRoom(String roomCode);
 
     void publishStartGame();
 
@@ -26,11 +18,7 @@ public interface ClientCommandPublisher {
 
     void publishReady(boolean ready);
 
-    void publishLobbyConfig(String difficulty, String selectedSkill);
-
-    default void publishLobbyConfig(String difficulty) {
-        publishLobbyConfig(difficulty, null);
-    }
+    void publishLobbyConfig(String difficulty);
 
     void publishUpgradeChoice(String choice);
 }

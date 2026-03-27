@@ -1,6 +1,8 @@
 package edu.hitsz.protocol;
 
 import edu.hitsz.common.Difficulty;
+import edu.hitsz.common.protocol.dto.CreateRoomPayload;
+import edu.hitsz.common.protocol.dto.JoinRoomPayload;
 import edu.hitsz.common.protocol.dto.LobbyConfigPayload;
 import edu.hitsz.common.protocol.dto.WorldSnapshot;
 import edu.hitsz.common.protocol.json.LobbyConfigPayloadJsonMapper;
@@ -13,12 +15,13 @@ public class LobbyConfigProtocolTest {
     public static void main(String[] args) {
         lobbyConfigPayloadRoundTrips();
         lobbyConfigPayloadDoesNotExposeSelectedSkill();
+        payloadTypesExposeOnlySingleArgumentConstructors();
         progressionFieldsRoundTripInWorldSnapshot();
     }
 
     private static void lobbyConfigPayloadRoundTrips() {
         LobbyConfigPayloadJsonMapper mapper = new LobbyConfigPayloadJsonMapper();
-        LobbyConfigPayload original = new LobbyConfigPayload(Difficulty.HARD.name(), "BOMB");
+        LobbyConfigPayload original = new LobbyConfigPayload(Difficulty.HARD.name());
 
         String json = mapper.toJson(original);
         LobbyConfigPayload decoded = mapper.fromJson(json);
@@ -30,6 +33,15 @@ public class LobbyConfigProtocolTest {
     private static void lobbyConfigPayloadDoesNotExposeSelectedSkill() {
         assert returnType(LobbyConfigPayload.class, "getSelectedSkill") == null
                 : "Lobby config payload should no longer expose selectedSkill";
+    }
+
+    private static void payloadTypesExposeOnlySingleArgumentConstructors() {
+        assert constructorsMatch(CreateRoomPayload.class, 1)
+                : "CreateRoomPayload should only expose a single-argument constructor";
+        assert constructorsMatch(JoinRoomPayload.class, 1)
+                : "JoinRoomPayload should only expose a single-argument constructor";
+        assert constructorsMatch(LobbyConfigPayload.class, 1)
+                : "LobbyConfigPayload should only expose a single-argument constructor";
     }
 
     private static void progressionFieldsRoundTripInWorldSnapshot() {
@@ -56,5 +68,13 @@ public class LobbyConfigProtocolTest {
         } catch (NoSuchMethodException e) {
             return null;
         }
+    }
+
+    private static boolean constructorsMatch(Class<?> type, int expectedParameterCount) {
+        java.lang.reflect.Constructor<?>[] constructors = type.getConstructors();
+        if (constructors.length != 1) {
+            return false;
+        }
+        return constructors[0].getParameterCount() == expectedParameterCount;
     }
 }

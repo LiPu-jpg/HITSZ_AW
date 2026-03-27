@@ -71,32 +71,11 @@ public class RoomRuntime {
         return findSession(sessionId) != null;
     }
 
-    public synchronized void addOrReconnectPlayer(String sessionId, String playerId, String selectedSkill, long nowMillis) {
-        PlayerSession session = worldState.getSessionRegistry().find(sessionId);
-        if (gameStarted && session == null) {
-            return;
-        }
-        boolean newSession = session == null;
-        if (session == null) {
-            session = worldState.getSessionRegistry().create(sessionId, playerId);
-            resetSessionForLobby(session);
-        } else if (!gameStarted && shouldResetForLobby(session)) {
-            resetSessionForLobby(session);
-        }
-        session.markConnected(nowMillis);
-        session.markSeen(nowMillis);
-        if (selectedSkill != null && (!gameStarted || newSession)) {
-            session.getPlayerState().setSelectedSkill(selectedSkill);
-        }
-        session.setReady(false);
-    }
-
     public synchronized void addOrReconnectPlayer(String sessionId, String playerId, long nowMillis) {
         PlayerSession session = worldState.getSessionRegistry().find(sessionId);
         if (gameStarted && session == null) {
             return;
         }
-        boolean newSession = session == null;
         if (session == null) {
             session = worldState.getSessionRegistry().create(sessionId, playerId);
             resetSessionForLobby(session);
@@ -124,10 +103,6 @@ public class RoomRuntime {
         if (!gameStarted) {
             session.setReady(false);
         }
-    }
-
-    public synchronized void updateLobbyConfig(String sessionId, Difficulty difficulty, String selectedSkill) {
-        updateLobbyConfig(sessionId, difficulty);
     }
 
     public synchronized void updateLobbyConfig(String sessionId, Difficulty difficulty) {

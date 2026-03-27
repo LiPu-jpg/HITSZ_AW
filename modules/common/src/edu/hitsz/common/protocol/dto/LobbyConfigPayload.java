@@ -8,10 +8,6 @@ public class LobbyConfigPayload {
         this.difficulty = difficulty;
     }
 
-    public LobbyConfigPayload(String difficulty, String selectedSkill) {
-        this(difficulty);
-    }
-
     public String getDifficulty() {
         return difficulty;
     }

@@ -3,6 +3,7 @@ package edu.hitsz.client;
 import edu.hitsz.common.Difficulty;
 
 import java.lang.reflect.Method;
+import java.lang.reflect.Modifier;
 import java.util.concurrent.atomic.AtomicReference;
 
 public class LauncherNoSkillSelectionTest {
@@ -14,6 +15,18 @@ public class LauncherNoSkillSelectionTest {
         assert Difficulty.NORMAL.name().equals(defaults.getDifficulty()) : "Create-room flow should default to NORMAL";
         assert !hasMethod(LauncherSelectionModel.class, "getSelectedSkill")
                 : "Launcher selection should no longer expose lobby skill state";
+        assert hasPublicMethod(ClientCommandPublisher.class, "publishCreateRoom", String.class)
+                : "ClientCommandPublisher should expose create-room without selected skill";
+        assert hasPublicMethod(ClientCommandPublisher.class, "publishJoinRoom", String.class)
+                : "ClientCommandPublisher should expose join-room without selected skill";
+        assert hasPublicMethod(ClientCommandPublisher.class, "publishLobbyConfig", String.class)
+                : "ClientCommandPublisher should expose lobby config without selected skill";
+        assert !hasMethod(ClientCommandPublisher.class, "publishCreateRoom", String.class, String.class)
+                : "ClientCommandPublisher should not keep the old create-room overload";
+        assert !hasMethod(ClientCommandPublisher.class, "publishJoinRoom", String.class, String.class)
+                : "ClientCommandPublisher should not keep the old join-room overload";
+        assert !hasMethod(ClientCommandPublisher.class, "publishLobbyConfig", String.class, String.class)
+                : "ClientCommandPublisher should not keep the old lobby-config overload";
 
         AtomicReference<LauncherSelectionModel> submitted = new AtomicReference<>();
         LauncherPanel panel = new LauncherPanel(submitted::set);
@@ -79,6 +92,23 @@ public class LauncherNoSkillSelectionTest {
             }
         }
         return false;
+    }
+
+    private static boolean hasMethod(Class<?> type, String methodName, Class<?>... parameterTypes) {
+        try {
+            type.getMethod(methodName, parameterTypes);
+            return true;
+        } catch (NoSuchMethodException e) {
+            return false;
+        }
+    }
+
+    private static boolean hasPublicMethod(Class<?> type, String methodName, Class<?>... parameterTypes) {
+        try {
+            return Modifier.isPublic(type.getMethod(methodName, parameterTypes).getModifiers());
+        } catch (NoSuchMethodException e) {
+            return false;
+        }
     }
 
     private static String invokeString(Object target, String methodName) throws Exception {

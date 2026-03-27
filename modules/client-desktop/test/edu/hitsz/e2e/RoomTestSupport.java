@@ -17,10 +17,6 @@ final class RoomTestSupport {
     private RoomTestSupport() {
     }
 
-    static ProtocolMessage createRoomMessage(String sessionId, long sequence, String difficulty, String selectedSkill) {
-        return createRoomMessage(sessionId, sequence, difficulty);
-    }
-
     static ProtocolMessage createRoomMessage(String sessionId, long sequence, String difficulty) {
         return new ProtocolMessage(
                 MessageType.CREATE_ROOM,
@@ -29,10 +25,6 @@ final class RoomTestSupport {
                 System.currentTimeMillis(),
                 "{\"difficulty\":\"" + difficulty + "\"}"
         );
-    }
-
-    static ProtocolMessage joinRoomMessage(String sessionId, long sequence, String roomCode, String selectedSkill) {
-        return joinRoomMessage(sessionId, sequence, roomCode);
     }
 
     static ProtocolMessage joinRoomMessage(String sessionId, long sequence, String roomCode) {

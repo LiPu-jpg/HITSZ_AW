@@ -9,13 +9,15 @@ public class StarterBlueDefaultStateTest {
 
     public static void main(String[] args) {
         RoomRuntime roomRuntime = new RoomRuntime("ROOM-1", "host-session", Difficulty.NORMAL);
-        roomRuntime.addOrReconnectPlayer("host-session", "player-local", null, 0L);
+        roomRuntime.addOrReconnectPlayer("host-session", "player-local", 0L);
 
         PlayerSession session = roomRuntime.findSession("host-session");
+        session.getPlayerState().setSelectedSkill("BOMB");
+        session.getPlayerState().resetForNewRound(320, 640);
 
         assert session != null : "Room should retain the connected player";
         assert session.getPlayerState().getSelectedSkill() == null
-                : "Starter-blue players should not begin with an active skill";
+                : "Resetting to starter-blue should clear any previously selected skill";
         assert AircraftBranch.STARTER_BLUE == invokeAircraftBranch(session.getPlayerState())
                 : "Starter-blue should be the only initial branch";
         assert roomRuntime.buildSnapshot().getPlayerSnapshots().get(0).getSelectedSkill() == null

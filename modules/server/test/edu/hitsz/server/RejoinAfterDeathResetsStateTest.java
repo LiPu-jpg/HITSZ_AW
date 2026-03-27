@@ -19,7 +19,7 @@ public class RejoinAfterDeathResetsStateTest {
                 "session-local",
                 1L,
                 900L,
-                "{\"difficulty\":\"NORMAL\",\"selectedSkill\":\"FREEZE\"}"
+                "{\"difficulty\":\"NORMAL\"}"
         ));
 
         PlayerSession session = findSession(server, "session-local");

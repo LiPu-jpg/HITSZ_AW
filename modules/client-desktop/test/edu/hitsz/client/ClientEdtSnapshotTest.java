@@ -27,7 +27,7 @@ public class ClientEdtSnapshotTest {
         );
         game.attachCommandPublisher(session);
         session.start();
-        session.publishCreateRoom("NORMAL", "FREEZE");
+        session.publishCreateRoom("NORMAL");
 
         boolean applied = game.awaitSnapshot(3000L);
 
