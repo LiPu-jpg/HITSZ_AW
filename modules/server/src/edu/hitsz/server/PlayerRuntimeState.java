@@ -1,6 +1,7 @@
 package edu.hitsz.server;
 
 import edu.hitsz.common.AircraftBranch;
+import edu.hitsz.common.GameConstants;
 import edu.hitsz.common.UpgradeChoice;
 import edu.hitsz.server.skill.PlayerSkillState;
 import edu.hitsz.server.skill.SkillType;
@@ -57,13 +58,15 @@ public class PlayerRuntimeState {
     }
 
     public void setPosition(int x, int y) {
-        aircraft.setLocation(x, y);
-        setTargetPosition(x, y);
+        int clampedX = clampX(x);
+        int clampedY = clampY(y);
+        aircraft.setLocation(clampedX, clampedY);
+        setTargetPosition(clampedX, clampedY);
     }
 
     public void setTargetPosition(int x, int y) {
-        this.targetX = x;
-        this.targetY = y;
+        this.targetX = clampX(x);
+        this.targetY = clampY(y);
     }
 
     public int getTargetX() {
@@ -274,7 +277,7 @@ public class PlayerRuntimeState {
         int moveSpeed = GameplayBalance.playerMoveSpeed(aircraftBranch);
         int stepX = clamp(deltaX, moveSpeed);
         int stepY = clamp(deltaY, moveSpeed);
-        aircraft.setLocation(currentX + stepX, currentY + stepY);
+        aircraft.setLocation(clampX(currentX + stepX), clampY(currentY + stepY));
     }
 
     private int clamp(int delta, int limit) {
@@ -285,6 +288,16 @@ public class PlayerRuntimeState {
             return -limit;
         }
         return delta;
+    }
+
+    private int clampX(int x) {
+        int halfWidth = aircraft.getWidth() / 2;
+        return Math.max(halfWidth, Math.min(GameConstants.WINDOW_WIDTH - halfWidth, x));
+    }
+
+    private int clampY(int y) {
+        int halfHeight = aircraft.getHeight() / 2;
+        return Math.max(halfHeight, Math.min(GameConstants.WINDOW_HEIGHT - halfHeight, y));
     }
 
     private String normalizeSelectedSkill(String selectedSkill) {
