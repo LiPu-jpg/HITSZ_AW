@@ -39,6 +39,7 @@ public class Game extends JPanel {
     private final List<AbstractAircraft> playerAircrafts;
     private final ClientWorldState clientWorldState;
     private final SnapshotApplier snapshotApplier;
+    private final GameAudioStateMachine gameAudioStateMachine;
     private ClientCommandPublisher commandPublisher;
     private String localSessionId;
     private final List<AbstractAircraft> enemyAircrafts;
@@ -85,6 +86,7 @@ public class Game extends JPanel {
         playerAircrafts = new LinkedList<>();
         clientWorldState = new ClientWorldState();
         snapshotApplier = new DefaultSnapshotApplier();
+        gameAudioStateMachine = new GameAudioStateMachine();
         heroBullets = new LinkedList<>();
         enemyBullets = new LinkedList<>();
         activeLasers = new LinkedList<>();
@@ -228,6 +230,14 @@ public class Game extends JPanel {
         chapterId = clientWorldState.getChapterId();
         gamePhase = clientWorldState.getGamePhase();
         chapterTransitionFlash = clientWorldState.isChapterTransitionFlash();
+        AudioManager.getInstance().apply(
+                gameAudioStateMachine.onSnapshot(
+                        gameStarted,
+                        bossActive,
+                        localHp,
+                        explosionSnapshots.size()
+                )
+        );
     }
 
     public void attachCommandPublisher(ClientCommandPublisher commandPublisher) {

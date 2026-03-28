@@ -41,6 +41,7 @@ public class ClientMain {
                 if (onClose != null) {
                     onClose.run();
                 }
+                AudioManager.getInstance().shutdown();
             }
         });
         LauncherPanel launcherPanel = new LauncherPanel(selection ->
@@ -74,6 +75,7 @@ public class ClientMain {
                 if (onClose != null) {
                     onClose.run();
                 }
+                AudioManager.getInstance().shutdown();
             }
         });
         frame.revalidate();

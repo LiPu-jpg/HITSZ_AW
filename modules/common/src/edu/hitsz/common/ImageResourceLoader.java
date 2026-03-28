@@ -10,7 +10,14 @@ import java.nio.file.Paths;
 
 public final class ImageResourceLoader {
 
-    private static final String IMAGE_ROOT = "images";
+    private static final String[] CLASSPATH_ROOTS = {
+            "videos/images",
+            "images"
+    };
+    private static final String[][] FILESYSTEM_ROOTS = {
+            {"src", "videos", "images"},
+            {"src", "images"}
+    };
 
     private ImageResourceLoader() {
     }
@@ -30,19 +37,21 @@ public final class ImageResourceLoader {
             }
         }
 
-        Path fallbackPath = Paths.get("src", IMAGE_ROOT, fileName);
-        if (Files.exists(fallbackPath)) {
-            try (InputStream inputStream = Files.newInputStream(fallbackPath)) {
-                return ImageIO.read(inputStream);
-            } catch (IOException e) {
-                throw new IllegalStateException("Failed to read image file: " + fallbackPath.toAbsolutePath(), e);
+        for (String[] root : FILESYSTEM_ROOTS) {
+            Path fallbackPath = Paths.get(root[0], java.util.Arrays.copyOfRange(root, 1, root.length)).resolve(fileName);
+            if (Files.exists(fallbackPath)) {
+                try (InputStream inputStream = Files.newInputStream(fallbackPath)) {
+                    return ImageIO.read(inputStream);
+                } catch (IOException e) {
+                    throw new IllegalStateException("Failed to read image file: " + fallbackPath.toAbsolutePath(), e);
+                }
             }
         }
 
         throw new IllegalStateException(
                 "Image resource not found: " + fileName
-                        + ". Expected classpath resource /" + IMAGE_ROOT + "/" + fileName
-                        + " or filesystem path " + fallbackPath.toAbsolutePath()
+                        + ". Expected classpath resource under " + String.join(", ", CLASSPATH_ROOTS)
+                        + " or filesystem path under src/videos/images or src/images"
         );
     }
 
@@ -55,15 +64,21 @@ public final class ImageResourceLoader {
     }
 
     private static BufferedImage loadFromClasspath(String fileName) {
-        String resourcePath = IMAGE_ROOT + "/" + fileName;
         ClassLoader contextClassLoader = Thread.currentThread().getContextClassLoader();
-        if (contextClassLoader != null) {
-            BufferedImage image = tryRead(contextClassLoader, resourcePath);
+        for (String root : CLASSPATH_ROOTS) {
+            String resourcePath = root + "/" + fileName;
+            if (contextClassLoader != null) {
+                BufferedImage image = tryRead(contextClassLoader, resourcePath);
+                if (image != null) {
+                    return image;
+                }
+            }
+            BufferedImage image = tryRead(ImageResourceLoader.class.getClassLoader(), resourcePath);
             if (image != null) {
                 return image;
             }
         }
-        return tryRead(ImageResourceLoader.class.getClassLoader(), resourcePath);
+        return null;
     }
 
     private static BufferedImage tryRead(ClassLoader classLoader, String resourcePath) {
