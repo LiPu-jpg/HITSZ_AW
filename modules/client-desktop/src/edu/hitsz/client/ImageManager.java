@@ -75,45 +75,45 @@ public class ImageManager {
     public static BufferedImage FREEZE_SUPPLY_IMAGE;
 
     static {
-        LAUNCHER_BACKGROUND_IMAGE = ImageResourceLoader.load("最终素材/背景5-天域.jpg");
-        EASY_BACKGROUND_IMAGE = ImageResourceLoader.load("最终素材/背景1-大草原.jpg");
-        NORMAL_BACKGROUND_IMAGE = ImageResourceLoader.load("最终素材/背景2-砂石之地.jpg");
-        HARD_BACKGROUND_IMAGE = ImageResourceLoader.load("最终素材/背景3-河源工厂.jpg");
-        BOSS_BACKGROUND_IMAGE = ImageResourceLoader.load("最终素材/背景4-熔岩火山.jpg");
+        LAUNCHER_BACKGROUND_IMAGE = ImageResourceLoader.load("背景5-天域.jpg");
+        EASY_BACKGROUND_IMAGE = ImageResourceLoader.load("背景1-大草原.jpg");
+        NORMAL_BACKGROUND_IMAGE = ImageResourceLoader.load("背景2-砂石之地.jpg");
+        HARD_BACKGROUND_IMAGE = ImageResourceLoader.load("背景3-河源工厂.jpg");
+        BOSS_BACKGROUND_IMAGE = ImageResourceLoader.load("背景4-熔岩火山.jpg");
         BACKGROUND_IMAGE = NORMAL_BACKGROUND_IMAGE;
 
-        STARTER_BLUE_IMAGE = ImageResourceLoader.load("最终素材/初始飞机.png");
+        STARTER_BLUE_IMAGE = ImageResourceLoader.load("初始飞机.png");
         HERO_IMAGE = STARTER_BLUE_IMAGE;
-        RED_SPEED_IMAGE = ImageResourceLoader.load("最终素材/速度分支.png");
-        GREEN_DEFENSE_IMAGE = ImageResourceLoader.load("最终素材/防御分支.png");
-        BLACK_HEAVY_IMAGE = ImageResourceLoader.load("最终素材/重轰分支.png");
+        RED_SPEED_IMAGE = ImageResourceLoader.load("速度分支.png");
+        GREEN_DEFENSE_IMAGE = ImageResourceLoader.load("防御分支.png");
+        BLACK_HEAVY_IMAGE = ImageResourceLoader.load("重轰分支.png");
 
-        MOB_ENEMY_IMAGE = ImageResourceLoader.load("最终素材/通用杂兵.png");
-        COMMON_SOLDIER_IMAGE = ImageResourceLoader.load("最终素材/通用普通兵.png");
-        CH1_ELITE_ENEMY_IMAGE = ImageResourceLoader.load("最终素材/1号地图-精英兵.png");
-        CH2_ELITE_ENEMY_IMAGE = ImageResourceLoader.load("最终素材/2号地图-精英兵.png");
-        CH3_ELITE_ENEMY_IMAGE = ImageResourceLoader.load("最终素材/3号地图-精英兵.png");
-        CH4_ELITE_ENEMY_IMAGE = ImageResourceLoader.load("最终素材/4号地图-精英兵.png");
-        CH5_ELITE_ENEMY_IMAGE = ImageResourceLoader.load("最终素材/5号地图-精英兵.png");
-        CH1_BOSS_ENEMY_IMAGE = ImageResourceLoader.load("最终素材/boss1.png");
-        CH2_BOSS_ENEMY_IMAGE = ImageResourceLoader.load("最终素材/boss2.png");
-        CH3_BOSS_ENEMY_IMAGE = ImageResourceLoader.load("最终素材/boss3.png");
-        CH4_BOSS_ENEMY_IMAGE = ImageResourceLoader.load("最终素材/boss4.png");
-        CH5_BOSS_ENEMY_IMAGE = ImageResourceLoader.load("最终素材/boss5.png");
+        MOB_ENEMY_IMAGE = ImageResourceLoader.load("通用杂兵.png");
+        COMMON_SOLDIER_IMAGE = ImageResourceLoader.load("通用普通兵.png");
+        CH1_ELITE_ENEMY_IMAGE = ImageResourceLoader.load("1号地图-精英兵.png");
+        CH2_ELITE_ENEMY_IMAGE = ImageResourceLoader.load("2号地图-精英兵.png");
+        CH3_ELITE_ENEMY_IMAGE = ImageResourceLoader.load("3号地图-精英兵.png");
+        CH4_ELITE_ENEMY_IMAGE = ImageResourceLoader.load("4号地图-精英兵.png");
+        CH5_ELITE_ENEMY_IMAGE = ImageResourceLoader.load("5号地图-精英兵.png");
+        CH1_BOSS_ENEMY_IMAGE = ImageResourceLoader.load("boss1.png");
+        CH2_BOSS_ENEMY_IMAGE = ImageResourceLoader.load("boss2.png");
+        CH3_BOSS_ENEMY_IMAGE = ImageResourceLoader.load("boss3.png");
+        CH4_BOSS_ENEMY_IMAGE = ImageResourceLoader.load("boss4.png");
+        CH5_BOSS_ENEMY_IMAGE = ImageResourceLoader.load("boss5.png");
         ELITE_ENEMY_IMAGE = CH1_ELITE_ENEMY_IMAGE;
         ELITE_PLUS_ENEMY_IMAGE = COMMON_SOLDIER_IMAGE;
         ACE_ENEMY_IMAGE = CH1_ELITE_ENEMY_IMAGE;
         BOSS_ENEMY_IMAGE = CH1_BOSS_ENEMY_IMAGE;
 
-        HERO_BULLET_IMAGE = ImageResourceLoader.load("最终素材/普通子弹-友.png");
-        EXPLOSIVE_HERO_BULLET_IMAGE = ImageResourceLoader.load("最终素材/爆炸子弹-友.png");
-        ENEMY_BULLET_IMAGE = ImageResourceLoader.load("最终素材/普通子弹-敌.png");
-        EXPLOSIVE_ENEMY_BULLET_IMAGE = ImageResourceLoader.load("最终素材/爆炸子弹-敌.png");
-        BLOOD_SUPPLY_IMAGE = ImageResourceLoader.load("最终素材/回血道具.png");
-        FIRE_SUPPLY_IMAGE = ImageResourceLoader.load("最终素材/子弹增强道具.png");
-        FIRE_PLUS_SUPPLY_IMAGE = ImageResourceLoader.load("最终素材/奇怪的标识.png");
-        BOMB_SUPPLY_IMAGE = ImageResourceLoader.load("最终素材/爆炸道具.png");
-        FREEZE_SUPPLY_IMAGE = ImageResourceLoader.load("最终素材/冻结道具.png");
+        HERO_BULLET_IMAGE = ImageResourceLoader.load("普通子弹-友.png");
+        EXPLOSIVE_HERO_BULLET_IMAGE = ImageResourceLoader.load("爆炸子弹-友.png");
+        ENEMY_BULLET_IMAGE = ImageResourceLoader.load("普通子弹-敌.png");
+        EXPLOSIVE_ENEMY_BULLET_IMAGE = ImageResourceLoader.load("爆炸子弹-敌.png");
+        BLOOD_SUPPLY_IMAGE = ImageResourceLoader.load("回血道具.png");
+        FIRE_SUPPLY_IMAGE = ImageResourceLoader.load("子弹增强道具.png");
+        FIRE_PLUS_SUPPLY_IMAGE = ImageResourceLoader.load("奇怪的标识.png");
+        BOMB_SUPPLY_IMAGE = ImageResourceLoader.load("爆炸道具.png");
+        FREEZE_SUPPLY_IMAGE = ImageResourceLoader.load("冻结道具.png");
 
         putMappings(HERO_IMAGE, HeroAircraft.class.getName(), OtherPlayer.class.getName());
         putMappings(MOB_ENEMY_IMAGE, MobEnemy.class.getName());
