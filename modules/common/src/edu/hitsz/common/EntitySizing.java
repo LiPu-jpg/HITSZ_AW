@@ -1,13 +1,18 @@
 package edu.hitsz.common;
 
 /**
- * Collision sizing for authoritative game logic.
+ * 服务端碰撞箱尺寸。
+ *
+ * 这里只影响命中判定，不影响客户端图片显示大小。
+ * 如果你觉得“明明没碰到却算碰到”或者“明明碰到了却没算”，优先调这里。
  */
 public final class EntitySizing {
 
+    // 玩家机碰撞箱
     public static final int HERO_WIDTH = 100;
     public static final int HERO_HEIGHT = 83;
 
+    // 敌机碰撞箱
     public static final int MOB_ENEMY_WIDTH = 75;
     public static final int MOB_ENEMY_HEIGHT = 50;
 
@@ -23,12 +28,14 @@ public final class EntitySizing {
     public static final int BOSS_ENEMY_WIDTH = 300;
     public static final int BOSS_ENEMY_HEIGHT = 200;
 
+    // 子弹碰撞箱
     public static final int HERO_BULLET_WIDTH = 10;
     public static final int HERO_BULLET_HEIGHT = 25;
 
     public static final int ENEMY_BULLET_WIDTH = 10;
     public static final int ENEMY_BULLET_HEIGHT = 18;
 
+    // 道具碰撞箱
     public static final int BLOOD_SUPPLY_WIDTH = 33;
     public static final int BLOOD_SUPPLY_HEIGHT = 30;
 

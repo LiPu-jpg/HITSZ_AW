@@ -20,10 +20,12 @@ public class ProgressionPolicy {
     }
 
     public int levelForScore(int score) {
+        /** 分数转等级的规则。具体阈值由 GameplayBalance.SCORE_PER_LEVEL 控制。 */
         return Math.min(GameplayBalance.MAX_LEVEL, 1 + Math.max(0, score) / GameplayBalance.SCORE_PER_LEVEL);
     }
 
     public int currentSpawnCycle(Difficulty difficulty, int totalScore, int bossStage) {
+        /** 刷怪周期：基础值 - 分数加速 - Boss 阶段加速。 */
         int base = GameplayBalance.baseSpawnCycle(difficulty);
         int accelerated = base
                 - totalScore / GameplayBalance.SPAWN_CYCLE_SCORE_DIVISOR
@@ -32,6 +34,7 @@ public class ProgressionPolicy {
     }
 
     public int currentShootCycle(Difficulty difficulty, int totalScore, int bossStage) {
+        /** 敌机射击周期：基础值 - 分数加速 - Boss 阶段加速。 */
         int base = GameplayBalance.baseShootCycle(difficulty);
         int accelerated = base
                 - totalScore / GameplayBalance.SHOOT_CYCLE_SCORE_DIVISOR
@@ -40,6 +43,7 @@ public class ProgressionPolicy {
     }
 
     public int currentEnemyMax(Difficulty difficulty, int totalScore, int bossStage) {
+        /** 场上敌机上限：基础值 + 分数带来的压力提升 + Boss 阶段额外提升。 */
         int base = GameplayBalance.baseEnemyMax(difficulty);
         return Math.min(
                 GameplayBalance.MAX_ENEMY_MAX,
@@ -49,6 +53,7 @@ public class ProgressionPolicy {
     }
 
     public double currentEliteProbability(Difficulty difficulty, int totalScore, int bossStage) {
+        /** 精英概率：基础值 + 分数成长 + Boss 阶段成长。 */
         double base = GameplayBalance.baseEliteProbability(difficulty);
         return Math.min(
                 GameplayBalance.MAX_ELITE_PROBABILITY,
@@ -58,6 +63,7 @@ public class ProgressionPolicy {
     }
 
     public int bossThreshold(Difficulty difficulty, int bossStage) {
+        /** 第 N 次 Boss 触发分数。 */
         return GameplayBalance.initialBossThreshold(difficulty)
                 + bossStage * GameplayBalance.BOSS_THRESHOLD_STEP;
     }
