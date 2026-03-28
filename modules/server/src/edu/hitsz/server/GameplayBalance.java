@@ -65,6 +65,7 @@ public final class GameplayBalance {
     public static final int CH4_ACE_VOLLEY_STEP = 2;
     public static final int CH4_BOSS_VOLLEY_COUNT = 11;
     public static final int CH4_BOSS_VOLLEY_STEP = 2;
+    public static final int CH4_BOSS_SWEEP_SHIFT_STEPS = 1;
     public static final int CH5_ELITE_VOLLEY_COUNT = 5;
     public static final int CH5_ELITE_VOLLEY_STEP = 2;
     public static final int CH5_ELITE_PLUS_VOLLEY_COUNT = 7;

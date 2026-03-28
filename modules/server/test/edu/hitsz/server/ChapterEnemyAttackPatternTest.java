@@ -49,11 +49,16 @@ public class ChapterEnemyAttackPatternTest {
                 : "Test should be able to advance to CH4";
         List<BaseBullet> ch4EliteVolley = worldState.buildEnemyVolleyForCurrentChapter(elite);
         List<BaseBullet> ch4BossVolley = worldState.buildEnemyVolleyForCurrentChapter(boss);
+        List<BaseBullet> ch4BossFollowUpVolley = worldState.buildEnemyVolleyForCurrentChapter(boss);
         assert worldState.getChapterId() == ChapterId.CH4 : "Precondition failed: world should now be at CH4";
         assert ch4EliteVolley.size() == 5 : "CH4 elite should upgrade to a five-shot spread";
         assert ch4BossVolley.size() == 11 : "CH4 boss should use a very dense eleven-shot fan";
         assert !allExplosive(ch4EliteVolley) : "CH4 elite volleys should stay kinetic";
         assert !allExplosive(ch4BossVolley) : "CH4 boss volleys should stay kinetic";
+        assert averageOffsetFromCenter(ch4BossVolley, boss.getLocationX()) < 0.0
+                : "CH4 boss first barrage should bias to one lateral side";
+        assert averageOffsetFromCenter(ch4BossFollowUpVolley, boss.getLocationX()) > 0.0
+                : "CH4 boss next barrage should swing pressure to the opposite side";
 
         assert worldState.getChapterProgressionState().advanceToNextChapter()
                 : "Test should be able to advance to CH5";
@@ -73,5 +78,13 @@ public class ChapterEnemyAttackPatternTest {
             }
         }
         return true;
+    }
+
+    private static double averageOffsetFromCenter(List<BaseBullet> bullets, int centerX) {
+        int totalOffset = 0;
+        for (BaseBullet bullet : bullets) {
+            totalOffset += bullet.getLocationX() - centerX;
+        }
+        return bullets.isEmpty() ? 0.0 : (double) totalOffset / (double) bullets.size();
     }
 }

@@ -56,6 +56,7 @@ public class ServerWorldState {
     private int shootCounter;
     private int bulletHitAudioCount;
     private int supplyPickupAudioCount;
+    private int ch4BossSweepDirection;
 
     public ServerWorldState() {
         this.sessionRegistry = new SessionRegistry();
@@ -72,6 +73,7 @@ public class ServerWorldState {
         this.chapterProgressionState = new ChapterProgressionState();
         this.random = new Random();
         this.difficulty = Difficulty.NORMAL;
+        this.ch4BossSweepDirection = -1;
         this.chapterProgressionState.resetToLobby(difficulty, progressionPolicy);
     }
 
@@ -243,6 +245,7 @@ public class ServerWorldState {
         bossActive = false;
         bulletHitAudioCount = 0;
         supplyPickupAudioCount = 0;
+        ch4BossSweepDirection = -1;
         chapterProgressionState.resetToLobby(difficulty, progressionPolicy);
     }
 
@@ -876,7 +879,17 @@ public class ServerWorldState {
             return buildSpreadVolley(enemyAircraft, new int[]{-6, -4, -2, 0, 2, 4, 6}, true);
         }
         if (getChapterId() == edu.hitsz.common.ChapterId.CH4) {
-            return buildSpreadVolley(enemyAircraft, symmetricSpread(GameplayBalance.CH4_BOSS_VOLLEY_COUNT, GameplayBalance.CH4_BOSS_VOLLEY_STEP), false);
+            List<BaseBullet> volley = buildSpreadVolley(
+                    enemyAircraft,
+                    biasedSpread(
+                            GameplayBalance.CH4_BOSS_VOLLEY_COUNT,
+                            GameplayBalance.CH4_BOSS_VOLLEY_STEP,
+                            ch4BossSweepDirection * GameplayBalance.CH4_BOSS_SWEEP_SHIFT_STEPS
+                    ),
+                    false
+            );
+            ch4BossSweepDirection = -ch4BossSweepDirection;
+            return volley;
         }
         if (getChapterId() == edu.hitsz.common.ChapterId.CH5) {
             return buildSpreadVolley(enemyAircraft, symmetricSpread(GameplayBalance.CH5_BOSS_VOLLEY_COUNT, GameplayBalance.CH5_BOSS_VOLLEY_STEP), true);
@@ -893,6 +906,15 @@ public class ServerWorldState {
         int center = normalizedCount / 2;
         for (int i = 0; i < normalizedCount; i++) {
             spread[i] = (i - center) * step;
+        }
+        return spread;
+    }
+
+    private int[] biasedSpread(int count, int step, int shiftSteps) {
+        int[] spread = symmetricSpread(count, step);
+        int shift = shiftSteps * step;
+        for (int i = 0; i < spread.length; i++) {
+            spread[i] += shift;
         }
         return spread;
     }
@@ -921,7 +943,9 @@ public class ServerWorldState {
     }
 
     private void spawnBossWarningLaserIfNeeded(BossEnemy bossEnemy) {
-        if (getChapterId() != edu.hitsz.common.ChapterId.CH3 || hasActiveBossLaser()) {
+        if ((getChapterId() != edu.hitsz.common.ChapterId.CH3
+                && getChapterId() != edu.hitsz.common.ChapterId.CH5)
+                || hasActiveBossLaser()) {
             return;
         }
         PlayerSession targetSession = nearestAlivePlayerTo(bossEnemy.getLocationX(), bossEnemy.getLocationY());
