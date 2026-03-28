@@ -15,16 +15,10 @@ mkdir -p "$OUT_DIR/images" "$OUT_DIR/videos/images" "$OUT_DIR/videos/audio"
 cp "$ROOT_DIR"/src/images/* "$OUT_DIR/images/"
 cp "$ROOT_DIR"/src/images/* "$OUT_DIR/videos/images/"
 if [ -d "$ROOT_DIR/src/videos/images" ]; then
-  find "$ROOT_DIR/src/videos/images" -type f ! -name '.DS_Store' -exec sh -c '
-    for file do
-      rel="${file#"$1"/src/videos/images/}"
-      mkdir -p "$2/videos/images/$(dirname "$rel")"
-      cp "$file" "$2/videos/images/$rel"
-    done
-  ' sh {} + "$ROOT_DIR" "$OUT_DIR"
+  cp -R "$ROOT_DIR/src/videos/images/." "$OUT_DIR/videos/images/"
 fi
 if [ -d "$ROOT_DIR/src/videos/audio" ]; then
-  find "$ROOT_DIR/src/videos/audio" -type f ! -name '.DS_Store' -exec cp {} "$OUT_DIR/videos/audio/" \;
+  cp -R "$ROOT_DIR/src/videos/audio/." "$OUT_DIR/videos/audio/"
 fi
 find "$ROOT_DIR/src/videos" -maxdepth 1 -type f \( -name '*.wav' -o -name '*.mp3' \) -exec cp {} "$OUT_DIR/videos/audio/" \;
 if [ -d "$ROOT_DIR/最终素材" ]; then

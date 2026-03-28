@@ -232,10 +232,12 @@ public class Game extends JPanel {
         chapterTransitionFlash = clientWorldState.isChapterTransitionFlash();
         AudioManager.getInstance().apply(
                 gameAudioStateMachine.onSnapshot(
-                        gameStarted,
-                        bossActive,
-                        localHp,
-                        explosionSnapshots.size()
+                gameStarted,
+                bossActive,
+                localHp,
+                explosionSnapshots.size(),
+                clientWorldState.getBulletHitAudioCount(),
+                clientWorldState.getSupplyPickupAudioCount()
                 )
         );
     }

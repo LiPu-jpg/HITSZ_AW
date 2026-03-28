@@ -26,6 +26,12 @@ public final class AudioManager {
         if (decision.shouldPlayExplosion()) {
             playOnce("bomb_explosion.wav");
         }
+        if (decision.shouldPlayBulletHit()) {
+            playOnce("bullet_hit.wav");
+        }
+        if (decision.shouldPlaySupplyPickup()) {
+            playOnce("get_supply.wav");
+        }
         if (decision.shouldPlayGameOver()) {
             playOnce("game_over.wav");
         }

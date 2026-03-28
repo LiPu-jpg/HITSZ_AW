@@ -29,6 +29,8 @@ public class WorldSnapshot {
     private ChapterId chapterId = ChapterId.CH1;
     private boolean chapterTransitionFlash;
     private boolean firstBossBranchSelection;
+    private int bulletHitAudioCount;
+    private int supplyPickupAudioCount;
 
     public WorldSnapshot(long tick) {
         this.tick = tick;
@@ -203,5 +205,21 @@ public class WorldSnapshot {
 
     public void setFirstBossBranchSelection(boolean firstBossBranchSelection) {
         this.firstBossBranchSelection = firstBossBranchSelection;
+    }
+
+    public int getBulletHitAudioCount() {
+        return bulletHitAudioCount;
+    }
+
+    public void setBulletHitAudioCount(int bulletHitAudioCount) {
+        this.bulletHitAudioCount = bulletHitAudioCount;
+    }
+
+    public int getSupplyPickupAudioCount() {
+        return supplyPickupAudioCount;
+    }
+
+    public void setSupplyPickupAudioCount(int supplyPickupAudioCount) {
+        this.supplyPickupAudioCount = supplyPickupAudioCount;
     }
 }

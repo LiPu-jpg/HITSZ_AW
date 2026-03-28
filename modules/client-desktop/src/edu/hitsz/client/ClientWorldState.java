@@ -46,6 +46,8 @@ public class ClientWorldState {
     private ChapterId chapterId = ChapterId.CH1;
     private GamePhase gamePhase = GamePhase.LOBBY;
     private boolean chapterTransitionFlash;
+    private int bulletHitAudioCount;
+    private int supplyPickupAudioCount;
 
     public ClientWorldState() {
         this.playerAircrafts = new LinkedList<>();
@@ -289,5 +291,21 @@ public class ClientWorldState {
 
     public void setChapterTransitionFlash(boolean chapterTransitionFlash) {
         this.chapterTransitionFlash = chapterTransitionFlash;
+    }
+
+    public int getBulletHitAudioCount() {
+        return bulletHitAudioCount;
+    }
+
+    public void setBulletHitAudioCount(int bulletHitAudioCount) {
+        this.bulletHitAudioCount = bulletHitAudioCount;
+    }
+
+    public int getSupplyPickupAudioCount() {
+        return supplyPickupAudioCount;
+    }
+
+    public void setSupplyPickupAudioCount(int supplyPickupAudioCount) {
+        this.supplyPickupAudioCount = supplyPickupAudioCount;
     }
 }

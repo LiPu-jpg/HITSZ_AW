@@ -130,6 +130,8 @@ public class DefaultSnapshotApplier implements SnapshotApplier {
         state.setChapterId(snapshot.getChapterId());
         state.setGamePhase(snapshot.getGamePhase());
         state.setChapterTransitionFlash(snapshot.isChapterTransitionFlash());
+        state.setBulletHitAudioCount(snapshot.getBulletHitAudioCount());
+        state.setSupplyPickupAudioCount(snapshot.getSupplyPickupAudioCount());
         if (localPlayerSnapshot != null) {
             HeroAircraft heroAircraft = HeroAircraft.getSingleton();
             heroAircraft.setAircraftBranch(localPlayerSnapshot.getAircraftBranch());

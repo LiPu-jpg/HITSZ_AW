@@ -54,6 +54,8 @@ public class ServerWorldState {
     private boolean bossActive;
     private int enemySpawnCounter;
     private int shootCounter;
+    private int bulletHitAudioCount;
+    private int supplyPickupAudioCount;
 
     public ServerWorldState() {
         this.sessionRegistry = new SessionRegistry();
@@ -160,6 +162,14 @@ public class ServerWorldState {
         return bossActive;
     }
 
+    public int getBulletHitAudioCount() {
+        return bulletHitAudioCount;
+    }
+
+    public int getSupplyPickupAudioCount() {
+        return supplyPickupAudioCount;
+    }
+
     public int getNextBossScoreThreshold() {
         return chapterProgressionState.getNextBossScoreThreshold();
     }
@@ -231,6 +241,8 @@ public class ServerWorldState {
         worldEffectState.reset();
         totalScore = 0;
         bossActive = false;
+        bulletHitAudioCount = 0;
+        supplyPickupAudioCount = 0;
         chapterProgressionState.resetToLobby(difficulty, progressionPolicy);
     }
 
@@ -408,6 +420,7 @@ public class ServerWorldState {
                 }
                 if (playerAircraft.crash(bullet) || bullet.crash(playerAircraft)) {
                     applyDamageToPlayer(session, bullet.getPower(), nowMillis);
+                    bulletHitAudioCount++;
                     bullet.vanish();
                     break;
                 }
@@ -424,6 +437,7 @@ public class ServerWorldState {
                 }
                 if (enemyAircraft.crash(bullet)) {
                     enemyAircraft.decreaseHp(bullet.getPower());
+                    bulletHitAudioCount++;
                     bullet.vanish();
                     if (enemyAircraft.notValid()) {
                         awardScore(bullet, enemyAircraft);
@@ -493,6 +507,7 @@ public class ServerWorldState {
                 }
                 if (item.crash(playerAircraft) || playerAircraft.crash(item)) {
                     applyItemEffect(item, session, nowMillis);
+                    supplyPickupAudioCount++;
                     item.vanish();
                     break;
                 }

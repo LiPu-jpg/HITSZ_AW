@@ -35,6 +35,8 @@ public class WorldSnapshotJsonMapper {
                 .append("\"chapterId\":").append(SimpleJsonSupport.quote(snapshot.getChapterId().name())).append(',')
                 .append("\"chapterTransitionFlash\":").append(snapshot.isChapterTransitionFlash()).append(',')
                 .append("\"firstBossBranchSelection\":").append(snapshot.isFirstBossBranchSelection()).append(',')
+                .append("\"bulletHitAudioCount\":").append(snapshot.getBulletHitAudioCount()).append(',')
+                .append("\"supplyPickupAudioCount\":").append(snapshot.getSupplyPickupAudioCount()).append(',')
                 .append("\"players\":").append(playersToJson(snapshot.getPlayerSnapshots())).append(',')
                 .append("\"enemies\":").append(enemiesToJson(snapshot.getEnemySnapshots())).append(',')
                 .append("\"heroBullets\":").append(bulletsToJson(snapshot.getHeroBulletSnapshots())).append(',')
@@ -69,6 +71,8 @@ public class WorldSnapshotJsonMapper {
         )));
         snapshot.setChapterTransitionFlash(SimpleJsonSupport.extractBooleanOrDefault(json, "chapterTransitionFlash", false));
         snapshot.setFirstBossBranchSelection(SimpleJsonSupport.extractBooleanOrDefault(json, "firstBossBranchSelection", false));
+        snapshot.setBulletHitAudioCount(SimpleJsonSupport.extractIntOrDefault(json, "bulletHitAudioCount", 0));
+        snapshot.setSupplyPickupAudioCount(SimpleJsonSupport.extractIntOrDefault(json, "supplyPickupAudioCount", 0));
         for (String playerJson : SimpleJsonSupport.splitTopLevelArray(SimpleJsonSupport.extractJsonValue(json, "players"))) {
             snapshot.addPlayerSnapshot(new PlayerSnapshot(
                     SimpleJsonSupport.extractString(playerJson, "sessionId"),

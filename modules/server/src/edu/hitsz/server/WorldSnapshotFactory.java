@@ -44,6 +44,8 @@ public class WorldSnapshotFactory {
         snapshot.setChapterTransitionFlash(
                 worldState.getChapterProgressionState().isChapterTransitionFlashActive(nowMillis)
         );
+        snapshot.setBulletHitAudioCount(worldState.getBulletHitAudioCount());
+        snapshot.setSupplyPickupAudioCount(worldState.getSupplyPickupAudioCount());
         for (PlayerSession session : worldState.getPlayerSessions()) {
             PlayerRuntimeState playerState = session.getPlayerState();
             snapshot.addPlayerSnapshot(new PlayerSnapshot(
