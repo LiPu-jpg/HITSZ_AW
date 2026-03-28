@@ -85,6 +85,7 @@ public class WorldSnapshotJsonMapper {
                     SimpleJsonSupport.extractInt(playerJson, "level"),
                     SimpleJsonSupport.extractString(playerJson, "selectedSkill"),
                     SimpleJsonSupport.extractLongOrDefault(playerJson, "skillCooldownRemainingMillis", 0L),
+                    SimpleJsonSupport.extractLongOrDefault(playerJson, "skillCooldownTotalMillis", 0L),
                     SimpleJsonSupport.extractIntOrDefault(playerJson, "maxHp", LEGACY_DEFAULT_MAX_HP),
                     splitUpgradeChoices(SimpleJsonSupport.extractJsonValueOrDefault(playerJson, "availableUpgradeChoices", "[]")),
                     parseUpgradeChoice(SimpleJsonSupport.extractStringOrDefault(playerJson, "selectedUpgradeChoice", null)),
@@ -169,6 +170,7 @@ public class WorldSnapshotJsonMapper {
                     .append("\"level\":").append(player.getLevel()).append(',')
                     .append("\"selectedSkill\":").append(SimpleJsonSupport.quote(player.getSelectedSkill())).append(',')
                     .append("\"skillCooldownRemainingMillis\":").append(player.getSkillCooldownRemainingMillis()).append(',')
+                    .append("\"skillCooldownTotalMillis\":").append(player.getSkillCooldownTotalMillis()).append(',')
                     .append("\"maxHp\":").append(player.getMaxHp()).append(',')
                     .append("\"availableUpgradeChoices\":").append(upgradeChoicesToJson(player.getAvailableUpgradeChoices())).append(',')
                     .append("\"selectedUpgradeChoice\":").append(SimpleJsonSupport.quote(enumName(player.getSelectedUpgradeChoice()))).append(',')

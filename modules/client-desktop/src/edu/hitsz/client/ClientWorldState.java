@@ -23,12 +23,14 @@ public class ClientWorldState {
     private List<ExplosionSnapshot> explosionSnapshots = java.util.Collections.emptyList();
     private final List<AbstractItem> items;
     private int localHp;
+    private int localMaxHp = 1000;
     private int localScore;
     private int localLevel = 1;
     private String localSelectedSkill;
     private AircraftBranch localAircraftBranch = AircraftBranch.STARTER_BLUE;
     private boolean localBranchUnlocked;
     private long localSkillCooldownRemainingMillis;
+    private long localSkillCooldownTotalMillis;
     private List<AircraftBranch> localAvailableBranchChoices = java.util.Collections.emptyList();
     private List<BranchUpgradeChoice> localAvailableUpgradeChoices = java.util.Collections.emptyList();
     private BranchUpgradeChoice localSelectedUpgradeChoice;
@@ -113,6 +115,14 @@ public class ClientWorldState {
         this.localHp = localHp;
     }
 
+    public int getLocalMaxHp() {
+        return localMaxHp;
+    }
+
+    public void setLocalMaxHp(int localMaxHp) {
+        this.localMaxHp = localMaxHp;
+    }
+
     public int getLocalLevel() {
         return localLevel;
     }
@@ -151,6 +161,14 @@ public class ClientWorldState {
 
     public void setLocalSkillCooldownRemainingMillis(long localSkillCooldownRemainingMillis) {
         this.localSkillCooldownRemainingMillis = localSkillCooldownRemainingMillis;
+    }
+
+    public long getLocalSkillCooldownTotalMillis() {
+        return localSkillCooldownTotalMillis;
+    }
+
+    public void setLocalSkillCooldownTotalMillis(long localSkillCooldownTotalMillis) {
+        this.localSkillCooldownTotalMillis = localSkillCooldownTotalMillis;
     }
 
     public List<AircraftBranch> getLocalAvailableBranchChoices() {

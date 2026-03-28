@@ -42,11 +42,13 @@ public class DefaultSnapshotApplier implements SnapshotApplier {
         java.util.List<ExplosionSnapshot> nextExplosionSnapshots = new java.util.LinkedList<>();
         java.util.List<AbstractItem> nextItems = new java.util.LinkedList<>();
         int nextLocalHp = 0;
+        int nextLocalMaxHp = 1000;
         int nextLocalScore = 0;
         int nextLocalLevel = 1;
         String nextLocalSelectedSkill = null;
         AircraftBranch nextLocalAircraftBranch = AircraftBranch.STARTER_BLUE;
         long nextLocalSkillCooldownRemainingMillis = 0L;
+        long nextLocalSkillCooldownTotalMillis = 0L;
         java.util.List<AircraftBranch> nextLocalAvailableBranchChoices = java.util.Collections.emptyList();
         java.util.List<BranchUpgradeChoice> nextLocalAvailableUpgradeChoices = java.util.Collections.emptyList();
         BranchUpgradeChoice nextLocalSelectedUpgradeChoice = null;
@@ -58,11 +60,13 @@ public class DefaultSnapshotApplier implements SnapshotApplier {
             if (playerSnapshot.getSessionId().equals(localSessionId)) {
                 localPlayerSnapshot = playerSnapshot;
                 nextLocalHp = playerSnapshot.getHp();
+                nextLocalMaxHp = playerSnapshot.getMaxHp();
                 nextLocalScore = playerSnapshot.getScore();
                 nextLocalLevel = playerSnapshot.getLevel();
                 nextLocalSelectedSkill = playerSnapshot.getSelectedSkill();
                 nextLocalAircraftBranch = playerSnapshot.getAircraftBranch();
                 nextLocalSkillCooldownRemainingMillis = playerSnapshot.getSkillCooldownRemainingMillis();
+                nextLocalSkillCooldownTotalMillis = playerSnapshot.getSkillCooldownTotalMillis();
                 nextLocalAvailableBranchChoices = playerSnapshot.getAvailableBranchChoices();
                 nextLocalAvailableUpgradeChoices = playerSnapshot.getAvailableUpgradeChoices();
                 nextLocalSelectedUpgradeChoice = playerSnapshot.getSelectedUpgradeChoice();
@@ -107,11 +111,13 @@ public class DefaultSnapshotApplier implements SnapshotApplier {
         state.setExplosionSnapshots(nextExplosionSnapshots);
         state.getItems().clear();
         state.setLocalHp(nextLocalHp);
+        state.setLocalMaxHp(nextLocalMaxHp);
         state.setLocalScore(nextLocalScore);
         state.setLocalLevel(nextLocalLevel);
         state.setLocalSelectedSkill(nextLocalSelectedSkill);
         state.setLocalAircraftBranch(nextLocalAircraftBranch);
         state.setLocalSkillCooldownRemainingMillis(nextLocalSkillCooldownRemainingMillis);
+        state.setLocalSkillCooldownTotalMillis(nextLocalSkillCooldownTotalMillis);
         state.setLocalAvailableBranchChoices(nextLocalAvailableBranchChoices);
         state.setLocalAvailableUpgradeChoices(nextLocalAvailableUpgradeChoices);
         state.setLocalSelectedUpgradeChoice(nextLocalSelectedUpgradeChoice);

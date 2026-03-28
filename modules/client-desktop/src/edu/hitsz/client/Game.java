@@ -51,12 +51,14 @@ public class Game extends JPanel {
 
     //当前玩家分数
     private int localHp = 0;
+    private int localMaxHp = 1000;
     private int score = 0;
     private int level = 1;
     private String localSelectedSkill;
     private AircraftBranch localAircraftBranch = AircraftBranch.STARTER_BLUE;
     private boolean localBranchUnlocked;
     private long localSkillCooldownRemainingMillis;
+    private long localSkillCooldownTotalMillis;
     private List<AircraftBranch> localAvailableBranchChoices = java.util.Collections.emptyList();
     private List<BranchUpgradeChoice> localAvailableUpgradeChoices = java.util.Collections.emptyList();
     private BranchUpgradeChoice localSelectedUpgradeChoice;
@@ -207,12 +209,14 @@ public class Game extends JPanel {
         items.clear();
         items.addAll(clientWorldState.getItems());
         localHp = clientWorldState.getLocalHp();
+        localMaxHp = clientWorldState.getLocalMaxHp();
         score = clientWorldState.getLocalScore();
         level = clientWorldState.getLocalLevel();
         localSelectedSkill = clientWorldState.getLocalSelectedSkill();
         localAircraftBranch = clientWorldState.getLocalAircraftBranch();
         localBranchUnlocked = clientWorldState.isLocalBranchUnlocked();
         localSkillCooldownRemainingMillis = clientWorldState.getLocalSkillCooldownRemainingMillis();
+        localSkillCooldownTotalMillis = clientWorldState.getLocalSkillCooldownTotalMillis();
         localAvailableBranchChoices = clientWorldState.getLocalAvailableBranchChoices();
         localAvailableUpgradeChoices = clientWorldState.getLocalAvailableUpgradeChoices();
         localSelectedUpgradeChoice = clientWorldState.getLocalSelectedUpgradeChoice();
@@ -336,6 +340,7 @@ public class Game extends JPanel {
 
         //绘制得分和生命值
         paintScoreAndLife(g);
+        paintBottomStatusBars(g);
         paintLobbyHint(g);
         paintBranchSelectionOverlay(g);
         paintUpgradeSelectionOverlay(g);
@@ -495,6 +500,88 @@ public class Game extends JPanel {
         g.drawString("关卡：" + UiText.chapterLabel(chapterId), x, y);
         y = y + 20;
         g.drawString(bossActive ? "首领：进行中" : "首领阈值：" + this.nextBossScoreThreshold, x, y);
+    }
+
+    private void paintBottomStatusBars(Graphics g) {
+        Graphics2D graphics = (Graphics2D) g.create();
+        try {
+            paintStatusBar(
+                    graphics,
+                    18,
+                    GameConstants.WINDOW_HEIGHT - 46,
+                    220,
+                    18,
+                    "生命",
+                    StatusBarModel.hpLabel(localHp, localMaxHp),
+                    StatusBarModel.hpFillRatio(localHp, localMaxHp),
+                    new Color(95, 20, 20, 180),
+                    new Color(220, 54, 54),
+                    new Color(255, 220, 220)
+            );
+            paintStatusBar(
+                    graphics,
+                    GameConstants.WINDOW_WIDTH - 18 - 220,
+                    GameConstants.WINDOW_HEIGHT - 46,
+                    220,
+                    18,
+                    "技能",
+                    StatusBarModel.cooldownLabel(
+                            localSelectedSkill,
+                            localSkillCooldownRemainingMillis,
+                            localSkillCooldownTotalMillis
+                    ),
+                    StatusBarModel.cooldownFillRatio(
+                            localSkillCooldownRemainingMillis,
+                            localSkillCooldownTotalMillis
+                    ),
+                    new Color(15, 35, 75, 180),
+                    new Color(55, 140, 255),
+                    new Color(220, 240, 255)
+            );
+        } finally {
+            graphics.dispose();
+        }
+    }
+
+    private void paintStatusBar(
+            Graphics2D graphics,
+            int x,
+            int y,
+            int width,
+            int height,
+            String title,
+            String valueText,
+            double fillRatio,
+            Color backgroundColor,
+            Color fillColor,
+            Color textColor
+    ) {
+        graphics.setColor(new Color(0, 0, 0, 110));
+        graphics.fillRoundRect(x - 6, y - 22, width + 12, height + 30, 14, 14);
+
+        graphics.setColor(textColor);
+        graphics.setFont(new Font("SansSerif", Font.BOLD, 14));
+        graphics.drawString(title, x, y - 6);
+
+        graphics.setColor(backgroundColor);
+        graphics.fillRoundRect(x, y, width, height, 10, 10);
+
+        int filledWidth = (int) Math.round(width * Math.max(0.0d, Math.min(1.0d, fillRatio)));
+        if (filledWidth > 0) {
+            graphics.setColor(fillColor);
+            graphics.fillRoundRect(x, y, filledWidth, height, 10, 10);
+        }
+
+        graphics.setColor(new Color(255, 255, 255, 200));
+        graphics.setStroke(new BasicStroke(2.0f));
+        graphics.drawRoundRect(x, y, width, height, 10, 10);
+
+        graphics.setColor(Color.WHITE);
+        graphics.setFont(new Font("SansSerif", Font.PLAIN, 13));
+        FontMetrics metrics = graphics.getFontMetrics();
+        int textX = x + (width - metrics.stringWidth(valueText)) / 2;
+        int textY = y + height - 4;
+        graphics.drawString(valueText, textX, textY);
     }
 
     private void paintLobbyHint(Graphics g) {

@@ -28,7 +28,7 @@ public class SkillCooldownHudTextTest {
         ));
         game.applyWorldSnapshot(roundTrip(cooldownSnapshot));
 
-        assert "SKILL: FREEZE (CD 2.5s)".equals(skillStatusText(game))
+        assert "技能：冻结（冷却 2.5秒）".equals(skillStatusText(game))
                 : "HUD should show remaining skill cooldown";
 
         WorldSnapshot readySnapshot = new WorldSnapshot(2L);
@@ -46,7 +46,7 @@ public class SkillCooldownHudTextTest {
         ));
         game.applyWorldSnapshot(roundTrip(readySnapshot));
 
-        assert "SKILL: FREEZE (READY)".equals(skillStatusText(game))
+        assert "技能：冻结（可用）".equals(skillStatusText(game))
                 : "HUD should show ready state after cooldown ends";
     }
 

@@ -24,9 +24,12 @@ import edu.hitsz.server.basic.FireSupply;
 import edu.hitsz.server.basic.FreezeSupply;
 import edu.hitsz.server.bullet.BaseBullet;
 import edu.hitsz.server.bullet.ExplosiveEnemyBullet;
+import edu.hitsz.server.skill.SkillScalingConfig;
 import edu.hitsz.server.skill.SkillType;
 
 public class WorldSnapshotFactory {
+
+    private final SkillScalingConfig skillScalingConfig = SkillScalingConfig.defaultConfig();
 
     public WorldSnapshot create(ServerWorldState worldState) {
         return create(worldState, System.currentTimeMillis());
@@ -59,6 +62,7 @@ public class WorldSnapshotFactory {
                     playerState.getLevel(),
                     playerState.getSelectedSkill(),
                     skillCooldownRemainingMillis(playerState, nowMillis),
+                    skillCooldownTotalMillis(playerState),
                     playerState.getAircraft().getMaxHp(),
                     playerState.getAvailableUpgradeChoices(),
                     playerState.getSelectedUpgradeChoice(),
@@ -137,6 +141,21 @@ public class WorldSnapshotFactory {
             return playerState.getSkillState().getSkillCooldownRemainingMillis(
                     SkillType.valueOf(selectedSkill),
                     nowMillis
+            );
+        } catch (IllegalArgumentException ex) {
+            return 0L;
+        }
+    }
+
+    private long skillCooldownTotalMillis(PlayerRuntimeState playerState) {
+        String selectedSkill = playerState.getSelectedSkill();
+        if (selectedSkill == null) {
+            return 0L;
+        }
+        try {
+            return skillScalingConfig.getSkillCooldownMillis(
+                    SkillType.valueOf(selectedSkill),
+                    playerState.getLevel()
             );
         } catch (IllegalArgumentException ex) {
             return 0L;
