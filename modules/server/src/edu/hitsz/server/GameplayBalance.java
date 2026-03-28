@@ -57,6 +57,22 @@ public final class GameplayBalance {
     public static final int CH2_BOSS_SPREAD_X_SPEED_STEP = 2;
     public static final int CH3_ELITE_SPREAD_X_SPEED_STEP = 3;
     public static final int CH3_BOSS_SPREAD_X_SPEED_STEP = 2;
+    public static final int CH4_ELITE_VOLLEY_COUNT = 5;
+    public static final int CH4_ELITE_VOLLEY_STEP = 2;
+    public static final int CH4_ELITE_PLUS_VOLLEY_COUNT = 7;
+    public static final int CH4_ELITE_PLUS_VOLLEY_STEP = 2;
+    public static final int CH4_ACE_VOLLEY_COUNT = 9;
+    public static final int CH4_ACE_VOLLEY_STEP = 2;
+    public static final int CH4_BOSS_VOLLEY_COUNT = 11;
+    public static final int CH4_BOSS_VOLLEY_STEP = 2;
+    public static final int CH5_ELITE_VOLLEY_COUNT = 5;
+    public static final int CH5_ELITE_VOLLEY_STEP = 2;
+    public static final int CH5_ELITE_PLUS_VOLLEY_COUNT = 7;
+    public static final int CH5_ELITE_PLUS_VOLLEY_STEP = 2;
+    public static final int CH5_ACE_VOLLEY_COUNT = 9;
+    public static final int CH5_ACE_VOLLEY_STEP = 2;
+    public static final int CH5_BOSS_VOLLEY_COUNT = 11;
+    public static final int CH5_BOSS_VOLLEY_STEP = 2;
 
     public static final double ITEM_DROP_PROBABILITY = 0.6;
 

@@ -830,12 +830,24 @@ public class ServerWorldState {
         if (getChapterId() == edu.hitsz.common.ChapterId.CH3) {
             return buildSpreadVolley(enemyAircraft, new int[]{-GameplayBalance.CH3_ELITE_SPREAD_X_SPEED_STEP, 0, GameplayBalance.CH3_ELITE_SPREAD_X_SPEED_STEP}, true);
         }
+        if (getChapterId() == edu.hitsz.common.ChapterId.CH4) {
+            return buildSpreadVolley(enemyAircraft, symmetricSpread(GameplayBalance.CH4_ELITE_VOLLEY_COUNT, GameplayBalance.CH4_ELITE_VOLLEY_STEP), false);
+        }
+        if (getChapterId() == edu.hitsz.common.ChapterId.CH5) {
+            return buildSpreadVolley(enemyAircraft, symmetricSpread(GameplayBalance.CH5_ELITE_VOLLEY_COUNT, GameplayBalance.CH5_ELITE_VOLLEY_STEP), true);
+        }
         return enemyAircraft.shoot();
     }
 
     private List<BaseBullet> buildElitePlusVolley(ElitePlusEnemy enemyAircraft) {
         if (getChapterId() == edu.hitsz.common.ChapterId.CH3) {
             return buildSpreadVolley(enemyAircraft, new int[]{-4, -2, 0, 2, 4}, true);
+        }
+        if (getChapterId() == edu.hitsz.common.ChapterId.CH4) {
+            return buildSpreadVolley(enemyAircraft, symmetricSpread(GameplayBalance.CH4_ELITE_PLUS_VOLLEY_COUNT, GameplayBalance.CH4_ELITE_PLUS_VOLLEY_STEP), false);
+        }
+        if (getChapterId() == edu.hitsz.common.ChapterId.CH5) {
+            return buildSpreadVolley(enemyAircraft, symmetricSpread(GameplayBalance.CH5_ELITE_PLUS_VOLLEY_COUNT, GameplayBalance.CH5_ELITE_PLUS_VOLLEY_STEP), true);
         }
         return enemyAircraft.shoot();
     }
@@ -847,6 +859,12 @@ public class ServerWorldState {
         if (getChapterId() == edu.hitsz.common.ChapterId.CH3) {
             return buildSpreadVolley(enemyAircraft, new int[]{-6, -4, -2, 0, 2, 4, 6}, true);
         }
+        if (getChapterId() == edu.hitsz.common.ChapterId.CH4) {
+            return buildSpreadVolley(enemyAircraft, symmetricSpread(GameplayBalance.CH4_ACE_VOLLEY_COUNT, GameplayBalance.CH4_ACE_VOLLEY_STEP), false);
+        }
+        if (getChapterId() == edu.hitsz.common.ChapterId.CH5) {
+            return buildSpreadVolley(enemyAircraft, symmetricSpread(GameplayBalance.CH5_ACE_VOLLEY_COUNT, GameplayBalance.CH5_ACE_VOLLEY_STEP), true);
+        }
         return enemyAircraft.shoot();
     }
 
@@ -857,7 +875,26 @@ public class ServerWorldState {
         if (getChapterId() == edu.hitsz.common.ChapterId.CH3) {
             return buildSpreadVolley(enemyAircraft, new int[]{-6, -4, -2, 0, 2, 4, 6}, true);
         }
+        if (getChapterId() == edu.hitsz.common.ChapterId.CH4) {
+            return buildSpreadVolley(enemyAircraft, symmetricSpread(GameplayBalance.CH4_BOSS_VOLLEY_COUNT, GameplayBalance.CH4_BOSS_VOLLEY_STEP), false);
+        }
+        if (getChapterId() == edu.hitsz.common.ChapterId.CH5) {
+            return buildSpreadVolley(enemyAircraft, symmetricSpread(GameplayBalance.CH5_BOSS_VOLLEY_COUNT, GameplayBalance.CH5_BOSS_VOLLEY_STEP), true);
+        }
         return enemyAircraft.shoot();
+    }
+
+    private int[] symmetricSpread(int count, int step) {
+        int normalizedCount = Math.max(1, count);
+        if (normalizedCount % 2 == 0) {
+            normalizedCount++;
+        }
+        int[] spread = new int[normalizedCount];
+        int center = normalizedCount / 2;
+        for (int i = 0; i < normalizedCount; i++) {
+            spread[i] = (i - center) * step;
+        }
+        return spread;
     }
 
     private List<BaseBullet> buildSpreadVolley(EliteEnemy enemyAircraft, int[] spread, boolean explosive) {
