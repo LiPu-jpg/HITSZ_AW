@@ -499,7 +499,9 @@ public class ServerWorldState {
             }
         }
 
-        for (AbstractItem item : items) {
+        // BombSupply may destroy elites and generate fresh drops during pickup handling,
+        // so iterate over a stable snapshot instead of the live item list.
+        for (AbstractItem item : new LinkedList<>(items)) {
             if (item.notValid()) {
                 continue;
             }
