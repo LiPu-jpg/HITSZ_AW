@@ -12,13 +12,10 @@ import java.nio.file.Paths;
 public final class AudioResourceLoader {
 
     private static final String[] CLASSPATH_ROOTS = {
-            "videos/audio",
-            "audio",
-            "videos"
+            "assets/audio"
     };
     private static final String[][] FILESYSTEM_ROOTS = {
-            {"src", "videos", "audio"},
-            {"src", "videos"}
+            {"src", "assets", "audio"}
     };
 
     private AudioResourceLoader() {
@@ -63,7 +60,7 @@ public final class AudioResourceLoader {
 
         throw new IllegalStateException(
                 "Audio resource not found: " + fileName
-                        + ". Expected classpath resource under videos/audio or filesystem path under src/videos/audio"
+                        + ". Expected classpath resource under assets/audio or filesystem path under src/assets/audio"
         );
     }
 

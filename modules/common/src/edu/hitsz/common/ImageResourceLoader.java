@@ -11,10 +11,10 @@ import java.nio.file.Paths;
 public final class ImageResourceLoader {
 
     private static final String[] CLASSPATH_ROOTS = {
-            "videos/images"
+            "assets/images"
     };
     private static final String[][] FILESYSTEM_ROOTS = {
-            {"src", "videos", "images"}
+            {"src", "assets", "images"}
     };
 
     private ImageResourceLoader() {
@@ -49,7 +49,7 @@ public final class ImageResourceLoader {
         throw new IllegalStateException(
                 "Image resource not found: " + fileName
                         + ". Expected classpath resource under " + String.join(", ", CLASSPATH_ROOTS)
-                        + " or filesystem path under src/videos/images"
+                        + " or filesystem path under src/assets/images"
         );
     }
 
