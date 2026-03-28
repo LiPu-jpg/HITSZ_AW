@@ -42,19 +42,25 @@ public class TargetFollowMovementTest {
 
         int stopRadius = readIntConstant("PLAYER_STOP_RADIUS");
         int moveSpeed = readIntConstant("PLAYER_BASE_MOVE_SPEED");
-        for (int i = 0; i < 120; i++) {
+        int endX = afterFirstTickX;
+        int endY = afterFirstTickY;
+        boolean reachedTarget = false;
+        for (int i = 0; i < 40; i++) {
             roomRuntime.tick(1080L + i * 40L, 10_000L);
+            endX = playerState.getX();
+            endY = playerState.getY();
+            int distanceX = Math.abs(targetX - endX);
+            int distanceY = Math.abs(targetY - endY);
+            if (distanceX <= stopRadius && distanceY <= stopRadius) {
+                reachedTarget = true;
+                break;
+            }
         }
 
-        int endX = playerState.getX();
-        int endY = playerState.getY();
-        int distanceX = Math.abs(targetX - endX);
-        int distanceY = Math.abs(targetY - endY);
+        assert reachedTarget
+                : "The player should settle within the configured stop radius before unrelated combat flow interferes";
 
-        assert distanceX <= stopRadius && distanceY <= stopRadius
-                : "The player should settle within the configured stop radius";
-
-        roomRuntime.tick(6000L, 10_000L);
+        roomRuntime.tick(3000L, 10_000L);
         assert playerState.getX() == endX && playerState.getY() == endY
                 : "Once inside the stop radius, the player should stop moving";
         assert Math.abs(afterFirstTickX - startX) <= moveSpeed

@@ -638,6 +638,8 @@ public class Game extends JPanel {
             g.drawString(line, 86, y);
             y += 24;
         }
+        g.setFont(new Font("SansSerif", Font.PLAIN, 14));
+        g.drawString(buildUpgradeSelectionHint(), 86, GameConstants.WINDOW_HEIGHT / 2 + 70);
     }
 
     private void paintBranchSelectionOverlay(Graphics g) {
@@ -655,6 +657,8 @@ public class Game extends JPanel {
             g.drawString((i + 1) + ". " + branchChoiceLabel(localAvailableBranchChoices.get(i)), 80, y);
             y += 28;
         }
+        g.setFont(new Font("SansSerif", Font.PLAIN, 14));
+        g.drawString(buildBranchSelectionHint(), 80, GameConstants.WINDOW_HEIGHT / 2 + 72);
     }
 
     private String[] buildLobbyOverlayLines() {
@@ -717,6 +721,14 @@ public class Game extends JPanel {
 
     private String branchChoiceLabel(AircraftBranch branch) {
         return UiText.branchLabel(branch);
+    }
+
+    private String buildBranchSelectionHint() {
+        return "按 1 / 2 / 3 选择机型，确认后进入下一关";
+    }
+
+    private String buildUpgradeSelectionHint() {
+        return "按 1 / 2 / 3 / 4 选择强化，确认后进入下一关";
     }
 
 }

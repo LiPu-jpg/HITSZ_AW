@@ -16,7 +16,7 @@ public final class GameplayBalance {
     public static final int PLAYER_MAX_SHOOT_NUM = 3;
     public static final int PLAYER_BASE_SHOOT_CYCLE = 20;
     public static final int PLAYER_MIN_SHOOT_CYCLE = 8;
-    public static final int PLAYER_BASE_MOVE_SPEED = 8;
+    public static final int PLAYER_BASE_MOVE_SPEED = 16;
     public static final int PLAYER_STOP_RADIUS = 6;
     public static final int PLAYER_BASE_BULLET_POWER = 30;
     public static final int PLAYER_MAX_BULLET_POWER = 60;

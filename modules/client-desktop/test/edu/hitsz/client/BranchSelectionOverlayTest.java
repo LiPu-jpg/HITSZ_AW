@@ -16,6 +16,7 @@ public class BranchSelectionOverlayTest {
         showsOverlayAndRoutesNumberKeysToBranchChoices();
         preservesUpgradeSelectionNumberRoutingOutsideBranchOverlay();
         removesOutdatedLobbySkillHint();
+        branchSelectionExplainsHowToProceed();
     }
 
     private static void showsOverlayAndRoutesNumberKeysToBranchChoices() {
@@ -134,6 +135,40 @@ public class BranchSelectionOverlayTest {
         }
     }
 
+    private static void branchSelectionExplainsHowToProceed() throws Exception {
+        Game game = new Game();
+        game.setLocalSessionId("session-local");
+
+        WorldSnapshot branchSnapshot = new WorldSnapshot(4L);
+        branchSnapshot.setGameStarted(true);
+        branchSnapshot.setGamePhase(GamePhase.BRANCH_SELECTION);
+        branchSnapshot.addPlayerSnapshot(new PlayerSnapshot(
+                "session-local",
+                "player-local",
+                200,
+                300,
+                900,
+                66,
+                false,
+                1,
+                null,
+                0L,
+                1000,
+                java.util.Collections.emptyList(),
+                null,
+                AircraftBranch.STARTER_BLUE,
+                Arrays.asList(AircraftBranch.RED_SPEED, AircraftBranch.GREEN_DEFENSE, AircraftBranch.BLACK_HEAVY),
+                false
+        ));
+        game.applyWorldSnapshot(branchSnapshot);
+
+        String overlay = overlayHint(game, "buildBranchSelectionHint");
+        assert overlay.contains("按 1 / 2 / 3 选择")
+                : "Branch overlay should explain number-key selection";
+        assert overlay.contains("进入下一关")
+                : "Branch overlay should explain that selection advances the chapter";
+    }
+
     private static void pressKey(Game game, int keyCode) {
         KeyEvent event = new KeyEvent(game, KeyEvent.KEY_PRESSED, System.currentTimeMillis(), 0, keyCode, KeyEvent.CHAR_UNDEFINED);
         for (java.awt.event.KeyListener listener : game.getKeyListeners()) {
@@ -145,6 +180,12 @@ public class BranchSelectionOverlayTest {
         Method method = Game.class.getDeclaredMethod("buildLobbyOverlayLines");
         method.setAccessible(true);
         return (String[]) method.invoke(game);
+    }
+
+    private static String overlayHint(Game game, String methodName) throws Exception {
+        Method method = Game.class.getDeclaredMethod(methodName);
+        method.setAccessible(true);
+        return (String) method.invoke(game);
     }
 
     private static final class RecordingPublisher implements ClientCommandPublisher {
