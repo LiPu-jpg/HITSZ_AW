@@ -10,6 +10,8 @@ public class LaserSnapshot {
     private final int length;
     private final int durationTicks;
     private final int damage;
+    private final String style;
+    private final double chargeRatio;
 
     public LaserSnapshot(String ownerSessionId,
                          int originX,
@@ -19,6 +21,19 @@ public class LaserSnapshot {
                          int length,
                          int durationTicks,
                          int damage) {
+        this(ownerSessionId, originX, originY, angle, width, length, durationTicks, damage, "PLAYER_RED_SPEED", 1.0);
+    }
+
+    public LaserSnapshot(String ownerSessionId,
+                         int originX,
+                         int originY,
+                         double angle,
+                         int width,
+                         int length,
+                         int durationTicks,
+                         int damage,
+                         String style,
+                         double chargeRatio) {
         this.ownerSessionId = ownerSessionId;
         this.originX = originX;
         this.originY = originY;
@@ -27,6 +42,8 @@ public class LaserSnapshot {
         this.length = length;
         this.durationTicks = durationTicks;
         this.damage = damage;
+        this.style = style;
+        this.chargeRatio = chargeRatio;
     }
 
     public String getOwnerSessionId() {
@@ -59,5 +76,13 @@ public class LaserSnapshot {
 
     public int getDamage() {
         return damage;
+    }
+
+    public String getStyle() {
+        return style;
+    }
+
+    public double getChargeRatio() {
+        return chargeRatio;
     }
 }

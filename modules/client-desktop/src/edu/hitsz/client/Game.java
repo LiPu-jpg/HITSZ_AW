@@ -14,6 +14,7 @@ import edu.hitsz.common.GamePhase;
 import edu.hitsz.common.protocol.dto.LaserSnapshot;
 import edu.hitsz.common.protocol.dto.ExplosionSnapshot;
 import edu.hitsz.common.protocol.dto.WorldSnapshot;
+import edu.hitsz.common.protocol.SnapshotTypes;
 
 import javax.swing.*;
 import java.awt.*;
@@ -359,28 +360,73 @@ public class Game extends JPanel {
             for (LaserSnapshot laser : activeLasers) {
                 int endX = laser.getOriginX() + (int) Math.round(Math.cos(laser.getAngle()) * laser.getLength());
                 int endY = laser.getOriginY() + (int) Math.round(Math.sin(laser.getAngle()) * laser.getLength());
-
-                graphics.setComposite(AlphaComposite.getInstance(AlphaComposite.SRC_OVER, 0.35f));
-                graphics.setStroke(new BasicStroke(
-                        Math.max(1.0f, laser.getWidth()),
-                        BasicStroke.CAP_ROUND,
-                        BasicStroke.JOIN_ROUND
-                ));
-                graphics.setColor(new Color(255, 64, 64));
-                graphics.drawLine(laser.getOriginX(), laser.getOriginY(), endX, endY);
-
-                graphics.setComposite(AlphaComposite.getInstance(AlphaComposite.SRC_OVER, 0.75f));
-                graphics.setStroke(new BasicStroke(
-                        Math.max(2.0f, laser.getWidth() / 3.0f),
-                        BasicStroke.CAP_ROUND,
-                        BasicStroke.JOIN_ROUND
-                ));
-                graphics.setColor(new Color(255, 240, 180));
-                graphics.drawLine(laser.getOriginX(), laser.getOriginY(), endX, endY);
+                paintLaserByStyle(graphics, laser, endX, endY);
             }
         } finally {
             graphics.dispose();
         }
+    }
+
+    private void paintLaserByStyle(Graphics2D graphics, LaserSnapshot laser, int endX, int endY) {
+        if (SnapshotTypes.Laser.BOSS_WARNING.equals(laser.getStyle())) {
+            float charge = (float) Math.max(0.0, Math.min(1.0, laser.getChargeRatio()));
+            graphics.setComposite(AlphaComposite.getInstance(AlphaComposite.SRC_OVER, 0.12f + 0.30f * charge));
+            graphics.setStroke(new BasicStroke(
+                    Math.max(1.0f, laser.getWidth()),
+                    BasicStroke.CAP_ROUND,
+                    BasicStroke.JOIN_ROUND
+            ));
+            graphics.setColor(new Color(255, 120, 120));
+            graphics.drawLine(laser.getOriginX(), laser.getOriginY(), endX, endY);
+
+            graphics.setComposite(AlphaComposite.getInstance(AlphaComposite.SRC_OVER, 0.20f + 0.50f * charge));
+            graphics.setStroke(new BasicStroke(
+                    Math.max(2.0f, laser.getWidth() / 4.0f),
+                    BasicStroke.CAP_ROUND,
+                    BasicStroke.JOIN_ROUND
+            ));
+            graphics.setColor(new Color(255, 180 - (int) (80 * charge), 180 - (int) (120 * charge)));
+            graphics.drawLine(laser.getOriginX(), laser.getOriginY(), endX, endY);
+            return;
+        }
+        if (SnapshotTypes.Laser.BOSS_FIRING.equals(laser.getStyle())) {
+            graphics.setComposite(AlphaComposite.getInstance(AlphaComposite.SRC_OVER, 0.45f));
+            graphics.setStroke(new BasicStroke(
+                    Math.max(1.0f, laser.getWidth()),
+                    BasicStroke.CAP_ROUND,
+                    BasicStroke.JOIN_ROUND
+            ));
+            graphics.setColor(new Color(180, 0, 0));
+            graphics.drawLine(laser.getOriginX(), laser.getOriginY(), endX, endY);
+
+            graphics.setComposite(AlphaComposite.getInstance(AlphaComposite.SRC_OVER, 0.85f));
+            graphics.setStroke(new BasicStroke(
+                    Math.max(3.0f, laser.getWidth() / 3.0f),
+                    BasicStroke.CAP_ROUND,
+                    BasicStroke.JOIN_ROUND
+            ));
+            graphics.setColor(new Color(255, 240, 240));
+            graphics.drawLine(laser.getOriginX(), laser.getOriginY(), endX, endY);
+            return;
+        }
+
+        graphics.setComposite(AlphaComposite.getInstance(AlphaComposite.SRC_OVER, 0.35f));
+        graphics.setStroke(new BasicStroke(
+                Math.max(1.0f, laser.getWidth()),
+                BasicStroke.CAP_ROUND,
+                BasicStroke.JOIN_ROUND
+        ));
+        graphics.setColor(new Color(255, 64, 64));
+        graphics.drawLine(laser.getOriginX(), laser.getOriginY(), endX, endY);
+
+        graphics.setComposite(AlphaComposite.getInstance(AlphaComposite.SRC_OVER, 0.75f));
+        graphics.setStroke(new BasicStroke(
+                Math.max(2.0f, laser.getWidth() / 3.0f),
+                BasicStroke.CAP_ROUND,
+                BasicStroke.JOIN_ROUND
+        ));
+        graphics.setColor(new Color(255, 240, 180));
+        graphics.drawLine(laser.getOriginX(), laser.getOriginY(), endX, endY);
     }
 
     private void paintExplosionBursts(Graphics g) {

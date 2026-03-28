@@ -122,7 +122,9 @@ public class WorldSnapshotJsonMapper {
                     SimpleJsonSupport.extractInt(laserJson, "width"),
                     SimpleJsonSupport.extractInt(laserJson, "length"),
                     SimpleJsonSupport.extractInt(laserJson, "durationTicks"),
-                    SimpleJsonSupport.extractInt(laserJson, "damage")
+                    SimpleJsonSupport.extractInt(laserJson, "damage"),
+                    SimpleJsonSupport.extractStringOrDefault(laserJson, "style", "PLAYER_RED_SPEED"),
+                    Double.parseDouble(SimpleJsonSupport.extractJsonValueOrDefault(laserJson, "chargeRatio", "1.0"))
             ));
         }
         for (String explosionJson : SimpleJsonSupport.splitTopLevelArray(
@@ -242,7 +244,9 @@ public class WorldSnapshotJsonMapper {
                     .append("\"width\":").append(laser.getWidth()).append(',')
                     .append("\"length\":").append(laser.getLength()).append(',')
                     .append("\"durationTicks\":").append(laser.getDurationTicks()).append(',')
-                    .append("\"damage\":").append(laser.getDamage())
+                    .append("\"damage\":").append(laser.getDamage()).append(',')
+                    .append("\"style\":").append(SimpleJsonSupport.quote(laser.getStyle())).append(',')
+                    .append("\"chargeRatio\":").append(laser.getChargeRatio())
                     .append('}');
         }
         builder.append(']');

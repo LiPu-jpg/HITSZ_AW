@@ -5,6 +5,7 @@ import edu.hitsz.common.BranchUpgradeChoice;
 import edu.hitsz.common.GameConstants;
 import edu.hitsz.server.skill.PlayerSkillState;
 import edu.hitsz.server.skill.SkillType;
+import edu.hitsz.common.protocol.SnapshotTypes;
 
 import java.util.Arrays;
 import java.util.Collections;
@@ -364,7 +365,11 @@ public class PlayerRuntimeState {
                 currentLaserWidth(),
                 length,
                 currentLaserDurationTicks(),
-                aircraft.getBulletPower()
+                aircraft.getBulletPower(),
+                SnapshotTypes.Laser.PLAYER_RED_SPEED,
+                null,
+                0,
+                0
         );
     }
 

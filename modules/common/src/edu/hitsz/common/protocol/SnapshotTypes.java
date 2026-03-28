@@ -36,4 +36,13 @@ public final class SnapshotTypes {
         private Bullet() {
         }
     }
+
+    public static final class Laser {
+        public static final String PLAYER_RED_SPEED = "PLAYER_RED_SPEED";
+        public static final String BOSS_WARNING = "BOSS_WARNING";
+        public static final String BOSS_FIRING = "BOSS_FIRING";
+
+        private Laser() {
+        }
+    }
 }

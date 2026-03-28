@@ -103,7 +103,9 @@ public class WorldSnapshotFactory {
                     laser.getWidth(),
                     laser.getLength(),
                     laser.getDurationTicks(),
-                    laser.getDamage()
+                    laser.getDamage(),
+                    laser.getStyle(),
+                    laser.getChargeRatio()
             ));
         }
         for (ExplosionSnapshot explosion : worldState.getExplosionSnapshots()) {
