@@ -20,7 +20,7 @@ public class ClientMain {
         String host = args.length > 0 ? args[0] : DEFAULT_HOST;
         int port = args.length > 1 ? Integer.parseInt(args[1]) : DEFAULT_PORT;
         String sessionId = args.length > 2 ? args[2] : DEFAULT_SESSION_ID;
-        SwingUtilities.invokeLater(() -> startWindowedClient("Aircraft War Client", host, port, sessionId, null));
+        SwingUtilities.invokeLater(() -> startWindowedClient("飞机大战客户端", host, port, sessionId, null));
     }
 
     static void startWindowedClient(String title, String host, int port, String sessionId, Runnable onClose) {

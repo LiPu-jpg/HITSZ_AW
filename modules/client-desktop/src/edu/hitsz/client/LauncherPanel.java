@@ -77,23 +77,23 @@ public class LauncherPanel extends JPanel {
         g.fillRoundRect(48, 88, 416, 518, 28, 28);
         g.setColor(Color.WHITE);
         g.setFont(new Font("SansSerif", Font.BOLD, 32));
-        g.drawString("Aircraft War", 147, 148);
+        g.drawString("飞机大战", 168, 148);
         g.setFont(new Font("SansSerif", Font.PLAIN, 18));
-        g.drawString("Host creates the room and picks difficulty.", 95, 180);
-        g.drawString("Teammates join with a room code.", 132, 206);
+        g.drawString("房主创建房间并选择难度。", 116, 180);
+        g.drawString("队友通过房间号加入。", 149, 206);
     }
 
     private void buildUi() {
-        addLabel("Mode", 100, 225, 140, 28);
-        createModeButton = addButton("Create", 100, 260, this::selectCreateMode);
-        joinModeButton = addButton("Join", 100, 302, this::selectJoinMode);
+        addLabel("模式", 100, 225, 140, 28);
+        createModeButton = addButton("创建", 100, 260, this::selectCreateMode);
+        joinModeButton = addButton("加入", 100, 302, this::selectJoinMode);
 
-        addLabel("Difficulty", 100, 350, 140, 28);
-        difficultyButtons.add(addButton("Easy", 100, 385, () -> selectDifficulty(Difficulty.EASY.name())));
-        difficultyButtons.add(addButton("Normal", 100, 427, () -> selectDifficulty(Difficulty.NORMAL.name())));
-        difficultyButtons.add(addButton("Hard", 100, 469, () -> selectDifficulty(Difficulty.HARD.name())));
+        addLabel("难度", 100, 350, 140, 28);
+        difficultyButtons.add(addButton("简单", 100, 385, () -> selectDifficulty(Difficulty.EASY.name())));
+        difficultyButtons.add(addButton("普通", 100, 427, () -> selectDifficulty(Difficulty.NORMAL.name())));
+        difficultyButtons.add(addButton("困难", 100, 469, () -> selectDifficulty(Difficulty.HARD.name())));
 
-        roomCodeLabel = addLabel("Room Code", 280, 225, 140, 28);
+        roomCodeLabel = addLabel("房间号", 280, 225, 140, 28);
         roomCodeField = new JTextField();
         roomCodeField.setBounds(280, 260, 130, 32);
         roomCodeField.addActionListener(e -> setRoomCode(roomCodeField.getText()));
@@ -103,7 +103,7 @@ public class LauncherPanel extends JPanel {
         difficultySummaryLabel = addSummaryLabel("", 96, 549, 320, 24);
         roomCodeSummaryLabel = addSummaryLabel("", 96, 573, 320, 24);
 
-        actionButton = new JButton("Create Room");
+        actionButton = new JButton("创建房间");
         actionButton.setBounds(154, 630, 204, 42);
         actionButton.addActionListener(e -> submitSelections());
         add(actionButton);
@@ -147,7 +147,7 @@ public class LauncherPanel extends JPanel {
             roomCodeField.setText(selectionModel.getRoomCode());
         }
         if (actionButton != null) {
-            actionButton.setText(joinMode ? "Join Room" : "Create Room");
+            actionButton.setText(joinMode ? "加入房间" : "创建房间");
         }
         if (createModeButton != null) {
             styleModeButton(createModeButton, !joinMode);
@@ -157,22 +157,22 @@ public class LauncherPanel extends JPanel {
         }
         syncSelectionButtons();
         if (modeSummaryLabel != null) {
-            modeSummaryLabel.setText("Mode: " + selectionModel.getEntryMode());
+            modeSummaryLabel.setText("模式：" + UiText.entryModeLabel(selectionModel.getEntryMode()));
         }
         if (difficultySummaryLabel != null) {
-            difficultySummaryLabel.setText("Difficulty: " + selectionModel.getDifficulty());
+            difficultySummaryLabel.setText("难度：" + UiText.difficultyLabel(selectionModel.getDifficulty()));
         }
         if (roomCodeSummaryLabel != null) {
             roomCodeSummaryLabel.setVisible(joinMode);
-            roomCodeSummaryLabel.setText("Room Code: " + selectionModel.getRoomCode());
+            roomCodeSummaryLabel.setText("房间号：" + selectionModel.getRoomCode());
         }
         repaint();
     }
 
     private void syncSelectionButtons() {
-        styleSelectionButton(difficultyButtons, selectionModel.getDifficulty(), "Easy", Difficulty.EASY.name());
-        styleSelectionButton(difficultyButtons, selectionModel.getDifficulty(), "Normal", Difficulty.NORMAL.name());
-        styleSelectionButton(difficultyButtons, selectionModel.getDifficulty(), "Hard", Difficulty.HARD.name());
+        styleSelectionButton(difficultyButtons, selectionModel.getDifficulty(), "简单", Difficulty.EASY.name());
+        styleSelectionButton(difficultyButtons, selectionModel.getDifficulty(), "普通", Difficulty.NORMAL.name());
+        styleSelectionButton(difficultyButtons, selectionModel.getDifficulty(), "困难", Difficulty.HARD.name());
     }
 
     private void styleModeButton(JButton button, boolean selected) {

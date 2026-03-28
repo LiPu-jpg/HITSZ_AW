@@ -5,7 +5,12 @@ public class ServerMain {
     public static void main(String[] args) throws InterruptedException {
         int port = args.length > 0 ? Integer.parseInt(args[0]) : 20123;
         LocalAuthorityServer server = new LocalAuthorityServer(port);
-        server.start();
+        try {
+            server.start();
+        } catch (IllegalStateException e) {
+            System.err.println(ServerStartupMessage.formatStartFailure(port, e));
+            return;
+        }
 
         Runtime.getRuntime().addShutdownHook(new Thread(server::stop));
 

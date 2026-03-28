@@ -11,7 +11,7 @@ public class DevMain {
         String sessionId = invokeString(server, "getLocalSessionId");
 
         ClientMain.startWindowedClient(
-                "Aircraft War Dev",
+                "飞机大战联调模式",
                 "127.0.0.1",
                 port,
                 sessionId,

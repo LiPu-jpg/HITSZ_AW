@@ -478,21 +478,23 @@ public class Game extends JPanel {
         int y = 25;
         g.setColor(Color.RED);
         g.setFont(new Font("SansSerif", Font.BOLD, 22));
-        g.drawString("SCORE: " + this.score, x, y);
+        g.drawString("分数：" + this.score, x, y);
         y = y + 20;
-        g.drawString("LIFE: " + this.localHp, x, y);
+        g.drawString("生命：" + this.localHp, x, y);
         y = y + 20;
-        g.drawString("LEVEL: " + this.level, x, y);
+        g.drawString("等级：" + this.level, x, y);
         y = y + 20;
         g.drawString(buildSkillStatusText(), x, y);
         y = y + 20;
-        g.drawString("ROOM: " + (roomCode == null ? "-" : roomCode), x, y);
+        g.drawString("房间：" + (roomCode == null ? "-" : roomCode), x, y);
         y = y + 20;
-        g.drawString("DIFF: " + this.difficulty, x, y);
+        g.drawString("难度：" + UiText.difficultyLabel(this.difficulty), x, y);
         y = y + 20;
-        g.drawString("TOTAL: " + this.totalScore, x, y);
+        g.drawString("总分：" + this.totalScore, x, y);
         y = y + 20;
-        g.drawString(bossActive ? "BOSS: ACTIVE" : "BOSS AT: " + this.nextBossScoreThreshold, x, y);
+        g.drawString("关卡：" + UiText.chapterLabel(chapterId), x, y);
+        y = y + 20;
+        g.drawString(bossActive ? "首领：进行中" : "首领阈值：" + this.nextBossScoreThreshold, x, y);
     }
 
     private void paintLobbyHint(Graphics g) {
@@ -503,7 +505,7 @@ public class Game extends JPanel {
                     g.fillRoundRect(150, 20, 220, 36, 16, 16);
                     g.setColor(Color.WHITE);
                     g.setFont(new Font("SansSerif", Font.BOLD, 20));
-                    g.drawString("BOSS INBOUND", 183, 45);
+                    g.drawString("首领来袭", 198, 45);
                 }
                 return;
             }
@@ -511,7 +513,7 @@ public class Game extends JPanel {
             g.fillRoundRect(60, GameConstants.WINDOW_HEIGHT / 2 - 35, 392, 70, 18, 18);
             g.setColor(Color.WHITE);
             g.setFont(new Font("SansSerif", Font.BOLD, 22));
-            g.drawString("You are down. Waiting for round end...", 88, GameConstants.WINDOW_HEIGHT / 2 + 8);
+            g.drawString("你已被击落，等待本局结束...", 104, GameConstants.WINDOW_HEIGHT / 2 + 8);
             return;
         }
 
@@ -519,7 +521,7 @@ public class Game extends JPanel {
         g.fillRoundRect(48, GameConstants.WINDOW_HEIGHT / 2 - 74, 416, 148, 18, 18);
         g.setColor(Color.WHITE);
         g.setFont(new Font("SansSerif", Font.BOLD, 22));
-        g.drawString("Room Lobby", 182, GameConstants.WINDOW_HEIGHT / 2 - 34);
+        g.drawString("房间大厅", 194, GameConstants.WINDOW_HEIGHT / 2 - 34);
         g.setFont(new Font("SansSerif", Font.PLAIN, 16));
         String[] lines = buildLobbyOverlayLines();
         int y = GameConstants.WINDOW_HEIGHT / 2 - 8;
@@ -537,14 +539,14 @@ public class Game extends JPanel {
         g.fillRoundRect(58, GameConstants.WINDOW_HEIGHT / 2 - 90, 396, 180, 18, 18);
         g.setColor(Color.BLACK);
         g.setFont(new Font("SansSerif", Font.BOLD, 20));
-        g.drawString("Choose Upgrade", 180, GameConstants.WINDOW_HEIGHT / 2 - 52);
+        g.drawString("选择强化", 194, GameConstants.WINDOW_HEIGHT / 2 - 52);
         g.setFont(new Font("SansSerif", Font.PLAIN, 16));
         int y = GameConstants.WINDOW_HEIGHT / 2 - 18;
         for (int i = 0; i < localAvailableUpgradeChoices.size(); i++) {
             BranchUpgradeChoice choice = localAvailableUpgradeChoices.get(i);
             String line = (i + 1) + ". " + upgradeChoiceLabel(choice);
             if (choice == localSelectedUpgradeChoice) {
-                line += " (SELECTED)";
+                line += "（已选择）";
             }
             g.drawString(line, 86, y);
             y += 24;
@@ -559,7 +561,7 @@ public class Game extends JPanel {
         g.fillRoundRect(40, GameConstants.WINDOW_HEIGHT / 2 - 108, 432, 216, 18, 18);
         g.setColor(Color.BLACK);
         g.setFont(new Font("SansSerif", Font.BOLD, 20));
-        g.drawString("Choose Branch", 178, GameConstants.WINDOW_HEIGHT / 2 - 68);
+        g.drawString("选择机型分支", 164, GameConstants.WINDOW_HEIGHT / 2 - 68);
         g.setFont(new Font("SansSerif", Font.PLAIN, 16));
         int y = GameConstants.WINDOW_HEIGHT / 2 - 30;
         for (int i = 0; i < localAvailableBranchChoices.size(); i++) {
@@ -570,18 +572,18 @@ public class Game extends JPanel {
 
     private String[] buildLobbyOverlayLines() {
         return new String[]{
-                "Enter ready   Host uses S to start",
-                "Ready " + readyPlayerCount + "/" + connectedPlayerCount
-                        + "   You " + (localReady ? "READY" : "WAITING"),
-                "Host " + displayHostLabel() + "   Room " + displayRoomCode(),
-                "Diff " + difficulty + "   Plane " + displayAircraftBranch(),
-                "Boss at " + nextBossScoreThreshold + "   Total " + totalScore
+                "按 Enter 准备，房主按 S 开始",
+                "已准备 " + readyPlayerCount + "/" + connectedPlayerCount
+                        + "   你当前" + (localReady ? "已准备" : "未准备"),
+                "房主 " + displayHostLabel() + "   房间 " + displayRoomCode(),
+                "难度 " + UiText.difficultyLabel(difficulty) + "   机型 " + displayAircraftBranch(),
+                UiText.chapterLabel(chapterId) + "   首领阈值 " + nextBossScoreThreshold + "   总分 " + totalScore
         };
     }
 
     private String displayHostLabel() {
         if (localHost) {
-            return "YOU";
+            return "你";
         }
         if (hostSessionId == null || hostSessionId.trim().isEmpty()) {
             return "-";
@@ -605,81 +607,29 @@ public class Game extends JPanel {
 
     private String buildSkillStatusText() {
         if (localSelectedSkill == null || localSelectedSkill.trim().isEmpty()) {
-            return "AIRCRAFT: " + displayAircraftBranch();
+            return "机型：" + displayAircraftBranch();
         }
         if (localSkillCooldownRemainingMillis <= 0L) {
-            return "SKILL: " + displaySelectedSkill() + " (READY)";
+            return "技能：" + displaySelectedSkill() + "（可用）";
         }
         double cooldownSeconds = localSkillCooldownRemainingMillis / 1000.0;
-        return String.format(Locale.US, "SKILL: %s (CD %.1fs)", displaySelectedSkill(), cooldownSeconds);
+        return String.format(Locale.US, "技能：%s（冷却 %.1f秒）", displaySelectedSkill(), cooldownSeconds);
     }
 
     private String displayAircraftBranch() {
-        if (localAircraftBranch == null) {
-            return "-";
-        }
-        switch (localAircraftBranch) {
-            case STARTER_BLUE:
-                return "Starter Blue";
-            case RED_SPEED:
-                return "Red Speed";
-            case GREEN_DEFENSE:
-                return "Green Defense";
-            case BLACK_HEAVY:
-                return "Black Heavy";
-            default:
-                return localAircraftBranch.name();
-        }
+        return UiText.branchLabel(localAircraftBranch);
     }
 
     private String displaySelectedSkill() {
-        if (localSelectedSkill == null || localSelectedSkill.trim().isEmpty()) {
-            return "-";
-        }
-        return localSelectedSkill;
+        return UiText.skillLabel(localSelectedSkill);
     }
 
     private String upgradeChoiceLabel(BranchUpgradeChoice choice) {
-        switch (choice) {
-            case LASER_DAMAGE:
-                return "Laser damage";
-            case LASER_WIDTH:
-                return "Laser width";
-            case LASER_DURATION:
-                return "Laser duration";
-            case MOVE_SPEED:
-                return "Move speed";
-            case SPREAD_COUNT:
-                return "More spread shots";
-            case SPREAD_WIDTH:
-                return "Wider spread";
-            case BULLET_DAMAGE:
-                return "Bullet damage";
-            case MAX_HP:
-                return "Max HP";
-            case AIRBURST_DAMAGE:
-                return "Airburst damage";
-            case AIRBURST_RADIUS:
-                return "Airburst radius";
-            case AIRBURST_RANGE:
-                return "Airburst range";
-            default:
-                return choice.name();
-        }
+        return UiText.upgradeChoiceLabel(choice);
     }
 
     private String branchChoiceLabel(AircraftBranch branch) {
-        switch (branch) {
-            case RED_SPEED:
-                return "Red Speed";
-            case GREEN_DEFENSE:
-                return "Green Defense";
-            case BLACK_HEAVY:
-                return "Black Heavy";
-            case STARTER_BLUE:
-            default:
-                return "Starter Blue";
-        }
+        return UiText.branchLabel(branch);
     }
 
 }
