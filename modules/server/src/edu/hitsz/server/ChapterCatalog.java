@@ -17,6 +17,10 @@ public final class ChapterCatalog {
                 return ChapterId.CH2;
             case CH2:
                 return ChapterId.CH3;
+            case CH3:
+                return ChapterId.CH4;
+            case CH4:
+                return ChapterId.CH5;
             default:
                 return null;
         }

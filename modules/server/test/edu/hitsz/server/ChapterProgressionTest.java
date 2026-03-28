@@ -29,5 +29,14 @@ public class ChapterProgressionTest {
         worldState.getChapterProgressionState().advanceToNextChapter();
         assert worldState.getChapterId() == ChapterId.CH2
                 : "Chapter progression state should be able to advance to the next configured chapter";
+        worldState.getChapterProgressionState().advanceToNextChapter();
+        assert worldState.getChapterId() == ChapterId.CH3
+                : "Chapter progression state should be able to advance to CH3";
+        worldState.getChapterProgressionState().advanceToNextChapter();
+        assert worldState.getChapterId() == ChapterId.CH4
+                : "Chapter progression state should be able to advance to CH4";
+        worldState.getChapterProgressionState().advanceToNextChapter();
+        assert worldState.getChapterId() == ChapterId.CH5
+                : "Chapter progression state should be able to advance to CH5";
     }
 }

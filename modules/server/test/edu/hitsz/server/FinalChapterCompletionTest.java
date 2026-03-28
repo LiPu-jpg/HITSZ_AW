@@ -21,7 +21,9 @@ public class FinalChapterCompletionTest {
         worldState.getChapterProgressionState().markFirstBossBranchSelectionCompleted();
         worldState.getChapterProgressionState().advanceToNextChapter();
         worldState.getChapterProgressionState().advanceToNextChapter();
-        assert roomRuntime.getChapterId() == ChapterId.CH3 : "Precondition failed: room should be at the terminal chapter";
+        worldState.getChapterProgressionState().advanceToNextChapter();
+        worldState.getChapterProgressionState().advanceToNextChapter();
+        assert roomRuntime.getChapterId() == ChapterId.CH5 : "Precondition failed: room should be at the terminal chapter";
 
         PlayerSession session = roomRuntime.findSession("host-session");
         session.getPlayerState().applyBranchChoice(AircraftBranch.RED_SPEED);

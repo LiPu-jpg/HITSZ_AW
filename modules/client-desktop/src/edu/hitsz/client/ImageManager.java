@@ -61,9 +61,13 @@ public class ImageManager {
     public static BufferedImage CH1_ELITE_ENEMY_IMAGE;
     public static BufferedImage CH2_ELITE_ENEMY_IMAGE;
     public static BufferedImage CH3_ELITE_ENEMY_IMAGE;
+    public static BufferedImage CH4_ELITE_ENEMY_IMAGE;
+    public static BufferedImage CH5_ELITE_ENEMY_IMAGE;
     public static BufferedImage CH1_BOSS_ENEMY_IMAGE;
     public static BufferedImage CH2_BOSS_ENEMY_IMAGE;
     public static BufferedImage CH3_BOSS_ENEMY_IMAGE;
+    public static BufferedImage CH4_BOSS_ENEMY_IMAGE;
+    public static BufferedImage CH5_BOSS_ENEMY_IMAGE;
     public static BufferedImage BLOOD_SUPPLY_IMAGE;
     public static BufferedImage FIRE_SUPPLY_IMAGE;
     public static BufferedImage FIRE_PLUS_SUPPLY_IMAGE;
@@ -89,9 +93,13 @@ public class ImageManager {
         CH1_ELITE_ENEMY_IMAGE = ImageResourceLoader.loadOrFallback("最终素材/1号地图-精英兵.png", "elite.png");
         CH2_ELITE_ENEMY_IMAGE = ImageResourceLoader.loadOrFallback("最终素材/2号地图-精英兵.png", "elite.png");
         CH3_ELITE_ENEMY_IMAGE = ImageResourceLoader.loadOrFallback("最终素材/3号地图-精英兵.png", "elite.png");
+        CH4_ELITE_ENEMY_IMAGE = ImageResourceLoader.loadOrFallback("最终素材/4号地图-精英兵.png", "elite.png");
+        CH5_ELITE_ENEMY_IMAGE = ImageResourceLoader.loadOrFallback("最终素材/5号地图-精英兵.png", "elite.png");
         CH1_BOSS_ENEMY_IMAGE = ImageResourceLoader.loadOrFallback("最终素材/boss1.png", "boss.png");
         CH2_BOSS_ENEMY_IMAGE = ImageResourceLoader.loadOrFallback("最终素材/boss2.png", "boss.png");
         CH3_BOSS_ENEMY_IMAGE = ImageResourceLoader.loadOrFallback("最终素材/boss3.png", "boss.png");
+        CH4_BOSS_ENEMY_IMAGE = ImageResourceLoader.loadOrFallback("最终素材/boss4.png", "boss.png");
+        CH5_BOSS_ENEMY_IMAGE = ImageResourceLoader.loadOrFallback("最终素材/boss5.png", "boss.png");
         ELITE_ENEMY_IMAGE = CH1_ELITE_ENEMY_IMAGE;
         ELITE_PLUS_ENEMY_IMAGE = COMMON_SOLDIER_IMAGE;
         ACE_ENEMY_IMAGE = CH1_ELITE_ENEMY_IMAGE;

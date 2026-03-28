@@ -25,6 +25,8 @@ public final class ChapterVisualCatalog {
         BACKGROUND_BY_CHAPTER.put(ChapterId.CH1, ImageManager.EASY_BACKGROUND_IMAGE);
         BACKGROUND_BY_CHAPTER.put(ChapterId.CH2, ImageManager.NORMAL_BACKGROUND_IMAGE);
         BACKGROUND_BY_CHAPTER.put(ChapterId.CH3, ImageManager.HARD_BACKGROUND_IMAGE);
+        BACKGROUND_BY_CHAPTER.put(ChapterId.CH4, ImageManager.BOSS_BACKGROUND_IMAGE);
+        BACKGROUND_BY_CHAPTER.put(ChapterId.CH5, ImageManager.LAUNCHER_BACKGROUND_IMAGE);
 
         ENEMY_IMAGES_BY_CHAPTER.put(ChapterId.CH1, chapterEnemyMap(
                 ImageManager.MOB_ENEMY_IMAGE,
@@ -47,15 +49,26 @@ public final class ChapterVisualCatalog {
                 tint(ImageManager.COMMON_SOLDIER_IMAGE, new Color(132, 24, 18, 96)),
                 ImageManager.CH3_BOSS_ENEMY_IMAGE
         ));
+        ENEMY_IMAGES_BY_CHAPTER.put(ChapterId.CH4, chapterEnemyMap(
+                tint(ImageManager.MOB_ENEMY_IMAGE, new Color(176, 88, 32, 92)),
+                ImageManager.CH4_ELITE_ENEMY_IMAGE,
+                tint(ImageManager.CH4_ELITE_ENEMY_IMAGE, new Color(214, 110, 58, 90)),
+                tint(ImageManager.COMMON_SOLDIER_IMAGE, new Color(176, 66, 20, 110)),
+                ImageManager.CH4_BOSS_ENEMY_IMAGE
+        ));
+        ENEMY_IMAGES_BY_CHAPTER.put(ChapterId.CH5, chapterEnemyMap(
+                tint(ImageManager.MOB_ENEMY_IMAGE, new Color(90, 136, 196, 86)),
+                ImageManager.CH5_ELITE_ENEMY_IMAGE,
+                tint(ImageManager.CH5_ELITE_ENEMY_IMAGE, new Color(88, 188, 218, 90)),
+                tint(ImageManager.COMMON_SOLDIER_IMAGE, new Color(88, 150, 220, 98)),
+                ImageManager.CH5_BOSS_ENEMY_IMAGE
+        ));
     }
 
     private ChapterVisualCatalog() {
     }
 
     public static BufferedImage backgroundFor(ChapterId chapterId, boolean bossActive) {
-        if (bossActive) {
-            return ImageManager.BOSS_BACKGROUND_IMAGE;
-        }
         return BACKGROUND_BY_CHAPTER.getOrDefault(chapterId, ImageManager.NORMAL_BACKGROUND_IMAGE);
     }
 
