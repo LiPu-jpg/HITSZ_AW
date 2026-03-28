@@ -41,6 +41,7 @@ public class SocketClientSession implements ClientCommandPublisher {
     private final UpgradeChoicePayloadJsonMapper upgradeChoicePayloadJsonMapper;
     private final BranchChoicePayloadJsonMapper branchChoicePayloadJsonMapper;
     private final WorldSnapshotJsonMapper worldSnapshotJsonMapper;
+    private volatile boolean started;
 
     public SocketClientSession(String host, int port, String sessionId, Game game) {
         this.sessionId = sessionId;
@@ -68,24 +69,27 @@ public class SocketClientSession implements ClientCommandPublisher {
             WorldSnapshot snapshot = worldSnapshotJsonMapper.fromJson(message.getPayload());
             SwingUtilities.invokeLater(() -> game.applyWorldSnapshot(snapshot));
         });
+        started = false;
         transport.start();
-        transport.send(new ProtocolMessage(
+        sendSafely(new ProtocolMessage(
                 MessageType.HELLO,
                 sessionId,
                 nextSequence(),
                 System.currentTimeMillis(),
                 "{}"
         ));
+        started = true;
     }
 
     @Override
     public void stop() {
+        started = false;
         transport.stop();
     }
 
     @Override
     public void publishCreateRoom(String difficulty) {
-        transport.send(new ProtocolMessage(
+        sendSafely(new ProtocolMessage(
                 MessageType.CREATE_ROOM,
                 sessionId,
                 nextSequence(),
@@ -96,7 +100,7 @@ public class SocketClientSession implements ClientCommandPublisher {
 
     @Override
     public void publishJoinRoom(String roomCode) {
-        transport.send(new ProtocolMessage(
+        sendSafely(new ProtocolMessage(
                 MessageType.JOIN_ROOM,
                 sessionId,
                 nextSequence(),
@@ -107,7 +111,7 @@ public class SocketClientSession implements ClientCommandPublisher {
 
     @Override
     public void publishStartGame() {
-        transport.send(new ProtocolMessage(
+        sendSafely(new ProtocolMessage(
                 MessageType.START_GAME,
                 sessionId,
                 nextSequence(),
@@ -118,7 +122,7 @@ public class SocketClientSession implements ClientCommandPublisher {
 
     @Override
     public void publishMove(int x, int y) {
-        transport.send(new ProtocolMessage(
+        sendSafely(new ProtocolMessage(
                 MessageType.INPUT_MOVE,
                 sessionId,
                 nextSequence(),
@@ -129,7 +133,7 @@ public class SocketClientSession implements ClientCommandPublisher {
 
     @Override
     public void publishSkill(String skillType) {
-        transport.send(new ProtocolMessage(
+        sendSafely(new ProtocolMessage(
                 MessageType.INPUT_SKILL,
                 sessionId,
                 nextSequence(),
@@ -140,7 +144,7 @@ public class SocketClientSession implements ClientCommandPublisher {
 
     @Override
     public void publishReady(boolean ready) {
-        transport.send(new ProtocolMessage(
+        sendSafely(new ProtocolMessage(
                 MessageType.INPUT_READY,
                 sessionId,
                 nextSequence(),
@@ -151,7 +155,7 @@ public class SocketClientSession implements ClientCommandPublisher {
 
     @Override
     public void publishLobbyConfig(String difficulty) {
-        transport.send(new ProtocolMessage(
+        sendSafely(new ProtocolMessage(
                 MessageType.INPUT_LOBBY_CONFIG,
                 sessionId,
                 nextSequence(),
@@ -162,7 +166,7 @@ public class SocketClientSession implements ClientCommandPublisher {
 
     @Override
     public void publishUpgradeChoice(String choice) {
-        transport.send(new ProtocolMessage(
+        sendSafely(new ProtocolMessage(
                 MessageType.INPUT_UPGRADE_CHOICE,
                 sessionId,
                 nextSequence(),
@@ -173,13 +177,25 @@ public class SocketClientSession implements ClientCommandPublisher {
 
     @Override
     public void publishBranchChoice(String branch) {
-        transport.send(new ProtocolMessage(
+        sendSafely(new ProtocolMessage(
                 MessageType.INPUT_BRANCH_CHOICE,
                 sessionId,
                 nextSequence(),
                 System.currentTimeMillis(),
                 branchChoicePayloadJsonMapper.toJson(new BranchChoicePayload(branch))
         ));
+    }
+
+    private void sendSafely(ProtocolMessage message) {
+        if (!started && message.getMessageType() != MessageType.HELLO) {
+            return;
+        }
+        try {
+            transport.send(message);
+        } catch (IllegalStateException e) {
+            started = false;
+            throw e;
+        }
     }
 
     private long nextSequence() {
