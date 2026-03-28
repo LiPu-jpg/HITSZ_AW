@@ -10,7 +10,9 @@ import java.io.IOException;
 import java.io.InputStreamReader;
 import java.io.OutputStreamWriter;
 import java.io.PrintWriter;
+import java.net.InetSocketAddress;
 import java.net.Socket;
+import java.net.SocketException;
 import java.nio.charset.StandardCharsets;
 
 public class SocketClientTransport implements Transport {
@@ -39,7 +41,9 @@ public class SocketClientTransport implements Transport {
             return;
         }
         try {
-            socket = new Socket(host, port);
+            socket = new Socket();
+            applyClientSocketOptions(socket);
+            socket.connect(new InetSocketAddress(host, port));
             writer = new PrintWriter(new OutputStreamWriter(socket.getOutputStream(), StandardCharsets.UTF_8), true);
             BufferedReader reader = new BufferedReader(
                     new InputStreamReader(socket.getInputStream(), StandardCharsets.UTF_8)
@@ -51,6 +55,11 @@ public class SocketClientTransport implements Transport {
         } catch (IOException e) {
             throw new IllegalStateException("Failed to start client transport", e);
         }
+    }
+
+    static void applyClientSocketOptions(Socket socket) throws SocketException {
+        socket.setTcpNoDelay(true);
+        socket.setKeepAlive(true);
     }
 
     @Override

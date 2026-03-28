@@ -6,6 +6,7 @@ public class ServerStartupMessageTest {
 
     public static void main(String[] args) {
         bindFailureMessageUsesChineseAndPortHint();
+        startedMessageShowsBindAddressAndClientHint();
     }
 
     private static void bindFailureMessageUsesChineseAndPortHint() {
@@ -14,5 +15,13 @@ public class ServerStartupMessageTest {
                 : "Bind failure message should explain the occupied port in Chinese";
         assert message.contains("ServerMain 20124")
                 : "Bind failure message should suggest using another port";
+    }
+
+    private static void startedMessageShowsBindAddressAndClientHint() {
+        String message = ServerStartupMessage.formatStarted("0.0.0.0", 20124);
+        assert message.contains("监听地址：0.0.0.0:20124")
+                : "Startup message should print the actual listening endpoint";
+        assert message.contains("127.0.0.1 20124")
+                : "Startup message should include a local client launch example";
     }
 }

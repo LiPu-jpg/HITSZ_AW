@@ -10,6 +10,7 @@ import java.io.IOException;
 import java.io.InputStreamReader;
 import java.io.OutputStreamWriter;
 import java.io.PrintWriter;
+import java.net.InetSocketAddress;
 import java.net.ServerSocket;
 import java.net.Socket;
 import java.net.SocketException;
@@ -21,7 +22,9 @@ import java.util.concurrent.CopyOnWriteArrayList;
 
 public class SocketServerTransport implements Transport {
 
+    private final String configuredBindHost;
     private final int configuredPort;
+    private final int configuredBacklog;
     private final MessageCodec codec;
     private final LineMessageFramer framer;
     private final List<ClientConnection> clients;
@@ -33,7 +36,15 @@ public class SocketServerTransport implements Transport {
     private Thread acceptThread;
 
     public SocketServerTransport(int configuredPort, MessageCodec codec) {
+        this("0.0.0.0", configuredPort, 128, codec);
+    }
+
+    public SocketServerTransport(String configuredBindHost, int configuredPort, int configuredBacklog, MessageCodec codec) {
+        this.configuredBindHost = configuredBindHost == null || configuredBindHost.trim().isEmpty()
+                ? "0.0.0.0"
+                : configuredBindHost.trim();
         this.configuredPort = configuredPort;
+        this.configuredBacklog = configuredBacklog;
         this.codec = codec;
         this.framer = new LineMessageFramer();
         this.clients = new CopyOnWriteArrayList<>();
@@ -45,7 +56,9 @@ public class SocketServerTransport implements Transport {
             return;
         }
         try {
-            serverSocket = new ServerSocket(configuredPort);
+            serverSocket = new ServerSocket();
+            serverSocket.setReuseAddress(true);
+            serverSocket.bind(new InetSocketAddress(configuredBindHost, configuredPort), configuredBacklog);
             running = true;
             acceptThread = new Thread(this::acceptLoop, "socket-server-acceptor");
             acceptThread.setDaemon(true);
@@ -100,6 +113,17 @@ public class SocketServerTransport implements Transport {
         return serverSocket == null ? configuredPort : serverSocket.getLocalPort();
     }
 
+    public String getBindHost() {
+        if (serverSocket == null || serverSocket.getInetAddress() == null) {
+            return configuredBindHost;
+        }
+        return serverSocket.getInetAddress().getHostAddress();
+    }
+
+    ServerSocket getServerSocketForTest() {
+        return serverSocket;
+    }
+
     private void acceptLoop() {
         while (running) {
             try {
@@ -140,6 +164,8 @@ public class SocketServerTransport implements Transport {
         }
 
         private void start() throws IOException {
+            socket.setTcpNoDelay(true);
+            socket.setKeepAlive(true);
             writer = new PrintWriter(new OutputStreamWriter(socket.getOutputStream(), StandardCharsets.UTF_8), true);
             BufferedReader reader = new BufferedReader(
                     new InputStreamReader(socket.getInputStream(), StandardCharsets.UTF_8)

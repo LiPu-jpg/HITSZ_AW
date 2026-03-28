@@ -50,8 +50,12 @@ public class LocalAuthorityServer {
     private final AtomicLong serverSequence;
 
     public LocalAuthorityServer(int port) {
+        this("0.0.0.0", port, 128);
+    }
+
+    public LocalAuthorityServer(String bindHost, int port, int backlog) {
         this.roomRegistry = new RoomRegistry();
-        this.transport = new SocketServerTransport(port, new JsonMessageCodec());
+        this.transport = new SocketServerTransport(bindHost, port, backlog, new JsonMessageCodec());
         this.movePayloadJsonMapper = new InputMovePayloadJsonMapper();
         this.skillPayloadJsonMapper = new InputSkillPayloadJsonMapper();
         this.createRoomPayloadJsonMapper = new CreateRoomPayloadJsonMapper();
@@ -89,6 +93,10 @@ public class LocalAuthorityServer {
 
     public int getPort() {
         return transport.getPort();
+    }
+
+    public String getBindHost() {
+        return transport.getBindHost();
     }
 
     public String getLocalSessionId() {

@@ -3,14 +3,19 @@ package edu.hitsz.server;
 public class ServerMain {
 
     public static void main(String[] args) throws InterruptedException {
-        int port = args.length > 0 ? Integer.parseInt(args[0]) : 20123;
-        LocalAuthorityServer server = new LocalAuthorityServer(port);
+        ServerLaunchConfig launchConfig = ServerLaunchConfig.fromArgs(args);
+        LocalAuthorityServer server = new LocalAuthorityServer(
+                launchConfig.getBindHost(),
+                launchConfig.getPort(),
+                launchConfig.getBacklog()
+        );
         try {
             server.start();
         } catch (IllegalStateException e) {
-            System.err.println(ServerStartupMessage.formatStartFailure(port, e));
+            System.err.println(ServerStartupMessage.formatStartFailure(launchConfig.getPort(), e));
             return;
         }
+        System.out.println(ServerStartupMessage.formatStarted(server.getBindHost(), server.getPort()));
 
         Runtime.getRuntime().addShutdownHook(new Thread(server::stop));
 
