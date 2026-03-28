@@ -86,9 +86,9 @@ public final class GameplayBalance {
     /** 黑色重轰机“空爆射程强化”每级增加的最大射程。 */
     public static final int BLACK_HEAVY_AIRBURST_RANGE_UPGRADE_BONUS = 40;
     /** 轻微追踪升级每级增加的横向修正速度。 */
-    public static final int PLAYER_LIGHT_TRACKING_SPEED_STEP = 1;
+    public static final int PLAYER_LIGHT_TRACKING_SPEED_STEP = 2;
     /** 轻微追踪最大横向修正速度上限。 */
-    public static final int PLAYER_LIGHT_TRACKING_MAX_SPEED = 4;
+    public static final int PLAYER_LIGHT_TRACKING_MAX_SPEED = 6;
 
     // =========================
     // 红色速度机激光参数
@@ -112,7 +112,7 @@ public final class GameplayBalance {
     /** Boss 真正发射阶段持续 tick。 */
     public static final int BOSS_WARNING_LASER_FIRING_TICKS = 4;
     /** Boss 激光单次命中的伤害。 */
-    public static final int BOSS_WARNING_LASER_DAMAGE = 80;
+    public static final int BOSS_WARNING_LASER_DAMAGE = 180;
 
     // =========================
     // 黑色重轰机空爆弹参数
@@ -141,19 +141,19 @@ public final class GameplayBalance {
     /** 第 4 章精英每次齐射的弹数。 */
     public static final int CH4_ELITE_VOLLEY_COUNT = 3;
     /** 第 4 章精英相邻弹道步长。 */
-    public static final int CH4_ELITE_VOLLEY_STEP = 2;
+    public static final int CH4_ELITE_VOLLEY_STEP = 4;
     /** 第 4 章精英加强型每次齐射的弹数。 */
     public static final int CH4_ELITE_PLUS_VOLLEY_COUNT = 7;
     /** 第 4 章精英加强型相邻弹道步长。 */
-    public static final int CH4_ELITE_PLUS_VOLLEY_STEP = 2;
+    public static final int CH4_ELITE_PLUS_VOLLEY_STEP = 4;
     /** 第 4 章王牌机每次齐射的弹数。 */
     public static final int CH4_ACE_VOLLEY_COUNT = 9;
     /** 第 4 章王牌机相邻弹道步长。 */
-    public static final int CH4_ACE_VOLLEY_STEP = 2;
+    public static final int CH4_ACE_VOLLEY_STEP = 4;
     /** 第 4 章 Boss 每次齐射的弹数。 */
     public static final int CH4_BOSS_VOLLEY_COUNT = 11;
     /** 第 4 章 Boss 相邻弹道步长。 */
-    public static final int CH4_BOSS_VOLLEY_STEP = 2;
+    public static final int CH4_BOSS_VOLLEY_STEP = 5;
     /** 第 4 章 Boss 左右侧压时的偏移量。 */
     public static final int CH4_BOSS_SWEEP_SHIFT_STEPS = 1;
     /** 第 5 章精英每次齐射的弹数。 */
@@ -217,7 +217,7 @@ public final class GameplayBalance {
     public static final int ACE_ENEMY_SCORE = 35;
 
     /** Boss 基础生命值。 */
-    public static final int BOSS_ENEMY_HP = 240;
+    public static final int BOSS_ENEMY_HP = 1500;
     /** Boss 横向巡航速度。 */
     public static final int BOSS_ENEMY_SPEED_X = 4;
     /** Boss 默认纵向速度，通常为 0。 */
@@ -265,9 +265,9 @@ public final class GameplayBalance {
     /** 困难难度敌机基础射击周期。 */
     public static final int HARD_BASE_SHOOT_CYCLE = 16;
     /** 敌机射击周期下限。 */
-    public static final int MIN_SHOOT_CYCLE = 8;
+    public static final int MIN_SHOOT_CYCLE = 10;
     /** 每累计多少分使敌机射击周期缩短 1。 */
-    public static final int SHOOT_CYCLE_SCORE_DIVISOR = 180;
+    public static final int SHOOT_CYCLE_SCORE_DIVISOR = 280;
     /** Boss 阶段额外缩短的敌机射击周期。 */
     public static final int SHOOT_CYCLE_BOSS_STAGE_ACCELERATION = 1;
 
@@ -275,15 +275,15 @@ public final class GameplayBalance {
     // 敌机数量上限
     // =========================
     /** 简单难度场上基础敌机上限。 */
-    public static final int EASY_BASE_ENEMY_MAX = 4;
+    public static final int EASY_BASE_ENEMY_MAX = 3;
     /** 普通难度场上基础敌机上限。 */
-    public static final int NORMAL_BASE_ENEMY_MAX = 5;
+    public static final int NORMAL_BASE_ENEMY_MAX = 4;
     /** 困难难度场上基础敌机上限。 */
-    public static final int HARD_BASE_ENEMY_MAX = 6;
+    public static final int HARD_BASE_ENEMY_MAX = 5;
     /** 场上敌机上限封顶值。 */
-    public static final int MAX_ENEMY_MAX = 10;
+    public static final int MAX_ENEMY_MAX = 8;
     /** 每累计多少分使场上敌机上限增加 1。 */
-    public static final int ENEMY_MAX_SCORE_DIVISOR = 200;
+    public static final int ENEMY_MAX_SCORE_DIVISOR = 600;
     /** Boss 阶段额外增加的敌机上限。 */
     public static final int ENEMY_MAX_BOSS_STAGE_BONUS = 1;
 
@@ -307,17 +307,17 @@ public final class GameplayBalance {
     // 初始 Boss 阈值
     // =========================
     /** 简单难度首次 Boss 触发分数。 */
-    public static final int EASY_INITIAL_BOSS_THRESHOLD = 240;
+    public static final int EASY_INITIAL_BOSS_THRESHOLD = 500;
     /** 普通难度首次 Boss 触发分数。 */
-    public static final int NORMAL_INITIAL_BOSS_THRESHOLD = 200;
+    public static final int NORMAL_INITIAL_BOSS_THRESHOLD = 700;
     /** 困难难度首次 Boss 触发分数。 */
-    public static final int HARD_INITIAL_BOSS_THRESHOLD = 160;
+    public static final int HARD_INITIAL_BOSS_THRESHOLD = 1000;
 
     // =========================
     // 高阶敌机解锁与概率
     // =========================
     /** 达到该分数后开始允许刷出 ElitePlus。 */
-    public static final int ELITE_PLUS_UNLOCK_SCORE = 150;
+    public static final int ELITE_PLUS_UNLOCK_SCORE = 300;
     /** ElitePlus 初始概率。 */
     public static final double ELITE_PLUS_BASE_PROBABILITY = 0.10;
     /** ElitePlus 概率上限。 */
